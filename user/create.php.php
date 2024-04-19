@@ -138,7 +138,6 @@ if($act=="envset"){
 }
 function _clean($str) {
   $str = htmlspecialchars($str);
-  if (get_magic_quotes_gpc()) $str = stripslashes($str);
   return $str;
 }
 
@@ -256,9 +255,9 @@ list($c_act,$c_com,$c_size,$c_mime,$c_date,$c_anot,$c_orig)=explode("<>",$upcook
 
 /* アクセス制限 */
 if(is_array($denylist)){
-  while(list(,$line)=each($denylist)){
-    if(strstr($host, $line)) error('アクセス制限','あなたにはアクセス権限がありません。');
-  }
+	foreach($denylist as $line) {
+		if(strstr($host, $line)) error('アクセス制限','あなたにはアクセス権限がありません。');
+	}
 }
 
 
@@ -396,8 +395,6 @@ if($pass2 !== $admin) error('Incorrect password.');
   /* MIMEタイプ */
   if(!$upfile_type) $upfile_type = "text/plain";//デフォMIMEはtext/plain
 
-  /* コメント他 */	//タグ変換
-  if(get_magic_quotes_gpc()) $com = stripslashes($com);	//￥除去
   $com = str_replace(array("\0","\t","\r","\n","\r\n"), "", $com);//改行除去
   // ▼Yakuba追加(もし拡張子を変えたならその旨タグ変換を表示)
   if($new_ext){

@@ -5,8 +5,6 @@
   /* MIMEタイプ */
   if(!$upfile_type) $upfile_type = "text/plain";//デフォMIMEはtext/plain
 
-  /* コメント他 */	//タグ変換
-  if(get_magic_quotes_gpc()) $com = stripslashes($com);	//￥除去
   $com = str_replace(array("\0","\t","\r","\n","\r\n"), "", $com);//改行除去
   // ▼Yakuba追加(もし拡張子を変えたならその旨タグ変換を表示)
   if($new_ext){

@@ -56,7 +56,6 @@ if($act=="envset"){
 }
 function _clean($str) {
   $str = htmlspecialchars($str);
-  if (get_magic_quotes_gpc()) $str = stripslashes($str);
   return $str;
 }
 
@@ -177,9 +176,9 @@ list($c_act,$c_com,$c_size,$c_mime,$c_date,$c_anot,$c_orig)=explode("<>",$upcook
 
 /* アクセス制限 */
 if(is_array($denylist)){
-  while(list(,$line)=each($denylist)){
-    if(strstr($host, $line)) error('アクセス制限','あなたにはアクセス権限がありません。');
-  }
+  	foreach($denylist as $line) {
+		if(strstr($host, $line)) error('アクセス制限','あなたにはアクセス権限がありません。');
+	}
 }
 
 

@@ -1,33 +1,5 @@
 <?php
-	
 
-				
-		function kaptcha_validate($key) {
-define('KAPTCHA_API_URL', 'https://sys.kolyma.org/kaptcha/kaptcha.php');
-define('VIP_API_KEY', '2chsh343626347');
-	$check = file_get_contents('https://vipcode.kolyma.org/login/vip.php?key='.VIP_API_KEY.'&addr='.$_SERVER['REMOTE_ADDR']);
-	if ($_SERVER['REMOTE_ADDR'] == $check) {
-		return true;
-	}
-			
-	if (isset($_REQUEST["_KAPTCHA_NOJS"])) {
-		if ($_SERVER['REMOTE_ADDR'] == $check && (isset($_GET["nojs"]) || isset($_GET["nojscheck"]) || isset($_GET["_KAPTCHA_NOJS"]))) {
-    		return true;
-		}
-
-		$k = $_REQUEST["_KAPTCHA_KEY"]??false;
-		if (!$k) return false;
-		return stristr(file_get_contents(KAPTCHA_API_URL."?nojscheck&key=&_KAPTCHA=".$k), "CHECK correct");
-	}
-
-	$k = $_REQUEST["_KAPTCHA"]??false;
-	if (!$k) return false;
-	return stristr(file_get_contents(KAPTCHA_API_URL."?_KAPTCHA=".$k."&key=".$key), "CHECK correct");
-}
-
-		if (!kaptcha_validate($_POST["_KAPTCHA_KEY"])) {
-			die('You seem to have mistyped the CAPTCHA');
-		} 
 function ob_file_callback($buffer)
 {
   global $ob_file;
@@ -178,7 +150,7 @@ echo $body3;
   mkdir($url);  
   if ($listdd == $yes) {
   $fp = fopen('index.htm', 'a');
-  fwrite($fp, '<font size="6"><center><a href="/user/'.$url.'">'.$url.'</a><br><br></font></center>');  
+  fwrite($fp, '<font size="6"><center><a href="'.$url.'">'.$url.'</a><br><br></font></center>');  
   fclose($fp);  
   }
   exec("cp templates/template1.php $url.php"); 
@@ -412,7 +384,7 @@ exec("mv $url.php $url/index.php && cd $url && touch souko.log last.log count.lo
 <body bgcolor="#ffffee" text="#800000" link="#0000ee" alink="#5555ee" vlink="#0000ee">
 <table width="100%"><tr><td bgcolor="#eeaa88"><strong><font size="4">Board Created </font></strong></td></tr></table>
 <center><img src="aiyay.png" alt="aiyay"></center> 
-<center><font size="8"><a href="/user/'.$url.'">Board created!</a></font></center> ';
+<center><font size="8"><a href="'.$url.'">Board created!</a></font></center> ';
  echo $body4;
   }
   }

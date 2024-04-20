@@ -198,7 +198,7 @@ function FormatByte($size){             //バイトのフォーマット（B→k
   else if($size <= (1024*1024))     $format = sprintf ("%dKB",($size/1024));
   else if($size <= (1000*1024*1024))  $format = sprintf ("%.2fMB",($size/(1024*1024)));
   else if($size <= (1000*1024*1024*1024))  $format = sprintf ("%.2fGB",($size/(1024*1024*1024)));
-  else if($size <= (1000*1024*1024*1024*1024)  || $size_ >= (1000*1024*1024*1024*1024))  $format = sprintf ("%.2fTB",($size/(1024*1024*1024*1024)));
+  else if($size <= (1000*1024*1024*1024*1024)  || $size >= (1000*1024*1024*1024*1024))  $format = sprintf ("%.2fTB",($size/(1024*1024*1024*1024)));
   else                              $format = $size."B";
   return $format;
 }

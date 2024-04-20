@@ -75,7 +75,7 @@ if(phpversion()>="4.1.0"){//PHP4.1.0以降対応
 
 // 基本設定-----------------------------------------------------------------
   $page_title   = 'Everything';         // Board title.
-  $logfile      = 'souko.log';          // Log file (You may want to change this)
+  $logfile      = 'souko.log';          // Log file (You may want to change this or block direct access from internet)
   $logmax       = 5000;                 // Maximum amount of files that can be uploaded
   $limitk       = 20*1024;              // 最大投稿容量(KB)(＜upload_max_filesize ← 標準2M)
   $max_all_flag = 1;                    // 総容量規制を使用する=1(未実装)

@@ -34,6 +34,10 @@
     ・指定した拡張子をアップの際に強制変換。
     ・拡張子を変換した場合、コメントに変更前後の拡張子を表示させるようにした。
     ・アップなどの処理の直後、F5を押すと同じ処理を繰り返すバグを修正。
+  2024/04/20 v3.0 software is uploaded to github and shared with few developers
+    ・Changed deprecated PHP codes into modern ones
+    ・It displays total board size in the proper unit now
+    ・Fixed the bug where it didn't check board filesize limit
 
 ■設置準備
   ・格納ディレクトリを作成しパーミッションは777に。

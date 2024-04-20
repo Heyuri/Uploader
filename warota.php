@@ -77,9 +77,9 @@ if(phpversion()>="4.1.0"){//PHP4.1.0以降対応
   $page_title   = 'Everything';          // タイトル名
   $logfile      = 'souko.log';          // ログファイル名(変更する事)
   $logmax       = 5000;                  // 保持件数
-  $limitk       = 20*1024;               // 最大投稿容量(KB)(＜upload_max_filesize ← 標準2M)
+  $limitk       = 20*1000;               // 最大投稿容量(KB)(＜upload_max_filesize ← 標準2M)
   $max_all_flag = 1;                    // 総容量規制を使用する=1(未実装)
-  $max_all_size = 200000;                   // 総制限容量(MB)
+  $max_all_size = 200000000;                   // 総制限容量(B)
   $updir        = './src/';             // ファイル格納ディレクトリ
   $prefix       = '';                   // 接頭語（up001.txt,up002.jpgならup）
   $commax       = 250;                  // コメント投稿量制限（バイト。全角はこの半分）
@@ -191,13 +191,15 @@ OSHIRI;
 
 echo $header;
 
+//FormatByte takes $size and returns a unit converted value. If $size is above 1000 units it will convert it to a "higher" unit via division
+//e.g: 2KB => 2000B / 1000
 function FormatByte($size){             //バイトのフォーマット（B→kB）
   if($size == 0)                    $format = "";
-  else if($size <= 1024)            $format = $size."B";
-  else if($size <= (1024*1024))     $format = sprintf ("%dKB",($size/1024));
-  else if($size <= (1000*1024*1024))  $format = sprintf ("%.2fMB",($size/(1024*1024)));
-  else if($size <= (1000*1024*1024*1024))  $format = sprintf ("%.2fGB",($size/(1024*1024*1024)));
-  else if($size <= (1000*1024*1024*1024*1024))  $format = sprintf ("%.2fTB",($size/(1024*1024*1024*1024)));
+  else if($size <= 1000)            $format = $size."B";
+  else if($size <= (1000*1000))     $format = sprintf ("%dKB",($size/1000));
+  else if($size <= (1000*1000*1000))  $format = sprintf ("%.2fMB",($size/(1000*1000)));
+  else if($size <= (1000*1000*1000*1000))  $format = sprintf ("%.2fGB",($size/(1000*1000*1000)));
+  else if($size <= (1000*1000*1000*1000*1000))  $format = sprintf ("%.2fTB",($size/(1000*1000*1000*1000)));
   else                              $format = $size."B";
   return $format;
 }
@@ -255,7 +257,7 @@ function runend($mes1,$mes2=""){         //処理終了メッセージ
 
 
 /* start */
-$limitb = $limitk * 1024;
+$limitb = $limitk * 1000;
 $host = 1337;
 if(!$upcook) $upcook=implode("<>",array($f_act,$f_com,$f_size,$f_mime,$f_date,$f_anot));
 list($c_act,$c_com,$c_size,$c_mime,$c_anot)=explode("<>",$upcook);
@@ -350,7 +352,7 @@ if(file_exists($upfile) && $com && $upfile_size > 0){
   if($last_time > 0){
     $now = time();
     $last = @fopen($last_file, "r+") or die("連続投稿用ファイル $last_file を作成してください");
-    $lsize = fgets($last, 1024);
+    $lsize = fgets($last, 1000);
     list($ltime, $lip) = explode("<>", $lsize);
     if($host == $lip && $last_time*60 > ($now-$ltime)){
       error('連続投稿制限中','時間を置いてやり直してください');
@@ -436,21 +438,21 @@ while(!feof($logfile_open)){
 } 
 fclose($logfile_open);
 
-$size_all_hikaku = $size_all/(1024*1024);       // 総容量比較用(MB)
+$size_all_hikaku = $size_all/(1000*1000);       // 総容量比較用(MB)
 
 // ファイル総容量単位変更----------------------------------------------------
 if($size_all == 0)                      $size_all_hyouzi = $size_all."B";
-else if($size_all <= 1024)              $size_all_hyouzi = $size_all."B";
-else if($size_all <= (1024*1024))       $size_all_hyouzi = sprintf ("%dKB",($size_all/1024));
-else if($size_all <= (1000*1024*1024))    $size_all_hyouzi = sprintf ("%.2fMB",($size_all/(1024*1024)));
-else if($size_all <= (1000*1024*1024*1024))  $size_all_hyouzi = sprintf ("%.2fGB",($size_all/(1024*1024*1024)));
-else if($size_all <= (10*1024*1024*1024*1024) || $size_all >= (10*1024*1024*1024*1024))  $size_all_hyouzi = sprintf ("%.2fTB",($size_all/(1024*1024*1024*1024)));
+else if($size_all <= 1000)              $size_all_hyouzi = $size_all."B";
+else if($size_all <= (1000*1000))       $size_all_hyouzi = sprintf ("%dKB",($size_all/1000));
+else if($size_all <= (1000*1000*1000))    $size_all_hyouzi = sprintf ("%.2fMB",($size_all/(1000*1000)));
+else if($size_all <= (1000*1000*1000*1000))  $size_all_hyouzi = sprintf ("%.2fGB",($size_all/(1000*1000*1000)));
+else if($size_all <= (1000*1000*1000*1000*1000) || $size_all >= (1000*1000*1000*1000*1000))  $size_all_hyouzi = sprintf ("%.2fTB",($size_all/(1000*1000*1000*1000)));
 else                                    $size_all_hyouzi = $size_all."B";
 
 
 // Post form header (Yakuba modification)-------------------------------------------
 // Check if the overall filesize limit for the board has been exceeded
-if($size_all_hikaku >= $max_all_size / (1024*1024)){
+if($size_all_hikaku >= $max_all_size / (1000*1000)){
   echo 'The total capacity has exceeded the limit and is currently under posting restriction.<br>Please notify the administrator.<br><br>';
 }
 else{

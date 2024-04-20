@@ -1,5 +1,7 @@
 <?php
 
+require_once 'globalconf.php';
+
 function ob_file_callback($buffer)
 {
   global $ob_file;
@@ -57,7 +59,7 @@ $body1 = '
 </head>
 <body bgcolor="#ffffee" text="#800000" link="#0000ee" alink="#5555ee" vlink="#0000ee">
 <table width="100%"><tr><td bgcolor="#eeaa88"><strong><font size="4">Error</font></strong></td></tr></table>
-<center><img src="aihelper.png" alt="aihelper"></center> 
+<center><img src="'.STATICPATH.'images/aihelper.png" alt="aihelper"></center>
 <center><font size="8">You did not fill out all of the fields!</font></center>
 ';
 echo $body1;
@@ -142,18 +144,18 @@ echo 'Title contains an invalid character.';
 </head>
 <body bgcolor="#ffffee" text="#800000" link="#0000ee" alink="#5555ee" vlink="#0000ee">
 <table width="100%"><tr><td bgcolor="#eeaa88"><strong><font size="4">Error</font></strong></td></tr></table>
-<center><img src="aihelper.png" alt="aihelper"></center> 
+<center><img src="aihelper.png" alt="aihelper"></center>
 <center><font size="8">That board URL already exists, or is a system directory.</font></center>
 ';
 echo $body3;
   } else {
-  mkdir($url);  
+  mkdir($url);
   if ($listdd == $yes) {
   $fp = fopen('index.htm', 'a');
-  fwrite($fp, '<font size="6"><center><a href="'.$url.'">'.$url.'</a><br><br></font></center>');  
-  fclose($fp);  
+  fwrite($fp, '<font size="6"><center><a href="'.$url.'">'.$url.'</a><br><br></font></center>');
+  fclose($fp);
   }
-  exec("cp templates/template1.php $url.php"); 
+  exec("cp templates/template1.php $url.php");
   $ob_file = fopen("$url.txt","w");
   ob_start('ob_file_callback');
   echo '$page_title = ';
@@ -273,80 +275,80 @@ echo $body3;
   $ob_file3 = fopen("$url.txt.3","w");
   ob_start('ob_file_callback3');
   if ($passup == $yes) {
-  echo 'Pass: <INPUT TYPE=password SIZE="10" NAME="pass2" maxlength="25"><br>';  
+  echo 'Pass: <INPUT TYPE=password SIZE="10" NAME="pass2" maxlength="25"><br>';
   }
   ob_end_flush();
   exec("cat $url.txt.3 >> $url.php");
   exec("cat templates/template4.php >> $url.php");
-exec("mv $url.php $url/index.php && cd $url && touch souko.log last.log count.log && mkdir src && cd - && rm -rf $url.txt $url.txt.2 $url.txt.3 && cd $url && mkdir templates && cd - && cp templates/template1.php templates/template2.php templates/template3.php templates/template4.php $url/templates && cp templates/settings.htm $url/settings.htm && cp aihelper.png $url/aihelper.png && cp templates/settings.php $url/settings.php && cp aiyay.png $url/aiyay.png");
+exec("mv $url.php $url/index.php && cd $url && touch souko.log last.log count.log && mkdir src && cd - && rm -rf $url.txt $url.txt.2 $url.txt.3 && cd $url && mkdir templates && cd - && cp templates/template1.php templates/template2.php templates/template3.php templates/template4.php $url/templates && cp templates/settings.htm $url/settings.htm && cp templates/settings.php $url/settings.php");
   $ob_file4 = fopen("$url.settings.php","w");
   ob_start('ob_file_callback4');
   echo '<?php';
   echo "\n";
   echo '$title = ';
-  echo '"'; 
+  echo '"';
   echo "$title";
-  echo '"'; 
+  echo '"';
   echo ';';
   echo "\n";
     echo '$password = ';
-  echo '"'; 
+  echo '"';
   echo "$password";
-  echo '"'; 
+  echo '"';
   echo ';';
   echo "\n";
   echo '$desc = ';
-  echo '"'; 
+  echo '"';
   echo "$desc";
-  echo '"'; 
+  echo '"';
   echo ';';
   echo "\n";
   echo '$comen = ';
-  echo '"'; 
+  echo '"';
   echo "$comen";
-  echo '"'; 
+  echo '"';
   echo ';';
   echo "\n";
   echo '$passup = ';
-  echo '"'; 
+  echo '"';
   echo "$passup";
-  echo '"'; 
+  echo '"';
   echo ';';
   echo "\n";
   echo '$saizu = ';
-  echo '"'; 
+  echo '"';
   echo "$saizu";
-  echo '"'; 
+  echo '"';
   echo ';';
   echo "\n";
   echo '$origu = ';
-  echo '"'; 
+  echo '"';
   echo "$origu";
-  echo '"'; 
+  echo '"';
   echo ';';
   echo "\n";
     echo '$mime = ';
-  echo '"'; 
+  echo '"';
   echo "$mime";
-  echo '"'; 
+  echo '"';
   echo ';';
   echo "\n";
     echo '$date = ';
-  echo '"'; 
+  echo '"';
   echo "$date";
-  echo '"'; 
+  echo '"';
   echo ';';
   echo "\n";
     echo '$fprefix = ';
-  echo '"'; 
+  echo '"';
   echo "$fprefix";
-  echo '"'; 
+  echo '"';
   echo ';';
   echo "\n";
       echo '$url = ';
-  echo '"'; 
+  echo '"';
   echo "$url";
-  echo '"'; 
+  echo '"';
   echo ';';
   echo "\n";
   echo '?>';
@@ -357,9 +359,9 @@ exec("mv $url.php $url/index.php && cd $url && touch souko.log last.log count.lo
     echo '<?php';
     echo "\n";
     echo '$password = ';
-  echo '"'; 
+  echo '"';
   echo "$password";
-  echo '"'; 
+  echo '"';
   echo ';';
   echo "\n";
   echo '?>';
@@ -383,7 +385,7 @@ exec("mv $url.php $url/index.php && cd $url && touch souko.log last.log count.lo
 </head>
 <body bgcolor="#ffffee" text="#800000" link="#0000ee" alink="#5555ee" vlink="#0000ee">
 <table width="100%"><tr><td bgcolor="#eeaa88"><strong><font size="4">Board Created </font></strong></td></tr></table>
-<center><img src="aiyay.png" alt="aiyay"></center> 
+<center><img src="'.STATICPATH.'images/aiyay.png" alt="aiyay"></center>
 <center><font size="8"><a href="'.$url.'">Board created!</a></font></center> ';
  echo $body4;
   }

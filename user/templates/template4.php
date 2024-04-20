@@ -1,4 +1,4 @@
-COMMENT<i><small>（※If no comment is entered, the page will be reloaded / URL will be auto-linked.）</small></i><br>
+<br>COMMENT<i><small>（※If no comment is entered, the page will be reloaded / URL will be auto-linked.）</small></i><br>
   <input type="text" size="45" value="ｷﾀ━━━(ﾟ∀ﾟ)━━━!!" name="com">
   <INPUT TYPE=submit VALUE="Up/Reload"><INPUT TYPE=reset VALUE="Cancel"><br>
   </FORM>
@@ -73,13 +73,13 @@ for($i = $st; $i < $st+$page_def; $i++){
   if($c_date) echo "<td><font size=2>$now</font></td>";
   if($c_orig) echo "<td><font size=2 color=aaaaaa>$orig</font></td>";
   echo "</tr>\n";
-  
+
   }
 
 
 echo "</table><HR>";
-echo 'Used '.$size_all_hyouzi.'／ '.$max_all_size.'MB<br>';
-echo 'Used '.count($lines).'Files／ '.$logmax.'Files<br>';
+echo 'Used '.$size_all_hyouzi.'／ '.FormatByte($max_all_size).'<br>';
+echo 'Used '.count($lines).' Files／ '.$logmax.' Files<br>';
 // echo paging($page,count($lines));
 echo $foot;
 ?>

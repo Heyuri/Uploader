@@ -46,7 +46,7 @@ while(!feof($logfile_open)){
     $str = explode("<>",$csv);
     $size_one = $str[5];
     $size_all = $size_all+$size_one;
-} 
+}
 fclose($logfile_open);
 
 $size_all_hikaku = $size_all/(1024*1024);       // 総容量比較用(MB)
@@ -55,10 +55,10 @@ $size_all_hikaku = $size_all/(1024*1024);       // 総容量比較用(MB)
 if($size_all == 0)                      $size_all_hyouzi = $size_all."B";
 else if($size_all <= 1024)              $size_all_hyouzi = $size_all."B";
 else if($size_all <= (1024*1024))       $size_all_hyouzi = sprintf ("%dKB",($size_all/1024));
-else if($size_all <= (10*1024*1024))    $size_all_hyouzi = sprintf ("%.2fMB",($size_all/(1024*1024)));
+else if($size_all <= (1000*1024*1024))    $size_all_hyouzi = sprintf ("%.2fMB",($size_all/(1024*1024)));
 else if($size_all <= (1000*1024*1024*1024))  $size_all_hyouzi = sprintf ("%.2fGB",($size_all/(1024*1024*1024)));
-else if($size_all <= (10*1024*1024*1024*1024))  $size_all_hyouzi = sprintf ("%.2fTB",($size_all/(1024*1024*1024*1024)));
-else                                    $size_all_hyouzi = $size_all."B";                                   $size_all_hyouzi = $size_all."B";
+else if($size_all <= (1000*1024*1024*1024*1024) || $size_all >= (1000*1024*1024*1024*1024))  $size_all_hyouzi = sprintf ("%.2fTB",($size_all/(1024*1024*1024*1024)));
+else                                    $size_all_hyouzi = $size_all."B";
 
 
 // 投稿フォームヘッダ(Yakuba改造)-------------------------------------------
@@ -70,5 +70,5 @@ else{
   <FORM METHOD="POST" ENCTYPE="multipart/form-data" ACTION="'.$PHP_SELF.'">
   FILE Max '.$limitk.'KB (Max '.$logmax.'Files)<br>
   <INPUT TYPE="hidden" name="MAX_FILE_SIZE" value="'.$limitb.'">
-  <INPUT TYPE=file  SIZE="40" NAME="upfile"> 
-  DELKey: <INPUT TYPE=password SIZE="10" NAME="pass" maxlength="10"> 
+  <INPUT TYPE=file  SIZE="40" NAME="upfile">
+  DELKey: <INPUT TYPE=password SIZE="10" NAME="pass" maxlength="10">

@@ -3,22 +3,22 @@ $logfile      = 'souko.log';
 $logmax       = 500;
 $limitk       = 500*1024;
 $max_all_flag = 1;
-$max_all_size = 250000; 
-$updir        = './src/'; 
+$max_all_size = 200*1024*1024;
+$updir        = './src/';
 $commax       = 250;
-$page_def     = 20; 
-$auto_link    = 0; 
+$page_def     = 20;
+$auto_link    = 0;
 $last_time    = 0;
 $last_file    = 'last.log';
 $count_look   = 0;
 $count_file   = 'count.log';
 $count_start  = '2009/09/01';
-$sam_look     = 0; 
+$sam_look     = 0;
 $denylist     = array('192.168.0.1','sex.com','annony');
 $arrowext     = array('bmp','cgi','gif','jpg','png','txt','mht','htm','html');
 $b_changeext  = array('mht','cgi','php','html','sh','htm','shtml','svg','xml');
-$a_changeext  = 'txt'; 
-$homepage_add = '/../user'; 
+$a_changeext  = 'txt';
+$homepage_add = '/../user';
 $f_act  = 'checked';
 $f_anot = '';
 // ファイル、DIRの有無チェック----------------------------------------------
@@ -102,16 +102,16 @@ OSHIRI;
 
 echo $header;
 
+//Unit conversion function
 function FormatByte($size){             //バイトのフォーマット（B→kB）
-	// ファイル総容量単位変更----------------------------------------------------
-	if($size == 0)                      $format = $size."B";
-	else if($size <= 1024)              $format = $size."B";
-	else if($size <= (1024*1024))       $format = sprintf ("%dKB",($size/1024));
-	else if($size <= (10*1024*1024))    $format = sprintf ("%.2fMB",($size/(1024*1024)));
-	else if($size <= (1000*1024*1024*1024))  $format = sprintf ("%.2fGB",($size/(1024*1024*1024)));
-	else if($size <= (10*1024*1024*1024*1024))  $format = sprintf ("%.2fTB",($size/(1024*1024*1024*1024)));
-	else                                    $format = $size."B";
-	return $format;
+  if($size == 0)                    $format = "";
+  else if($size <= 1024)            $format = $size."B";
+  else if($size <= (1024*1024))     $format = sprintf ("%dKB",($size/1024));
+  else if($size <= (1000*1024*1024))  $format = sprintf ("%.2fMB",($size/(1024*1024)));
+  else if($size <= (1000*1024*1024*1024))  $format = sprintf ("%.2fGB",($size/(1024*1024*1024)));
+  else if($size <= (1000*1024*1024*1024*1024)  || $size >= (1000*1024*1024*1024*1024))  $format = sprintf ("%.2fTB",($size/(1024*1024*1024*1024)));
+  else                              $format = $size."B";
+  return $format;
 }
 
 function paging($page, $total){         //ページリンク作成
@@ -202,7 +202,7 @@ if($delid && $delpass!=""){
   if(!$find) error('Deletion Error','The file cannot be found.');
   if($delpass == $admin || substr(md5($delpass), 2, 7) == $del_pwd){
     if(file_exists($updir.$prefix.$delid.".$del_ext")) unlink($updir.$prefix.$delid.".$del_ext");
-    
+
     $fp = fopen($logfile, "w");
     flock($fp, LOCK_EX);
 
@@ -301,13 +301,3 @@ if(file_exists($upfile) && $com && $upfile_size > 0){
   $newname = $prefix.$id.".".$ext;
 
   /* 自鯖転送 */
-
-
-
-
-
- 
-
-
-
-

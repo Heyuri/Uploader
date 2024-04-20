@@ -444,8 +444,8 @@ else if($size_all <= (10*1024*1024*1024*1024) || $size_all >= (10*1024*1024*1024
 else                                    $size_all_hyouzi = $size_all."B";
 
 
-// 投稿フォームヘッダ(Yakuba改造)-------------------------------------------
-// Later note 2024: It doesn't even seem like this ever worked, because size_all_hikaku and max_all_size are different units of mesurement... It should work now though
+// Post form header (Yakuba modification)-------------------------------------------
+// Check if the overall filesize limit for the board has been exceeded
 if($size_all_hikaku >= $max_all_size / (1024*1024)){
   echo 'The total capacity has exceeded the limit and is currently under posting restriction.<br>Please notify the administrator.<br><br>';
 }

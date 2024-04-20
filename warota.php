@@ -79,7 +79,7 @@ if(phpversion()>="4.1.0"){//PHP4.1.0以降対応
   $logmax       = 5000;                  // 保持件数
   $limitk       = 20*1024;               // 最大投稿容量(KB)(＜upload_max_filesize ← 標準2M)
   $max_all_flag = 1;                    // 総容量規制を使用する=1(未実装)
-  $max_all_size = 200000;                   // 総制限容量(MB)
+  $max_all_size = 200*1024*1024*1024;   // 総制限容量(B)
   $updir        = './src/';             // ファイル格納ディレクトリ
   $prefix       = '';                   // 接頭語（up001.txt,up002.jpgならup）
   $commax       = 250;                  // コメント投稿量制限（バイト。全角はこの半分）
@@ -191,6 +191,7 @@ OSHIRI;
 
 echo $header;
 
+//Unit conversion function
 function FormatByte($size){             //バイトのフォーマット（B→kB）
   if($size == 0)                    $format = "";
   else if($size <= 1024)            $format = $size."B";

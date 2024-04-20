@@ -191,7 +191,9 @@ function FormatByte($size){             //バイトのフォーマット（B→k
   if($size == 0)                    $format = "";
   else if($size <= 1024)            $format = $size."B";
   else if($size <= (1024*1024))     $format = sprintf ("%dKB",($size/1024));
-  else if($size <= (10*1024*1024))  $format = sprintf ("%.2fMB",($size/(1024*1024)));
+  else if($size <= (1000*1024*1024))  $format = sprintf ("%.2fMB",($size/(1024*1024)));
+  else if($size <= (1000*1024*1024*1024))  $format = sprintf ("%.2fGB",($size/(1024*1024*1024)));
+  else if($size <= (1000*1024*1024*1024*1024))  $format = sprintf ("%.2fTB",($size/(1024*1024*1024*1024)));
   else                              $format = $size."B";
   return $format;
 }
@@ -527,7 +529,7 @@ for($i = $st; $i < $st+$page_def; $i++){
 
 
 echo "</table><HR>";
-echo 'Used '.$size_all_hyouzi.'／ '.$max_all_size.'MB<br>';
+echo 'Used '.$size_all_hyouzi.'／ '.FormatByte($max_all_size).'<br>';
 echo 'Used '.count($lines).' Files／ '.$logmax.'Files<br>';
 // echo paging($page,count($lines));
 echo $foot;

@@ -447,7 +447,10 @@ if($size_all == 0)                      $size_all_hyouzi = $size_all."B";
 else if($size_all <= 1024)              $size_all_hyouzi = $size_all."B";
 else if($size_all <= (1024*1024))       $size_all_hyouzi = sprintf ("%dKB",($size_all/1024));
 else if($size_all <= (10*1024*1024))    $size_all_hyouzi = sprintf ("%.2fMB",($size_all/(1024*1024)));
+else if($size_all <= (1000*1024*1024*1024))  $size_all_hyouzi = sprintf ("%.2fGB",($size_all/(1024*1024*1024)));
+else if($size_all <= (10*1024*1024*1024*1024))  $size_all_hyouzi = sprintf ("%.2fTB",($size_all/(1024*1024*1024*1024)));
 else                                    $size_all_hyouzi = $size_all."B";
+
 
 
 // 投稿フォームヘッダ(Yakuba改造)-------------------------------------------

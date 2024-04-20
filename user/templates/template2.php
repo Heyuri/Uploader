@@ -103,12 +103,15 @@ OSHIRI;
 echo $header;
 
 function FormatByte($size){             //バイトのフォーマット（B→kB）
-  if($size == 0)                    $format = "";
-  else if($size <= 1024)            $format = $size."B";
-  else if($size <= (1024*1024))     $format = sprintf ("%dKB",($size/1024));
-  else if($size <= (10*1024*1024))  $format = sprintf ("%.2fMB",($size/(1024*1024)));
-  else                              $format = $size."B";
-  return $format;
+	// ファイル総容量単位変更----------------------------------------------------
+	if($size == 0)                      $format = $size."B";
+	else if($size <= 1024)              $format = $size."B";
+	else if($size <= (1024*1024))       $format = sprintf ("%dKB",($size/1024));
+	else if($size <= (10*1024*1024))    $format = sprintf ("%.2fMB",($size/(1024*1024)));
+	else if($size <= (1000*1024*1024*1024))  $format = sprintf ("%.2fGB",($size/(1024*1024*1024)));
+	else if($size <= (10*1024*1024*1024*1024))  $format = sprintf ("%.2fTB",($size/(1024*1024*1024*1024)));
+	else                                    $format = $size."B";
+	return $format;
 }
 
 function paging($page, $total){         //ページリンク作成

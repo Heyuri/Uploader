@@ -438,6 +438,8 @@ if($size_all == 0)                      $size_all_hyouzi = $size_all."B";
 else if($size_all <= 1024)              $size_all_hyouzi = $size_all."B";
 else if($size_all <= (1024*1024))       $size_all_hyouzi = sprintf ("%dKB",($size_all/1024));
 else if($size_all <= (10*1024*1024))    $size_all_hyouzi = sprintf ("%.2fMB",($size_all/(1024*1024)));
+else if($size_all <= (1000*1024*1024*1024))  $size_all_hyouzi = sprintf ("%.2fGB",($size_all/(1024*1024*1024)));
+else if($size_all <= (10*1024*1024*1024*1024))  $size_all_hyouzi = sprintf ("%.2fTB",($size_all/(1024*1024*1024*1024)));
 else                                    $size_all_hyouzi = $size_all."B";
 
 
@@ -527,7 +529,7 @@ for($i = $st; $i < $st+$page_def; $i++){
 
 echo "</table><HR>";
 echo 'Used '.$size_all_hyouzi.'／ '.$max_all_size.'MB<br>';
-echo 'Used '.count($lines).'Files／ '.$logmax.'Files<br>';
+echo 'Used '.count($lines).' Files／ '.$logmax.'Files<br>';
 // echo paging($page,count($lines));
 echo $foot;
 ?>

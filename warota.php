@@ -74,17 +74,17 @@ if(phpversion()>="4.1.0"){//PHP4.1.0以降対応
 
 
 // 基本設定-----------------------------------------------------------------
-  $page_title   = 'Everything';          // タイトル名
-  $logfile      = 'souko.log';          // ログファイル名(変更する事)
-  $logmax       = 5000;                  // 保持件数
-  $limitk       = 20*1024;               // 最大投稿容量(KB)(＜upload_max_filesize ← 標準2M)
+  $page_title   = 'Everything';         // Board title.
+  $logfile      = 'souko.log';          // Log file (You may want to change this)
+  $logmax       = 5000;                 // Maximum amount of files that can be uploaded
+  $limitk       = 20*1024;              // 最大投稿容量(KB)(＜upload_max_filesize ← 標準2M)
   $max_all_flag = 1;                    // 総容量規制を使用する=1(未実装)
-  $max_all_size = 200*1024*1024*1024;   // 総制限容量(B)
+  $max_all_size = 200*1024*1024*1024;   // Total board capacity (in bytes). 200*1024*1024*1024B = 200GB.
   $updir        = './src/';             // ファイル格納ディレクトリ
-  $prefix       = '';                   // 接頭語（up001.txt,up002.jpgならup）
-  $commax       = 250;                  // コメント投稿量制限（バイト。全角はこの半分）
+  $prefix       = '';                   // filename prefix (eg. set to "up" for filenames to be up001.txt, up002.jpg)
+  $commax       = 250;                  // Maximum comment lenght (In bytes. It's half this value for fullwidth characters)
   $page_def     = 20;                   // 一ページの表示行数
-  $admin        = 'adminpassword';               // 削除管理パス
+  $admin        = 'adminpassword';      // Admin deletion password. You can delete any file using this as the PW. MAKE SURE TO CHANGE.
   $auto_link    = 0;                    // コメントの自動リンク（Yes=1;No=0);
   $last_time    = 0;                    // 同一IPからの連続投稿許可する間隔(分)(0で無制限)
   $last_file    = 'last.log';           // 連続投稿制限用ファイル(空ファイルで666)

@@ -75,6 +75,7 @@ if(phpversion()>="4.1.0"){//PHP4.1.0以降対応
 
 // 基本設定-----------------------------------------------------------------
   $page_title   = 'Everything';         // Board title.
+  $title_sub   = 'Home for your files'; // Board description.
   $logfile      = 'souko.log';          // Log file (You may want to change this or block direct access from internet)
   $logmax       = 5000;                 // Maximum amount of files that can be uploaded
   $limitk       = 20*1024;              // 最大投稿容量(KB)(＜upload_max_filesize ← 標準2M)
@@ -174,7 +175,7 @@ $header = '
 <body bgcolor="#ffffee" text="#800000" link="#0000ee" alink="#5555ee" vlink="#0000ee">
 <table width="100%"><tr><td bgcolor="#eeaa88"><strong><font size="4">'.$page_title.'</font></strong></td></tr></table>
 <tt>
-<br><br>【Is no gream as same as daed?】<br><br><br>
+<br><br>'.$title_sub.'<br><br><br>
 </tt>
 ';
 

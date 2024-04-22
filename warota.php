@@ -58,6 +58,9 @@
 
  **************************************************************************/
 
+//add config values
+require 'config.php';
+
 
 if(phpversion()>="4.1.0"){//PHP4.1.0以降対応
   $_GET = array_map("_clean", $_GET);
@@ -72,47 +75,6 @@ if(phpversion()>="4.1.0"){//PHP4.1.0以降対応
   $upfile=$_FILES["upfile"]["tmp_name"];
 }
 
-
-// 基本設定-----------------------------------------------------------------
-  $page_title   = 'Everything';          // Board title.
-  $title_sub    = 'Home for your files'; // Board description.
-  $logfile      = 'souko.log';           // Log file (You may want to change this or block direct access from internet)
-  $logmax       = 5000;                  // Maximum amount of files that can be uploaded
-  $limitk       = 20*1024;               // 最大投稿容量(KB)(＜upload_max_filesize ← 標準2M)
-  $max_all_flag = 1;                     // 総容量規制を使用する=1(未実装)
-  $max_all_size = 200*1024*1024*1024;    // Total board capacity (in bytes). 200*1024*1024*1024B = 200GB.
-  $updir        = './src/';              // File storage directory
-  $prefix       = '';                    // Filename prefix (eg. set to "up" for filenames to be up001.txt, up002.jpg)
-  $commax       = 250;                   // Maximum comment lenght (In bytes. It's half this value for fullwidth characters)
-  $page_def     = 20;                    // Number of files to display per page.
-  $admin        = 'adminpassword';       // Admin deletion password. You can delete any file using this as the PW. MAKE SURE TO CHANGE.
-  $auto_link    = 0;                     // コメントの自動リンク（Yes=1;No=0);
-  $last_time    = 0;                     // 同一IPからの連続投稿許可する間隔(分)(0で無制限)
-  $last_file    = 'last.log';            // 連続投稿制限用ファイル(空ファイルで666)
-  $count_look   = 0;                     // カウンタ表示(Yes=1,No=0)
-  $count_file   = 'count.log';           // カウンタファイル(空ファイルで666)
-  $count_start  = '2009/09/01';          // カウンタ開始日
-  $sam_look     = 0;                     // 画像一覧表示(Yes=1,No=0)←img.php必須
-  $denylist     = array('192.168.0.1','sex.com','annony');                          //アクセス拒否ホスト
-  $arrowext     = array('dat','htm','torrent','deb','lzh','ogm','doc','class','js','swift','cc','tga','ape','woff2','cab','whl','mpe','rmvb','srt','pdf','xz','exe','m4a','crx','vob','tif','gz','roq','m4v','gif','rb','3g2','m4a','rvb','sid','ai','wma','pea','bmp','py','mp4','m4p','ods','jpeg','command','azw4','otf','ebook','rtf','ttf','mobi','ra','flv','ogv','mpg','xls','jpg','mkv','nsv','mp3','kmz','java','lua','m2v','deb','rst','csv','pls','pak','egg','tlz','c','cbz','xcodeproj','iso','xm','azw','webm','3ds','azw6','azw3','cue','kml','woff','zipx','3gp','po','mpa','mng','wps','wpd','a','s7z','ics','tex','go','ps','org','yml','msg','xml','cpio','epub','docx','lha','flac','odp','wmv','vcxproj','mar','eot','less','asf','apk','css','mp2','odt','patch','wav','msi','rs','gsm','ogg','cbr','azw1','m','dds','h','dmg','mid','psd','dwg','aac','s3m','cs','cpp','au','aiff','diff','avi','bat','html','pages','bin','txt','rpm','m3u','max','vcf','svg','ppt','clj','png','svi','tiff','tgz','mxf','7z','drc','yuv','mov','tbz2','bz2','gpx','shar','xcf','dxf','jar','qt','tar','xpi','zip','thm','cxx','3dm','rar','md','scss','mpv','webp','war','pl','xlsx','mpeg','aaf','avchd','mod','rm','it','wasm','el','eps','nes','smc','sfc','md','smd','gen','gg','z64','v64','n64','gb','gbc','gba','srl','gcm','gcz','nds','dsi','wbfs','wad','cia','3ds','ngp','ngc','pce','vb','ws','wsc','dsv','sav','ps2','mcr','mpk','eep','st0','dta','srm','afa','zpaq','arc','paq','lpaq','swf','pdn','lol','php','sh','img','ico','asc', 'm2ts', 'nzb', 'appimage', 'json');    //Allow extensions (these must be in lowercase or it will give an error)
-    //許可拡張子 小文字（それ以外はエラー
-
-  // ▼Yakuba(設定追加)
-  $b_changeext  = array('htm','mht','cgi','php','html','sh','shtml','xml','svg');
-  $a_changeext  = 'txt';                // 強制変換後の拡張子
-  $base_php     = 'warota.php';          // このファイル名
-  $homepage_add = '../../';      // [Home]のリンク先(相対、絶対両方可能)
-  // ▲Yakuba
-
-// 項目表示（環境設定）の初期状態 (表示ならChecked 表示しないなら空)--------
-  $f_act  = 'checked';          //ACT（削除リンク）
-  $f_com  = 'checked';          //コメント
-  $f_size = 'checked';          //ファイルサイズ
-  $f_mime = '';                 //MIMEタイプ
-  $f_date = '';          //日付け
-  $f_anot = 'checked';                 //別窓で開く？
-  $f_orig = '';
-  $secret = 'yuzuyu';                 //元ファイル名
 // ファイル、DIRの有無チェック----------------------------------------------
 // ▼Yakuba(ファイル、DIRがなければ注意)
 if ( !file_exists($logfile) ) {
@@ -255,9 +217,7 @@ function runend($mes1,$mes2=""){         //処理終了メッセージ
   exit;
 }
 
-
 /* start */
-$limitb = $limitk * 1024;
 $host = 1337;
 if(!$upcook) $upcook=implode("<>",array($f_act,$f_com,$f_size,$f_mime,$f_date,$f_anot));
 list($c_act,$c_com,$c_size,$c_mime,$c_anot)=explode("<>",$upcook);
@@ -342,14 +302,19 @@ exit;
 }
 $lines = file($logfile);
 
-
 // アプロード書き込み処理---------------------------------------------------
 if(file_exists($upfile) && $com && $upfile_size > 0){
   if(strlen($com) > $commax)    error('Comment too big.');
-  if($upfile_size > $limitb)    error('File too big.');
+  if($upfile_size > $limitb)	error('File too big.');
+
+  //will check if anti-flood script is enabled
+  if($antiflood) {
+  	require_once $module_List['mod_antiflood'];
+  }
 
   /* 連続投稿制限 */
   if($last_time > 0){
+	  
     $now = time();
     $last = @fopen($last_file, "r+") or die("連続投稿用ファイル $last_file を作成してください");
     $lsize = fgets($last, 1024);
@@ -458,7 +423,7 @@ if($size_all_hikaku >= $max_all_size / (1024*1024)){
 else{
   echo '
   <FORM METHOD="POST" ENCTYPE="multipart/form-data" ACTION="'.$PHP_SELF.'">
-  FILE Max '.$limitk.'KB (Max '.$logmax.'Files)<br>
+  FILE Max '.FormatByte($limitb).' (Max '.$logmax.' Files)<br>
   <INPUT TYPE="hidden" name="MAX_FILE_SIZE" value="'.$limitb.'">
   <INPUT TYPE=file  SIZE="40" NAME="upfile"> 
   DELKey: <INPUT TYPE=password SIZE="10" NAME="pass" maxlength="10"><br>
@@ -511,7 +476,7 @@ echo '<HR><table width="100%" style="font-size:10pt;"><tr>';
 if($c_act) echo '<td width="4%"><tt><b>DEL</b></tt></td>';
 echo '<td width="8%"><tt><b>NAME</b></tt></td>';
 if($c_com)  echo '<td width="58%"><tt><b>COMMENT</b></tt></td>';
-if($c_size) echo '<td width="7%"><tt><b>SIZE</b></tt></td>';
+if($c_size) echo '<td width="7%"><tt><b> SIZE</b></tt></td>';
 if($c_mime) echo '<td><tt><b>MIME</b></tt></td>';
 echo '</tr>';
 
@@ -537,7 +502,7 @@ for($i = $st; $i < $st+$page_def; $i++){
 
 echo "</table><HR>";
 echo 'Used '.$size_all_hyouzi.'／ '.FormatByte($max_all_size).'<br>';
-echo 'Used '.count($lines).' Files／ '.$logmax.'Files<br>';
+echo 'Used '.count($lines).' Files／ '.$logmax.' Files<br>';
 // echo paging($page,count($lines));
 echo $foot;
 ?>

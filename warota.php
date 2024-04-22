@@ -217,6 +217,7 @@ function paging($page, $total){         //ページリンク作成
 
     // ▼Yakuba(画像一覧のリンク表示を選択)
     global $sam_look;
+    global $base_php;
     if($page=="all" and $sam_look) return sprintf ("[<a href=\"$homepage_add\">Home</a>] [<a href=\"img.php\">Image List</a>]　[<b>ALL</b>] %s",$next,$PHP_SELF);
     else if($page=="all" and !$sam_look) return sprintf ("[<a href=\"$homepage_add\">Home</a>]　[<b>ALL</b>] %s",$next,$PHP_SELF);
     else if($page!="all" and $sam_look) return sprintf ("[<a href=\"$homepage_add\">Home</a>] [<a href=\"img.php\">Image List</a>]　[<a href=\"$base_php?page=all\">ALL</a>] %s",$next,$PHP_SELF);
@@ -540,4 +541,3 @@ echo 'Used '.$size_all_hyouzi.'／ '.FormatByte($max_all_size).'<br>';
 echo 'Used '.count($lines).' Files／ '.$logmax.'Files<br>';
 // echo paging($page,count($lines));
 echo $foot;
-?>

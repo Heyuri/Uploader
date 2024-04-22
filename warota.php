@@ -68,20 +68,6 @@ error_reporting(E_ALL);
  * Heyuri's file uploader.
  */
 
- if(phpversion()>="4.1.0"){//PHP4.1.0以降対応
-    $_GET = array_map("htmlspecialchars", $_GET);
-    $_POST = array_map("htmlspecialchars", $_POST);
-    extract($_GET);
-    extract($_POST);
-    extract($_COOKIE);
-    extract($_SERVER);
-    $upfile_type=htmlspecialchars($_FILES['upfile']['type']);
-    $upfile_size=$_FILES["upfile"]["size"];
-    $upfile_name=htmlspecialchars($_FILES["upfile"]["name"]);
-    $upfile=$_FILES["upfile"]["tmp_name"];
-}
-
-
 $page_title   = 'Everything';          // Board title.
 $title_sub    = 'Home for your files'; // Board description.
 $logfile      = 'souko.log';           // Log file (You may want to change this or block direct access from internet)
@@ -109,60 +95,17 @@ $arrowext     = array('dat','htm','torrent','deb','lzh','ogm','doc','class','js'
 // ▼Yakuba(設定追加)
 $b_changeext  = array('htm','mht','cgi','php','html','sh','shtml','xml','svg');
 $a_changeext  = 'txt';       // 強制変換後の拡張子
-$base_php     = 'warota.php';// このファイル名
 $homepage_add = '../../';    // [Home]のリンク先(相対、絶対両方可能)
 // ▲Yakuba
 
-// 項目表示（環境設定）の初期状態 (表示ならChecked 表示しないなら空)--------
-$f_act  = 'checked';  //ACT（削除リンク）
-$f_com  = 'checked';  //コメント
-$f_size = 'checked';  //ファイルサイズ
-$f_mime = '';         //MIMEタイプ
-$f_date = '';         //日付け
-$f_anot = 'checked';  //別窓で開く？
-$f_orig = '';
-$secret = 'yuzuyu';   //元ファイル名
-
-function sanityCheck(){
-    global $logfile;
-    global $countFile;
-    global $lastFile;
-    global $uploadDir;
-
-
-    if ( !file_exists($logfile) ) {
-        echo ($logfile.' がありません。作成してください。(0666or0600)<br><br>');
-        $out = '1';
-    }
-
-    if (!file_exists($countFile)) {
-        echo ($countFile.' がありません。作成してください。(0666or0600)<br><br>');
-        $out = '1';
-    }
-
-    if (!file_exists($lastFile)) {
-        echo ($lastFile.' がありません。作成してください。(0666or0600)<br><br>');
-        $out = '1';
-    }
-
-    if (!file_exists($uploadDir)) {
-        echo ($uploadDir.' がありません。作成してください。(0777or0701)<br><br>');
-        $out = '1';
-    }
-
-    if ($out){
-      echo ('処理を中止します。');
-      exit;
-    }
-}
-function loadAndSetCookie(){
-    global $act,$acte,$come,$sizee,$mimee,$datee,$anote;
-
-    if($act=="envset"){
-      $cookval = implode("<>", array($acte,$come,$sizee,$mimee,$datee,$anote));
-      setcookie ("upcook", $cookval,time()+365*24*3600);
-    }
-}
+/* defualt enviorment settings. changes the look of the site */
+$D_showDeleteButton  = 'checked';
+$D_showComment  = 'checked';
+$D_showSize = 'checked';
+$D_showMimeType = '';
+//$D_showDateUploaded = ''; // dose not work
+//$D_openInNewWinow = ''; // dose not work
+//$D_showOriginalFileName = '';// dose not work
 
 /* draw functions */
 function drawHeader(){
@@ -177,32 +120,28 @@ function drawHeader(){
     <meta name="ROBOTS" content="NOINDEX,NOFOLLOW">
     <meta http-equiv="pragma" content="no-cache">
     <title>'.$page_title.'</title>
-    <style>
-      <!--
-      a:link    {color:#0000ee;}
-      a:hover   {color:#5555ee;}
-      a:visited {color:#0000ee;}
-      tr:nth-child(odd) {background-color: #f7efea;}
-      tr:hover {background-color: #f0e0d6;}
-      table {border-collapse: collapse;}
-      -->
-    </style>
     </head>
     <body bgcolor="#ffffee" text="#800000" link="#0000ee" alink="#5555ee" vlink="#0000ee">
-    <table width="100%"><tr><td bgcolor="#eeaa88"><strong><font size="4">'.$page_title.'</font></strong></td></tr></table>
-    <tt>
-    <br><br>'.$title_sub.'<br><br><br>
-    </tt>
-    ';
+        <table width="100%">
+            <tr><td bgcolor="#eeaa88">
+                <strong><font size="4">'.$page_title.'</font></strong>
+            </td></tr>
+        </table>
+        <tt><br>
+        <br>
+        '.$title_sub.'<br>
+        <br>
+        <br>
+        </tt>';
 }
 function drawPageBar($page, $total){
     global $PHP_SELF,$page_def,$homepage_add;
 
     for ($j = 1; $j * $page_def < $total+$page_def; $j++) {
         if($page == $j){
-            $next .= "[ <b>$j</b> ]";
+            $next .= '[ <b>'.$j.'</b> ]';
         }else{
-            $next .= sprintf("[<a href=\"%s?page=%d\">%d</a>]", $PHP_SELF,$j,$j);
+            $next .= sprintf('[<a href="%s?page=%d">%d</a>]', $PHP_SELF,$j,$j);
         }
     }
 
@@ -210,21 +149,25 @@ function drawPageBar($page, $total){
     global $sam_look;
     global $base_php;
     if($page=="all" and $sam_look) 
-        return sprintf ("[<a href=\"$homepage_add\">Home</a>] [<a href=\"img.php\">Image List</a>]　[<b>ALL</b>] %s",$next,$PHP_SELF);
-    else if($page=="all" and !$sam_look) 
-        return sprintf ("[<a href=\"$homepage_add\">Home</a>]　[<b>ALL</b>] %s",$next,$PHP_SELF);
-    else if($page!="all" and $sam_look) 
-        return sprintf ("[<a href=\"$homepage_add\">Home</a>] [<a href=\"img.php\">Image List</a>]　[<a href=\"$base_php?page=all\">ALL</a>] %s",$next,$PHP_SELF);
+        return sprintf ('[<a href="'.$homepage_add.'">Home</a>] [<a href="images.php">Image List</a>] [<b>ALL</b>] %s',$next,$PHP_SELF);
+    elseif($page=="all" and !$sam_look) 
+        return sprintf ('[<a href="'.$homepage_add.'">Home</a>] [<b>ALL</b>] %s',$next,$_SERVER['PHP_SELF']);
+    elseif($page!="all" and $sam_look) 
+        return sprintf ('[<a href="'.$homepage_add.'">Home</a>] [<a href="images.php">Image List</a>] [<a href="'.$_SERVER['PHP_SELF'].'?page=all">ALL</a>] %s',$next,$PHP_SELF);
     else 
-        return sprintf ("[<a href=\"$homepage_add\">Home</a>]　[<a href=\"$base_php?page=all\">ALL</a>] %s",$next,$PHP_SELF);
+        return sprintf ('[<a href="'.$homepage_add.'">Home</a>] [<a href="'.$base_php.'?page=all">ALL</a>] %s',$next,$PHP_SELF);
+}
+function drawFileListingN($n){
+
 }
 function drawFooter(){
     echo '
-    <BR><H5 align="right">
-    <a href="https://github.com/Heyuri/Uploader/">Heyuri</a> + <a href="http://zurubon.strange-x.com/uploader/">ずるぽんあぷろだ</a> + <a href="http://php.s3.to/">ﾚｯﾂ PHP!</a> + <a href="http://t-jun.kemoren.com/">隠れ里の村役場</a><BR>
-    </H5>
-    </BODY>
-    </HTML>';
+    <br>
+    <h5 align="right">
+        <a href="https://github.com/Heyuri/Uploader/">Heyuri</a> + <a href="http://zurubon.strange-x.com/uploader/">ずるぽんあぷろだ</a> + <a href="http://php.s3.to/">ﾚｯﾂ PHP!</a> + <a href="http://t-jun.kemoren.com/">隠れ里の村役場</a><BR>
+    </h5>
+    </body>
+    </html>';
 }
 function drawErrorPageAndExit($mes1,$mes2=""){
     global $base_php;
@@ -240,24 +183,138 @@ function drawErrorPageAndExit($mes1,$mes2=""){
     exit;
 }
 function drawErrorAndKeepRunning($mes1,$mes2=""){ 
-    global $base_php;
     echo '
     <hr>
     center>
         <strong>'.$mes1.'</strong><br>
         <p>'.$mes2.'</p>
     </center>
-    [<a href="'.$base_php.'">Back</a>]
-    <script type="text/javascript">setTimeout("location.href="'.$base_php.'",0)</script>';
+    [<a href="'.$_SERVER['PHP_SELF'].'">Back</a>]
+    <script type="text/javascript">setTimeout("location.href="'.$_SERVER['PHP_SELF'].'",0)</script>';
     drawFooter();
     exit;
 }
+function drawUploadForm(){
+    // Post form header (Yakuba modification)
+    // Check if the overall filesize limit for the board has been exceeded
+    if($size_all_hikaku >= $max_all_size / (1024*1024)){
+        echo 'The total capacity has exceeded the limit and is currently under posting restriction.<br>Please notify the administrator.<br><br>';
+    }
+    else{
+        echo '
+        <FORM METHOD="POST" ENCTYPE="multipart/form-data" ACTION="'.$PHP_SELF.'">
+        FILE Max '.$limitk.'KB (Max '.$logmax.'Files)<br>
+        <INPUT TYPE="hidden" name="MAX_FILE_SIZE" value="'.$limitb.'">
+        <INPUT TYPE=file  SIZE="40" NAME="upfile"> 
+        DELKey: <INPUT TYPE=password SIZE="10" NAME="pass" maxlength="10"><br>
+        COMMENT<i><small>(※If no comment is entered, the page will be reloaded / URL will be auto-linked.)</small></i><br>
+        <input type="text" size="45" value="ｷﾀ━━━(ﾟ∀ﾟ)━━━!!" name="com">
+        <INPUT TYPE=submit VALUE="Up/Reload"><INPUT TYPE=reset VALUE="Cancel"><br>
+        <small>Allowed extensions:'.$arrow.'</small>
+        </FORM>
+        ';
+    }
+}
 function drawDeletionForm($fielID){
     echo'
-    <form action=$PHP_SELF method=\"POST\">
-    <input type=hidden name=deletePostID value="'.$fielID).'">
+    <form action='.$_SERVER['PHP_SELF'].' method="POST">
+    <input type=hidden name=deletePostID value="'.$fielID.'">
     Enter your password: <input type=password size=12 name=deletePassword>
-    <input type=submit value=\"Delete\"></form>"';
+    <input type=submit value="Delete"></form>"';
+}
+function drawSettingsForm(){
+    echo '
+    <hr>
+    <strong>client Settings</strong><br>
+    <form method=POST action="'.$_SERVER['PHP_SELF'].'">
+    <input type=hidden name=action value="setUserSettings">
+    <ul>
+        <li><strong>display</strong>
+        <ul>
+            <input type=checkbox name=showDeleteButtons value=checked '.$_COOKIE['showDeleteButtons'].'>ACT<br>
+            <input type=checkbox name=showComments  value=checked '.$_COOKIE['showComments'].'>COMMENT<br>
+            <input type=checkbox name=showFileSizes value=checked '.$_COOKIE['showFileSizes'].'>SIZE<br>
+            <input type=checkbox name=showMimeTypes value=checked '.$_COOKIE['showMimeTypes'].'>MIME<br>
+        </ul>
+    <ul><br>
+    <br><br>
+
+    <input type=submit value=\"登録\">
+    <input type=reset value=\"元に戻す\">
+    </form>
+    <a href="'.$_SERVER['PHP_SELF'].'">[Back]</a>';
+}
+function drawActionLinks(){
+    echo '
+    <HR size=1>
+    <small>
+        <a href="'.$_SERVER['PHP_SELF'].'?goingto=settings">settings</a> | <a href="'.$_SERVER['PHP_SELF'].'">reload</a> | <a href="images.php">image list</a>
+    </small>
+    <HR size=1>';
+}
+/* data getters */
+function getDataByID($id){
+    global $conf;
+    $logFile = $conf['logFile'];
+    $openFile = fopen($logFile,"r");
+    $data = null;
+
+    while(!feof($openFile)){ 
+        $line = fgets($openFile);
+        $array = explode("<>",$line);
+        if($array[0] == $id){
+            $data = $array;
+            break;
+        }
+    } 
+    fclose($openFile);
+
+    return $data;
+}
+function getID($postData){
+    return $postData[0];    
+}
+function getFileExtention($postData){
+    return $postData[1];
+}
+function getComent($postData){
+    return $postData[2];
+}
+function getHost($postData){
+    return $postData[3];
+}
+function getDateUploaded($postData){
+    return $postData[4];
+}
+function getSizeInBytes($postData){
+    return $postData[5];
+}
+function getMimeType($postData){
+    return $postData[5];
+}
+function getPassword($postData){
+    return $postData[6];
+}
+function getOriginalFileName($postData){
+    return $postData[7];
+}
+/* helper libs */
+function getTotalUseageInBytes(){
+    // Total file size calculation
+    global $conf;
+    $logFile = $conf['logFile'];
+    $totalSize=0;
+    $openFile = fopen($logFile,"r");
+
+    //while not at the end of file
+    //id<>fileExtention<>comment<>host<>dateUploaded<>sizeInBytes<>mimeType<>Password<>orginalFileName
+    while(!feof($openFile)){ 
+        $line = fgets($openFile);
+        $array = explode("<>",$line);
+        $size = getSizeInBytes($array);
+        $totalSize = $totalSize + $size;
+    } 
+    fclose($openFile);
 }
 function bytesToHumanReadable($size){
     if($size == 0){
@@ -284,7 +341,6 @@ function bytesToHumanReadable($size){
 
     return $format;
 }
-
 function IsBaned($host){
     global $denylist;
     foreach($denylist as $line) {
@@ -293,115 +349,109 @@ function IsBaned($host){
         }
     }
 }
+function deleteDataFromLogByID($id){
+    global $conf;
+    $logFile = $conf['logFile'];
+    $openLogFile = fopen($logFile, "r");
+    $dataIsFoundInFile = false;
+    $newFileContent = [];
+
+    // while not at the end of the file.
+    while (!feof($openLogFile)) {
+        $line = fgets($openLogFile);
+        $array = explode("<>", $line);
+
+        if ($array[0] == $id) {
+            $dataIsFoundInFile = true;
+        } else {
+            $newFileContent[] = $line;
+        }
+    }
+    fclose($openLogFile);
+
+    // data was not found.
+    if ($dataIsFoundInFile == false) {
+        return false;
+    }
+
+    $openLogFile = fopen($logFile, "w");
+    flock($openLogFile, LOCK_EX);
+
+    foreach ($newFileContent as $line) {
+        fwrite($openLogFile, $line);
+    }
+    fclose($openLogFile);
+    
+    return true;
+
+}
+
+function loadCookieSettings(){
+    global $conf;
+    $defualt = $conf['defualtCookieValues'];
+
+    if(isset($_COOKIE['settings']) == false){
+        $cookie = implode("<>", $conf['defualtCookieValues']);
+    }
+
+    if($_POST['action']=="setUserSettings"){
+        // the order of this array must be the same order as $conf['defualtCookieValues']
+        $cookie = implode("<>", array(   $_POST['showDeleteButton']
+                                        ,$_POST['showComment']
+                                        ,$_POST['showSize']
+                                        ,$_POST['showMimeType']));
+        setcookie ("settings", $cookie,time()+365*24*3600);
+    }
+    
+
+    $settings = array_combine($defualt, explode("<>",$cookie));
+    return $settings;
+}
 
 /*
  *  Start of the main logic
  */
 
-//checks for expected files. not needed in prod enviorment.
-sanityCheck();
-
 if(IsBaned($_SERVER['REMOTE_ADDR'])){
     drawErrorPageAndExit('you are banned');
 }
 
-loadAndSetCookie();
-
-//this is more cookie things i cant understand bc they dont document the invisable super globals.....
-if(!$upcook){
-    $upcook = implode("<>",array($f_act,$f_com,$f_size,$f_mime,$f_date,$f_anot));
-}
-list($c_act,$c_com,$c_size,$c_mime,$c_anot) = explode("<>",$upcook);
-
-/* kilobytes to bytes */
-$byteLimit = $kilobyteLimit * 1024;
-
+$userSettings = loadCookieSettings();
 
 /* deletion form was posted to */
-if(is_null($_POST['deleteFileID']) == false && $_POST['deletionPassword']){
+if(is_numeric($_POST['deleteFileID']) && isset($_POST['deletionPassword'])){
     $fileID = $_POST['deleteFileID'];
     $password = $_POST['deletionPassword'];
 
-    $old = file($logfile);
-    $find = false;
-    for($i=0; $i<count($old); $i++){
-        list($did,$dext,,,,,,$dpwd,)=explode("<>",$old[$i]);
-        if($delid==$did){
-            $find = true;
-            $del_ext = $dext;
-            $del_pwd = rtrim($dpwd);
-        }else{
-            $new[] = $old[$i];
-        }
-    }
-    if(!$find){
+    $postData = getDataByID($fileID);
+    if(is_null($postData)){
         error('Deletion Error','The file cannot be found.');
     }
-    if($delpass == $admin || substr(md5($delpass), 2, 7) == $del_pwd){
-        if(file_exists($updir.$prefix.$delid.".$del_ext")){
-            unlink($updir.$prefix.$delid.".$del_ext");
+    if($password == $conf['adminPassword'] || $password == getPassword($postData)){
+        $filePath = $conf['uploadDir'] ."/". $conf['prefix'] . $fileID . getFileExtention($postData);
+        if(file_exists($filePath)){
+            unlink($filePath);
         }
-        $fp = fopen($logfile, "w");
-        flock($fp, LOCK_EX);
-
-        if(!$new) 
-        {
-            fputs($fp,$new);
-        }
-        else{
-            fputs($fp, implode("",$new));
-        }
-
-        fclose($fp);
-        runend('The process is over. The screen will change automatically.','If this does not change, click "Back".');
+        deleteDataFromLogByID($fileID);
+        runend('file has been deleted.','If this page dose not change, click "Back".');
     }else{
         error('Deletion Error','The password is incorrect.');
     }
 }
 /* draw form when user is atempting to delete a file */
-elseif(is_null($_GET['deleteFileID']) == false){
-    // remeber to always clean strings before drawing them.
+elseif(is_numeric($_GET['deleteFileID'])){
     drawDeletionForm(htmlspecialchars($_GET['deleteFileID']));
     die();
 }
 
-/* Preferences form */
-if($act=="env"){
-    echo '
-    <hr>
-    <strong>環境設定</strong><br>
-    <form method=GET action="'.$PHP_SELF.'">
-    <input type=hidden name=act value=\"envset\">
-    <ul>
-        <li><strong>表示設定</strong>
-        <ul>
-            <input type=checkbox name=acte value=checked '.$c_act.'>ACT<br>
-            <input type=checkbox name=come value=checked '.$c_com.'>COMMENT<br>
-            <input type=checkbox name=sizee value=checked '.$c_size.'>SIZE<br>
-            <input type=checkbox name=mimee value=checked '.$c_mime.'>MIME<br>
-            <input type=checkbox name=datee value=checked >DATE<br>
-        </ul>
-        <li><strong>動作設定</strong>
-    <ul>
-        <input type=checkbox name=anote value=checked $c_anot>ファイルを開く時は別窓で開く<br>
-    </ul><br>
-    cookieを利用しています。<br>
-    上記の設定で訪問することができます。<br><br>
-
-    <input type=submit value=\"登録\">
-    <input type=reset value=\"元に戻す\">
-    </form>
-    <a href="'.$PHP_SELF.'">Back</a>
-    ';
-    drawFooter();
-    exit;
-}
-$lines = file($logfile);
-
 // Upload writing process 
 if(file_exists($upfile) && $com && $upfile_size > 0){
-    if(strlen($com) > $commax)    error('Comment too big.');
-    if($upfile_size > $limitb)    error('File too big.');
+    if(strlen($com) > $conf['maxCommentSize']){
+        error('Comment too big.');
+    }
+    if($upfile_size > $conf['maxFileSize']){
+        error('File too big.');
+    }
 
     /* 連続投稿制限 */
     if($last_time > 0){
@@ -485,16 +535,7 @@ foreach($arrowext as $list){
 }
 
 
-// Total file size calculation
-$size_all=0;
-$logfile_open = fopen($logfile,"r");
-while(!feof($logfile_open)){
-    $csv = fgets($logfile_open);
-    $str = explode("<>",$csv);
-    $size_one = $str[5];
-    $size_all = $size_all+$size_one;
-} 
-fclose($logfile_open);
+
 
 // For total capacity comparison(MB)
 $size_all_hikaku = $size_all/(1024*1024);
@@ -509,25 +550,7 @@ else if($size_all <= (1000*1024*1024*1024*1024) || $size_all >= (1000*1024*1024*
 else                                    $size_all_hyouzi = $size_all."B";
 
 
-// Post form header (Yakuba modification)
-// Check if the overall filesize limit for the board has been exceeded
-if($size_all_hikaku >= $max_all_size / (1024*1024)){
-  echo 'The total capacity has exceeded the limit and is currently under posting restriction.<br>Please notify the administrator.<br><br>';
-}
-else{
-  echo '
-  <FORM METHOD="POST" ENCTYPE="multipart/form-data" ACTION="'.$PHP_SELF.'">
-  FILE Max '.$limitk.'KB (Max '.$logmax.'Files)<br>
-  <INPUT TYPE="hidden" name="MAX_FILE_SIZE" value="'.$limitb.'">
-  <INPUT TYPE=file  SIZE="40" NAME="upfile"> 
-  DELKey: <INPUT TYPE=password SIZE="10" NAME="pass" maxlength="10"><br>
-  COMMENT<i><small>(※If no comment is entered, the page will be reloaded / URL will be auto-linked.)</small></i><br>
-  <input type="text" size="45" value="ｷﾀ━━━(ﾟ∀ﾟ)━━━!!" name="com">
-  <INPUT TYPE=submit VALUE="Up/Reload"><INPUT TYPE=reset VALUE="Cancel"><br>
-  <small>Allowed extensions:'.$arrow.'</small>
-  </FORM>
-  ';
-}
+
 
 
 // Counter display selection
@@ -546,13 +569,6 @@ if($count_look){
 }
 
 
-/* mode link */
-echo '
-<!--(こわれにくさレベル1)「■」=投稿記事削除</small>
-<HR size=1><small><a href="'.$PHP_SELF.'?act=env">環境設定</a> | <a href=?>リロード</a> | <a href="img.php">画像一覧</a>
-</small>-->
-<HR size=1>
-';
 
 /* Log start position */
 $st = ($page) ? ($page - 1) * $page_def : 0;
@@ -598,4 +614,8 @@ echo 'Used '.$size_all_hyouzi.'/ '.FormatByte($max_all_size).'<br>';
 echo 'Used '.count($lines).' Files/ '.$logmax.'Files<br>';
 // echo paging($page,count($lines));
 
+drawHeader();
+drawUploadForm();
+drawActionLinks();
+drawFileListing();
 drawFooter();

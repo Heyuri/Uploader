@@ -113,8 +113,11 @@ if(phpversion()>="4.1.0"){//PHP4.1.0以降対応
   $f_anot = 'checked';                 //別窓で開く？
   $f_orig = '';
   $secret = 'yuzuyu';                 //元ファイル名
+
+{
 // ファイル、DIRの有無チェック----------------------------------------------
 // ▼Yakuba(ファイル、DIRがなければ注意)
+
 if ( !file_exists($logfile) ) {
   echo ($logfile.' がありません。作成してください。(0666or0600)<br><br>');
   $out = '1';
@@ -140,6 +143,7 @@ if ($out){
   exit;
 }
 // ▲Yakuba
+}
 
 
 if($act=="envset"){

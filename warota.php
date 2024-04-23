@@ -426,7 +426,7 @@ else{
   COMMENT<i><small>（※If no comment is entered, the page will be reloaded / URL will be auto-linked.）</small></i><br>
   <input type="text" size="45" value="ｷﾀ━━━(ﾟ∀ﾟ)━━━!!" name="com">
   <INPUT TYPE=submit VALUE="Up/Reload"><INPUT TYPE=reset VALUE="Cancel"><br>
-  <small>Allowed extensions：'.$arrow.'</small>
+  <small><details> <summary>Allowed extensions</summary>'.$arrow.'</details></small>
   </FORM>
   ';
 }

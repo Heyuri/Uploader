@@ -68,32 +68,16 @@ error_reporting(E_ALL);
  * Heyuri's file uploader.
  */
 
-$conf = [
-    'boardTitle' => 'Everything',
-    'boardSubTitle' => 'Home for your files',
-    'home' => "https://cgi.heyuri.net/goatse/",
-    'adminPassword' => "lolpenis",
+//config
+require_once 'config.php';
 
-    'timeZone' => 'UTC',        // timezone
-    'logFile' => "souko.log",   // name of flat file
-    'uploadDir' => "src/",      // upload location (slash is required).
-
-    'maxAmountOfFiles' => 20,       // max files allowed on server
-    'maxTotalSize' => 21474836480,  // total sized allowed in bytes
-    'filesPerListing' => 3,         // how many files listed per page
-    'maxUploadSize' => 20971520,    // max upload size in bytes
-    'commentRequired' => true,      // comment is requires or not
-    'maxCommentSize' => 128,        // max comment length
-
-    'denylist' => ['0.0.0.0'],
-
-    'prefix' => "", // front part of a file name
-    'allowedExtensions' =>  ['dat','htm','torrent','deb','lzh','ogm','doc','class','js','swift','cc','tga','ape','woff2','cab','whl','mpe','rmvb','srt','pdf','xz','exe','m4a','crx','vob','tif','gz','roq','m4v','gif','rb','3g2','m4a','rvb','sid','ai','wma','pea','bmp','py','mp4','m4p','ods','jpeg','command','azw4','otf','ebook','rtf','ttf','mobi','ra','flv','ogv','mpg','xls','jpg','mkv','nsv','mp3','kmz','java','lua','m2v','deb','rst','csv','pls','pak','egg','tlz','c','cbz','xcodeproj','iso','xm','azw','webm','3ds','azw6','azw3','cue','kml','woff','zipx','3gp','po','mpa','mng','wps','wpd','a','s7z','ics','tex','go','ps','org','yml','msg','xml','cpio','epub','docx','lha','flac','odp','wmv','vcxproj','mar','eot','less','asf','apk','css','mp2','odt','patch','wav','msi','rs','gsm','ogg','cbr','azw1','m','dds','h','dmg','mid','psd','dwg','aac','s3m','cs','cpp','au','aiff','diff','avi','bat','html','pages','bin','txt','rpm','m3u','max','vcf','svg','ppt','clj','png','svi','tiff','tgz','mxf','7z','drc','yuv','mov','tbz2','bz2','gpx','shar','xcf','dxf','jar','qt','tar','xpi','zip','thm','cxx','3dm','rar','md','scss','mpv','webp','war','pl','xlsx','mpeg','aaf','avchd','mod','rm','it','wasm','el','eps','nes','smc','sfc','md','smd','gen','gg','z64','v64','n64','gb','gbc','gba','srl','gcm','gcz','nds','dsi','wbfs','wad','cia','3ds','ngp','ngc','pce','vb','ws','wsc','dsv','sav','ps2','mcr','mpk','eep','st0','dta','srm','afa','zpaq','arc','paq','lpaq','swf','pdn','lol','php','sh','img','ico','asc', 'm2ts', 'nzb', 'appimage', 'json'],
-    'extentionsToBeConvertedToText' => ['htm','mht','cgi','php','html','sh','shtml','xml','svg'],
-    'defualtCookieValues' => ['showDeleteButton' => 'checked','showComment' => 'checked','showFileSize' => 'checked','showMimeType' => ''],
-];
 
 date_default_timezone_set($conf['timeZone']);
+
+/* load modules */
+if($ipcheck) require_once $module_List['mod_ipcheck']; // ip log module
+if($antiflood) require_once $module_List['mod_antiflood']; // anti-flood script
+
 
 /* draw functions */
 function drawHeader(){
@@ -110,7 +94,6 @@ function drawHeader(){
     <meta http-equiv="expires" content="0">
     <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT">
     <meta http-equiv="pragma" content="no-cache">
-    <title>'.$conf['boardTitle'].'</title>
     <style>
         a:link    {color:#0000ee;}
         a:hover   {color:#5555ee;}
@@ -119,6 +102,7 @@ function drawHeader(){
         tr:hover {background-color: #f0e0d6;}
         table {border-collapse: collapse;}
     </style>
+    <title>'.$conf['boardTitle'].'</title>
     </head>
     <body bgcolor="#ffffee" text="#800000" link="#0000ee" alink="#5555ee" vlink="#0000ee">
         <table width="100%">
@@ -146,6 +130,12 @@ function drawPageingBar($page=1){
 
     echo '[<a href="'.$conf['home'].'">Home</a>] [<a href="'.$_SERVER['PHP_SELF'].'?page=all">ALL</a>]';
 
+    for($i = 1; $i < $pages; $i++) {
+        if($i == $page){
+            echo '[<b>'.$i.'</b>]'; 
+        }else{
+            echo '[<a href="'.$_SERVER['PHP_SELF'].'?page='.$i.'">'.$i.'</a>]'; 
+        }
     for($i = 1; $i < $pages; $i++) {
         if($i == $page){
             echo '[<b>'.$i.'</b>]'; 
@@ -603,6 +593,12 @@ function getSplitCookie(){
 
 function userUploadedFile(){
     global $conf;
+    global $antiflood;
+
+    if(function_exists('getIP')) $conf['ip'] = call_user_func('getIP');
+    //check if IP is banned from uploading [only usuable if ipcheck module is enabled]
+    if(function_exists('matchIP_to_denylist')) call_user_func('matchIP_to_denylist', $conf['ip']);
+
     if($_FILES["upfile"]['size'] <= 0){
         drawErrorPageAndExit('please select a file.');
     }
@@ -615,9 +611,8 @@ function userUploadedFile(){
     if(strlen($_POST['comment']) > $conf['maxCommentSize']){
         drawErrorPageAndExit('Comment is too big.');
     }
-    if(isRateLimited()){
-        drawErrorPageAndExit('you are posting to fast. try again later');
-    }
+    if(function_exists('anti_flood_check')) call_user_func('anti_flood_check');
+
 
     $fullFileName = $_FILES["upfile"]["name"];
     $fileInfo = pathinfo($fullFileName);
@@ -663,13 +658,19 @@ function userUploadedFile(){
         $password = '';
     }
 
+    if(function_exists('getIP')) $conf['ip'] = call_user_func('getIP');
+
+
     $data = createData( $newID, $fileExtension, $comment, $_SERVER['REMOTE_ADDR'],
                         time(), $_FILES['upfile']['size'], $realMimeType, $password,
                         $fileName);
 
     // if over max. delete last file
     if(getTotalLogLines() >= $conf['maxAmountOfFiles']){
-        removeLastData();
+        if($conf['deleteAfterMax']){
+            removeLastData(); //remove file if deleteAfterMax is true
+        }
+	    drawErrorPageAndExit("File limit reached, contact administrator.");
     }
     writeDataToLogs($data);
     drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');

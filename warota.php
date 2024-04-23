@@ -218,9 +218,19 @@ function runend($mes1,$mes2=""){         //処理終了メッセージ
 }
 
 /* start */
+
 $host = 1337;
+// if ipcheck and de-anon are enabled then it will log IP
+if($ipcheck) {
+	require_once $module_List['mod_ipcheck'];
+	
+	if(function_exists('getIP'))	$host = call_user_func('getIP');
+}
+
+
 if(!$upcook) $upcook=implode("<>",array($f_act,$f_com,$f_size,$f_mime,$f_date,$f_anot));
 list($c_act,$c_com,$c_size,$c_mime,$c_anot)=explode("<>",$upcook);
+
 
 
 /* アクセス制限 */
@@ -304,27 +314,18 @@ $lines = file($logfile);
 
 // アプロード書き込み処理---------------------------------------------------
 if(file_exists($upfile) && $com && $upfile_size > 0){
+  //check if IP is banned from uploading [only usuable if ipcheck module is enabled]
+  if(function_exists('matchIP_to_denylist')) call_user_func('matchIP_to_denylist', $host);
+	
   if(strlen($com) > $commax)    error('Comment too big.');
   if($upfile_size > $limitb)	error('File too big.');
 
   //will check if anti-flood script is enabled
   if($antiflood) {
-  	require_once $module_List['mod_antiflood'];
-  }
-
-  /* 連続投稿制限 */
-  if($last_time > 0){
-	  
-    $now = time();
-    $last = @fopen($last_file, "r+") or die("連続投稿用ファイル $last_file を作成してください");
-    $lsize = fgets($last, 1024);
-    list($ltime, $lip) = explode("<>", $lsize);
-    if($host == $lip && $last_time*60 > ($now-$ltime)){
-      error('連続投稿制限中','時間を置いてやり直してください');
-    }
-    rewind($last);
-    fputs($last, "$now,$host,");
-    fclose($last);
+	require_once $module_List['mod_antiflood'];
+	if(function_exists('anti_flood_check')) {
+		call_user_func('anti_flood_check');
+	}
   }
 
   /* 拡張子と新ファイル名 */

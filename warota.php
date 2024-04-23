@@ -586,15 +586,19 @@ function getSplitCookie(){
 
 function userUploadedFile(){
     global $conf;
+    if($_FILES["upfile"]['size'] <= 0){
+        drawErrorPageAndExit('please select a file.');
+    }
+    if($_FILES["upfile"]['size'] > $conf['maxUploadSize']){
+        drawErrorPageAndExit('File is too big.');
+    }
     if($_POST['comment'] == "" && $conf['commentRequired']){
         drawErrorPageAndExit('comment is required.');
     }
     if(strlen($_POST['comment']) > $conf['maxCommentSize']){
         drawErrorPageAndExit('Comment is too big.');
     }
-    if($_FILES["upfile"]['size'] > $conf['maxUploadSize']){
-        drawErrorPageAndExit('File is too big.');
-    }
+
 
     if(isRateLimited()){
         drawErrorPageAndExit('you are posting to fast. try again later');

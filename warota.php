@@ -107,6 +107,9 @@ $D_showMimeType = '';
 //$D_openInNewWinow = ''; // dose not work
 //$D_showOriginalFileName = '';// dose not work
 
+
+date_default_timezone_set($conf['timeZone']);
+
 /* draw functions */
 function drawHeader(){
     global $page_title;
@@ -134,7 +137,7 @@ function drawHeader(){
         <br>
         </tt>';
 }
-function drawPageBar($page, $total){
+function drawPageingBar($page, $total){
     global $PHP_SELF,$page_def,$homepage_add;
 
     for ($j = 1; $j * $page_def < $total+$page_def; $j++) {
@@ -171,7 +174,7 @@ function drawFooter(){
 }
 function drawErrorPageAndExit($mes1,$mes2=""){
     global $base_php;
-    
+    drawHeader();
     echo '
     <hr>
     <center>
@@ -182,7 +185,8 @@ function drawErrorPageAndExit($mes1,$mes2=""){
     drawFooter();
     exit;
 }
-function drawErrorAndKeepRunning($mes1,$mes2=""){ 
+function drawMessageAndRedirectHome($mes1,$mes2=""){ 
+    drawHeader();
     echo '
     <hr>
     center>
@@ -197,30 +201,37 @@ function drawErrorAndKeepRunning($mes1,$mes2=""){
 function drawUploadForm(){
     // Post form header (Yakuba modification)
     // Check if the overall filesize limit for the board has been exceeded
-    if($size_all_hikaku >= $max_all_size / (1024*1024)){
-        echo 'The total capacity has exceeded the limit and is currently under posting restriction.<br>Please notify the administrator.<br><br>';
+    global $conf;
+    if(getTotalUseageInBytes() >= $conf['maxTotalSize']){
+        echo '
+        The total capacity has exceeded the limit and is currently under posting restriction.<br>
+        Please notify the administrator.<br>
+        <br>';
     }
     else{
         echo '
-        <FORM METHOD="POST" ENCTYPE="multipart/form-data" ACTION="'.$PHP_SELF.'">
-        FILE Max '.$limitk.'KB (Max '.$logmax.'Files)<br>
-        <INPUT TYPE="hidden" name="MAX_FILE_SIZE" value="'.$limitb.'">
-        <INPUT TYPE=file  SIZE="40" NAME="upfile"> 
-        DELKey: <INPUT TYPE=password SIZE="10" NAME="pass" maxlength="10"><br>
-        COMMENT<i><small>(※If no comment is entered, the page will be reloaded / URL will be auto-linked.)</small></i><br>
-        <input type="text" size="45" value="ｷﾀ━━━(ﾟ∀ﾟ)━━━!!" name="com">
-        <INPUT TYPE=submit VALUE="Up/Reload"><INPUT TYPE=reset VALUE="Cancel"><br>
-        <small>Allowed extensions:'.$arrow.'</small>
-        </FORM>
+        <form method="post" enctype="multipart/form-data" action="'. $_SERVER['PHP_SELF'] .'">
+        <input type="hidden" name="MAX_FILE_SIZE" value="'. $conf['maxUploadSize'] .'">
+            MAX UPLOAD SIZE: '. bytesToHumanReadable($conf['maxUploadSize']) .'<br>
+            <input type=file  name="40" name="upfile"> 
+
+            DELETION KEY: <input type=password size="10" name="password" maxlength="10"><br>
+            COMMENT<i><small>(※If no comment is entered, the page will be reloaded / URL will be auto-linked.)</small></i><br>
+            <input type="text" size="45" value="ｷﾀ━━━(ﾟ∀ﾟ)━━━!!" name="com">
+            <input type=submit value="Up/Reload">
+            <input type=reset value="Cancel"><br>
+            <small>Allowed extensions:'. $conf['allowedExtensions'] .'</small>
+        </form>
         ';
     }
 }
 function drawDeletionForm($fielID){
     echo'
-    <form action='.$_SERVER['PHP_SELF'].' method="POST">
-    <input type=hidden name=deletePostID value="'.$fielID.'">
-    Enter your password: <input type=password size=12 name=deletePassword>
-    <input type=submit value="Delete"></form>"';
+    <form action='.$_SERVER['PHP_SELF'].' method="post">
+        <input type=hidden name=deletePostID value="'.$fielID.'">
+        Enter your password: <input type=password size=12 name=deletePassword>
+        <input type=submit value="Delete">
+    </form>"';
 }
 function drawSettingsForm(){
     echo '
@@ -252,7 +263,18 @@ function drawActionLinks(){
     </small>
     <HR size=1>';
 }
+
 /* data getters */
+function getLastID(){
+    global $conf;
+    $logFile = $conf['logFile'];
+    $openFile = fopen($logFile,"r");
+    
+    $firstLine = fgets($openFile);
+    $array = explode("<>",$firstLine);
+    fclose($openFile);
+    return getID($array);
+}
 function getDataByID($id){
     global $conf;
     $logFile = $conf['logFile'];
@@ -290,15 +312,59 @@ function getSizeInBytes($postData){
     return $postData[5];
 }
 function getMimeType($postData){
-    return $postData[5];
-}
-function getPassword($postData){
     return $postData[6];
 }
-function getOriginalFileName($postData){
+function getPassword($postData){
     return $postData[7];
 }
+function getOriginalFileName($postData){
+    return $postData[8];
+}
+function createData($id,$fileExtension,$comment,$ip,$time,$size,$mimeType,$password,$orignalFileName){
+    return array($id,$fileExtension,$comment,$ip,$time,$size,$mimeType,$password,$orignalFileName);
+}
+
 /* helper libs */
+function writeDataToLogs($data){
+    global $conf;
+
+    $stringData = implode("<>", $data) . "\n";
+
+    $fileHandle = fopen($conf['logFile'], "c+");
+
+    if ($fileHandle === false) {
+        // Handle error when file cannot be opened
+        echo "Failed to open log file.";
+        return false;
+    }
+
+    // Acquire an exclusive lock
+    if (!flock($fileHandle, LOCK_EX)) {
+        echo "Could not lock log file.";
+        fclose($fileHandle);
+        return false;
+    }
+
+    // Read the existing contents to prepend new data
+    $existingData = stream_get_contents($fileHandle);
+
+    // Rewind the file pointer to the beginning of the file
+    rewind($fileHandle);
+
+    // Prepend new data and write the existing data back
+    if (fwrite($fileHandle, $stringData . $existingData) === false) {
+        echo "Failed to write to log file.";
+        flock($fileHandle, LOCK_UN);
+        fclose($fileHandle);
+        return false;
+    }
+
+    // Unlock the file and close
+    flock($fileHandle, LOCK_UN);
+    fclose($fileHandle);
+
+    return true;
+}
 function getTotalUseageInBytes(){
     // Total file size calculation
     global $conf;
@@ -315,6 +381,68 @@ function getTotalUseageInBytes(){
         $totalSize = $totalSize + $size;
     } 
     fclose($openFile);
+}
+function getTotalLogLines(){
+    global $conf;
+    $lineCount = 0; 
+    $fileHandle = fopen($conf['logFile'], 'r'); 
+
+    while (!feof($fileHandle)) {
+        fgets($fileHandle);
+        $lineCount++; 
+    }
+    fclose($fileHandle); 
+
+    return $lineCount;
+}
+function delteFileByData($data){
+    global $conf;
+    $path = $conf['uploadDir'] ."/". $conf['prefix'] . getID($data) . getFileExtention($data);
+    unlink($path);
+}
+function removeLastData(){
+    global $conf;
+    $fileHandle = fopen($conf['logFile'], 'r+'); 
+    flock($fileHandle, LOCK_EX);
+
+    if (!$fileHandle) {
+        return [false, ""]; // Return false and an empty string if the file cannot be opened
+    }
+
+    $lastLine = '';
+    $len = 0; // To track the length of the last line
+
+    // Move to the end of the file
+    fseek($fileHandle, 0, SEEK_END);
+    $fileSize = ftell($fileHandle); // Get the size of the file
+
+    // Read backwards to find the beginning of the last line
+    while ($fileSize > 0) {
+        fseek($fileHandle, --$fileSize, SEEK_SET);
+        $char = fgetc($fileHandle);
+        if ($char == "\n" && $len > 0) {
+            break;
+        }
+        if ($char != "\r") {
+            $lastLine = $char . $lastLine;
+            $len++;
+        }
+    }
+
+    // Truncate the file to remove the last line
+    if ($fileSize == 0) { // If it's the first and only line in the file
+        ftruncate($fileHandle, 0);
+    } else {
+        ftruncate($fileHandle, $fileSize);
+    }
+
+    // Close the file handle
+    fclose($fileHandle);
+
+    $data = explode("<>", $lastLine);
+    delteFileByData($data);
+
+    return [true, $lastLine]; // Return true and the last line
 }
 function bytesToHumanReadable($size){
     if($size == 0){
@@ -349,6 +477,10 @@ function IsBaned($host){
         }
     }
 }
+function isRateLimited(){
+    //hachi this one is for you to fill in
+    return false;
+}
 function deleteDataFromLogByID($id){
     global $conf;
     $logFile = $conf['logFile'];
@@ -359,9 +491,9 @@ function deleteDataFromLogByID($id){
     // while not at the end of the file.
     while (!feof($openLogFile)) {
         $line = fgets($openLogFile);
-        $array = explode("<>", $line);
+        $data = explode("<>", $line);
 
-        if ($array[0] == $id) {
+        if ($data[0] == $id) {
             $dataIsFoundInFile = true;
         } else {
             $newFileContent[] = $line;
@@ -374,6 +506,7 @@ function deleteDataFromLogByID($id){
         return false;
     }
 
+
     $openLogFile = fopen($logFile, "w");
     flock($openLogFile, LOCK_EX);
 
@@ -382,10 +515,10 @@ function deleteDataFromLogByID($id){
     }
     fclose($openLogFile);
     
+    delteFileByData($data);
+
     return true;
-
 }
-
 function loadCookieSettings(){
     global $conf;
     $defualt = $conf['defualtCookieValues'];
@@ -403,9 +536,98 @@ function loadCookieSettings(){
         setcookie ("settings", $cookie,time()+365*24*3600);
     }
     
-
     $settings = array_combine($defualt, explode("<>",$cookie));
     return $settings;
+}
+
+/* main funcitons */
+
+function userUploadedFile(){
+    global $conf;
+    if($_POST['comment'] == "" && $conf['commentRequired']){
+        drawErrorPageAndExit('comment is required.');
+    }
+    if(strlen($_POST['comment']) > $conf['maxCommentSize']){
+        drawErrorPageAndExit('Comment is too big.');
+    }
+    if($_FILES["upfile"]['size'] > $conf['maxFileSize']){
+        drawErrorPageAndExit('File is too big.');
+    }
+
+    if(isRateLimited()){
+        drawErrorPageAndExit('you are posting to fast. try again later');
+    }
+
+    $fullFileName = $_FILES["upfile"]["name"];
+    $fileInfo = pathinfo($fullFileName);
+
+    $fileName = $fileInfo['filename'];
+    $fileExtension = strtolower($fileInfo['extension']);
+
+    if(!in_array($fileExtension, $conf['allowedExtentions'])){
+        drawErrorPageAndExit("invlaid extension","file can not be uploaded with that extension");
+    }
+
+    $originalExtension = $fileExtension;
+    // convert posibly dangerous scripts into text files
+    if(in_array($fileExtension, $conf['extentionsToBeConvertedToText'])){
+        $originalExtension = $fileExtension;
+        $fileExtension = "txt";
+    }
+    // get mimetype for this post
+    $finfo = finfo_open(FILEINFO_MIME_TYPE); // Return MIME type
+    $realMimeType = finfo_file($finfo, $_FILES['upfile']['tmp_name']);
+    finfo_close($finfo);
+
+    // get a ID for this new post
+    $newID = sprintf("%03d", getLastID() + 1);
+    $newname = $conf['prefix'] . $newID . "." . $fileExtension;
+
+    rename($_FILES['upfile']['tmp_name'], $conf['uploadDir'].$newname);
+    chmod($conf['uploadDir'] . $newname, 0644);
+
+    //remove line breaks from the comment
+    $comment = str_replace(array("\0","\t","\r","\n","\r\n"), "", $_POST['comment']);
+    
+    // check if the extention has been converted to somthing safe
+    if($originalExtension != $fileExtension){
+        //show the converstion
+        $comment = $comment . '<font color="#ff0000">('. $fileExtension .'←'. $originalExtension .')</font>';
+    }
+    
+    // get password
+    if(isset($_POST['password'])){
+        $password = $_POST['password'];
+    }else{
+        $password = "*";
+    }
+
+    $data = createData( $newID, $fileExtension, $comment, $_SERVER['REMOTE_HOST'],
+                        time(), $_FILES['upfile']['size'], $realMimeType, $password,
+                        $fileName);
+
+    // if over max. delete last file
+    if(getTotalLogLines() >= $conf['maxAmountOfFiles']){
+        removeLastData();
+    }
+    writeDataToLogs($data);
+    drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');
+}
+function userDeletePost(){
+    global $conf;
+    $fileID = $_POST['deleteFileID'];
+    $password = $_POST['deletionPassword'];
+
+    $postData = getDataByID($fileID);
+    if(is_null($postData)){
+        drawErrorPageAndExit('Deletion Error','The file cannot be found.');
+    }
+    if($password == $conf['adminPassword'] || $password == getPassword($postData)){
+        deleteDataFromLogByID($fileID);
+        drawMessageAndRedirectHome('file has been deleted.','If this page dose not change, click "Back".');
+    }else{
+        drawErrorPageAndExit('Deletion Error','The password is incorrect.');
+    }
 }
 
 /*
@@ -420,155 +642,21 @@ $userSettings = loadCookieSettings();
 
 /* deletion form was posted to */
 if(is_numeric($_POST['deleteFileID']) && isset($_POST['deletionPassword'])){
-    $fileID = $_POST['deleteFileID'];
-    $password = $_POST['deletionPassword'];
-
-    $postData = getDataByID($fileID);
-    if(is_null($postData)){
-        error('Deletion Error','The file cannot be found.');
-    }
-    if($password == $conf['adminPassword'] || $password == getPassword($postData)){
-        $filePath = $conf['uploadDir'] ."/". $conf['prefix'] . $fileID . getFileExtention($postData);
-        if(file_exists($filePath)){
-            unlink($filePath);
-        }
-        deleteDataFromLogByID($fileID);
-        runend('file has been deleted.','If this page dose not change, click "Back".');
-    }else{
-        error('Deletion Error','The password is incorrect.');
-    }
+    userDeletePost();
 }
-/* draw form when user is atempting to delete a file */
-elseif(is_numeric($_GET['deleteFileID'])){
+
+/* draw a form when user is atempting to delete a file */
+if(is_numeric($_GET['deleteFileID'])){
+    drawHeader();
     drawDeletionForm(htmlspecialchars($_GET['deleteFileID']));
+    drawFooter();
     die();
 }
 
-// Upload writing process 
-if(file_exists($upfile) && $com && $upfile_size > 0){
-    if(strlen($com) > $conf['maxCommentSize']){
-        error('Comment too big.');
-    }
-    if($upfile_size > $conf['maxFileSize']){
-        error('File too big.');
-    }
-
-    /* 連続投稿制限 */
-    if($last_time > 0){
-        $now = time();
-        $last = @fopen($last_file, "r+") or die("連続投稿用ファイル $last_file を作成してください");
-        $lsize = fgets($last, 1024);
-        list($ltime, $lip) = explode("<>", $lsize);
-        if($_SERVER['REMOTE_ADDR'] == $lip && $last_time*60 > ($now-$ltime)){
-            error('連続投稿制限中','時間を置いてやり直してください');
-        }
-        rewind($last);
-        fputs($last, "$now,$host,");
-        fclose($last);
-    }
-
-    /* 拡張子と新ファイル名 */
-    $pos = strrpos($upfile_name,".");                             //拡張子取得
-    $ext = substr($upfile_name,$pos+1,strlen($upfile_name)-$pos);
-    $ext = strtolower($ext);                                      //小文字化
-    if(!in_array($ext, $arrowext)){
-        error("拡張子エラー","その拡張子ファイルはアップロードできません");
-    }
-    // ▼Yakuba追加
-    if(in_array($ext,$b_changeext)){
-        $org_ext = $ext;
-        $new_ext = $a_changeext;
-        $ext = $a_changeext;
-    }
-
-    /* 拒否拡張子はtxtに変換
-    for($i=0; $i<count($denyext); $i++){
-        if(strstr($ext,$denyext[$i])) $ext = 'txt';
-    }
-    */
-
-    list($id,) = explode("<>", $lines[0]);                        //No取得
-    $id = sprintf("%03d", ++$id);                                 //インクリ
-    $newname = $prefix.$id.".".$ext;
-
-    /* 自鯖転送 */
-    move_uploaded_file($upfile, $updir.$newname);//3.0.16より後のバージョンのPHP 3または 4.0.2 後
-    //copy($upfile, $updir.$newname);
-    chmod($updir.$newname, 0644);
-
-    /* MIMEタイプ */
-    if(!$upfile_type) $upfile_type = "text/plain";//デフォMIMEはtext/plain
-
-    $com = str_replace(array("\0","\t","\r","\n","\r\n"), "", $com);//改行除去
-    // ▼Yakuba追加(もし拡張子を変えたならその旨タグ変換を表示)
-    if($new_ext){
-        $com = "$com <font color=\"#ff0000\">($new_ext←$org_ext)</font>";
-    }
-    $now = gmdate("Y/m/d(D)H:i", time()+9*60*60);	//日付のフォーマット
-    $pwd = ($pass) ? substr(md5($pass), 2, 7) : "*";	//パスっ作成（無いなら*）
-
-    $dat = implode("<>", array($id,$ext,$com,$host,$now,$upfile_size,$upfile_type,$pwd,$upfile_name,));
-
-    if(count($lines) >= $logmax){		//ログオーバーならデータ削除
-        for($d = count($lines)-1; $d >= $logmax-1; $d--){
-        list($did,$dext,)=explode("<>", $lines[$d]);
-        if(file_exists($updir.$prefix.$did.".".$dext)) {
-            unlink($updir.$prefix.$did.".".$dext);
-        }
-        }
-    }
-
-    $fp = fopen ($logfile , "w");		//書き込みモードでオープン
-    flock($fp ,LOCK_EX);
-    fputs ($fp, "$dat\n");		//先頭に書き込む
-    foreach ($lines as $line)
-        fputs($fp, $line);
-    fclose ($fp);
-    reset($lines);
-    $lines = file($logfile);		//入れなおし
-    runend('The process is over. The screen will change automatically.','If this does not change, click "Back".');
-
+// file is uploading
+if(file_exists($_FILES['upfile'])){
+    userUploadedFile();
 }
-
-foreach($arrowext as $list){
-    $arrow .= $list." ";
-}
-
-
-
-
-// For total capacity comparison(MB)
-$size_all_hikaku = $size_all/(1024*1024);
-
-// Change total file capacity unit\
-if($size_all == 0)                      $size_all_hyouzi = $size_all."B";
-else if($size_all <= 1024)              $size_all_hyouzi = $size_all."B";
-else if($size_all <= (1024*1024))       $size_all_hyouzi = sprintf ("%dKB",($size_all/1024));
-else if($size_all <= (1000*1024*1024))    $size_all_hyouzi = sprintf ("%.2fMB",($size_all/(1024*1024)));
-else if($size_all <= (1000*1024*1024*1024))  $size_all_hyouzi = sprintf ("%.2fGB",($size_all/(1024*1024*1024)));
-else if($size_all <= (1000*1024*1024*1024*1024) || $size_all >= (1000*1024*1024*1024*1024))  $size_all_hyouzi = sprintf ("%.2fTB",($size_all/(1024*1024*1024*1024)));
-else                                    $size_all_hyouzi = $size_all."B";
-
-
-
-
-
-// Counter display selection
-if($count_look){
-  echo "<small>$count_start から ";
-  if(file_exists($count_file)){
-    $fp = fopen($count_file,"r+");  //読み書きモードでオープン
-    $count = fgets($fp, 64);        //64バイトorEOFまで取得、カウントアップ
-    $count++;
-    fseek($fp, 0);                  //ポインタを先頭に、ロックして書き込み
-    flock($fp, LOCK_EX);
-    fputs($fp, $count);
-    fclose($fp);                    //ファイルを閉じる
-    echo $count.'人 </small>';      //カウンタ表示
-  }
-}
-
-
 
 /* Log start position */
 $st = ($page) ? ($page - 1) * $page_def : 0;
@@ -577,7 +665,7 @@ if($page == "all"){
   $st = 0;
   $page_def = count($lines);
 }
-echo paging($page, count($lines));//ページリンク
+echo paging($page, count($lines));
 
 
 // Main header (please adjust the width if you change the display items)

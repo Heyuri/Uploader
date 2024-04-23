@@ -21,8 +21,6 @@ define('ROOTPATH', './'); // main path for project
   $page_def     = 20;                    // Number of files to display per page.
   $admin        = 'adminpassword';       // Admin deletion password. You can delete any file using this as the PW. MAKE SURE TO CHANGE.
   $auto_link    = 0;                     // コメントの自動リンク（Yes=1;No=0);
-  $last_time    = 0;                     // 同一IPからの連続投稿許可する間隔(分)(0で無制限)
-  $last_file    = 'last.log';            // 連続投稿制限用ファイル(空ファイルで666)
   $count_look   = 0;                     // カウンタ表示(Yes=1,No=0)
   $count_file   = 'count.log';           // カウンタファイル(空ファイルで666)
   $count_start  = '2009/09/01';          // カウンタ開始日

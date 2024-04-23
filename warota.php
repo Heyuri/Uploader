@@ -87,11 +87,6 @@ if (!file_exists($count_file)) {
   $out = '1';
 }
 
-if (!file_exists($last_file)) {
-  echo ($last_file.' がありません。作成してください。(0666or0600)<br><br>');
-  $out = '1';
-}
-
 if (!file_exists($updir)) {
   echo ($updir.' がありません。作成してください。(0777or0701)<br><br>');
   $out = '1';

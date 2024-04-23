@@ -15,9 +15,9 @@ $conf = [
     'uploadDir' => "src/",      // upload location (slash is required).
 
     'maxAmountOfFiles' => 20,       // max files allowed on server
-    'maxTotalSize' => 21474836480,  // total sized allowed in bytes
+    'maxTotalSize' => 200*1024*1024*1024,  // total sized allowed in bytes
     'filesPerListing' => 20,         // how many files listed per page
-    'maxUploadSize' => 20971520,    // max upload size in bytes
+    'maxUploadSize' => 20*1024*1024,    // max upload size in bytes
     'commentRequired' => true,      // comment is requires or not
     'maxCommentSize' => 128,        // max comment length
 
@@ -47,7 +47,7 @@ $conf = [
 
   /* ip check module settings [KEEP THIS MODULE DISABLED TO HAVE NO IP TRACKING] */
   $ipcheck = false; //false -> disable script | true -> enable script
-  $banlist = array('0.0.0.0'); //list of banned IPs
+  $banlist = array('127.0.0.1'); //list of banned IPs
 
   //temporary module manager
   $module_List = array(

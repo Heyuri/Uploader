@@ -137,32 +137,30 @@ function drawHeader(){
         <br>
         </tt>';
 }
-function drawPageingBar($page=0){
-    global $PHP_SELF,$page_def,$homepage_add;
+function drawPageingBar($page=1){
+    global $conf;
+    
+    $fileCount = getTotalLogLines();
+    $pages = $fileCount / $conf['filesPerListing'];
 
-    for ($j = 1; $j * $page_def < $total+$page_def; $j++) {
-        if($page == $j){
-            $next .= '[ <b>'.$j.'</b> ]';
-        }else{
-            $next .= sprintf('[<a href="%s?page=%d">%d</a>]', $PHP_SELF,$j,$j);
-        }
+    if($page == "all"){
+        $count = getTotalLogLines();
+        $page = 0;
+        echo '[<a href="'.$conf['home'].'">Home</a>] [<b>ALL</b>] [<a href="'.$_SERVER['PHP_SELF'].'?page=1">1</a>]';
+        return;
     }
 
-    // ▼Yakuba(画像一覧のリンク表示を選択)
-    global $sam_look;
-    global $base_php;
+    echo '[<a href="'.$conf['home'].'">Home</a>] [<a href="'.$_SERVER['PHP_SELF'].'?page=all">ALL</a>]';
 
-    elseif($page=="all"){
-        return sprintf ('[<a href="'.$homepage_add.'">Home</a>] [<b>ALL</b>] %s',$next,$_SERVER['PHP_SELF']);
+    for($i = 1; $i <= $pages; $i++) {
+        echo '[<a href="'.$_SERVER['PHP_SELF'].'?page='.$i.'"'.$i.'</a>]'; 
     }
-
-    else{
-        return sprintf ('[<a href="'.$homepage_add.'">Home</a>] [<a href="'.$base_php.'?page=all">ALL</a>] %s',$next,$PHP_SELF);
-    }
+    
 }
 
 function drawFileListing($page=0){
 
+    global $conf;
     $count = $conf['filesPerListing'];
     if($page == "all"){
         $count = getTotalLogLines();
@@ -171,7 +169,7 @@ function drawFileListing($page=0){
 
     $lineOffset = $count * $page;
 
-    $fileHandle = fopen($filePath, 'r');
+    $fileHandle = fopen($conf['logFile'], 'r');
 
     //go to the offest
     $currentLine = 0;
@@ -198,14 +196,13 @@ function drawFileListing($page=0){
         $path = $conf['uploadDir'] . $fileName;
 
         if($_COOKIE['showDeleteButton']) echo   '<td><small><a href='. $_SERVER['PHP_SELF'] .'?del=$id>■</a></small></td>';
-        echo                                    '<td><a href="'. $path .'">'.$filename.'</a></td>';
-        if($_COOKIE['showComment']) echo        '<td><font size=2>'.$com.'</font></td>';
-        if($_COOKIE['showSize']) echo           '<td><font size=2>'.$fsize.'</font></td>';
-        if($_COOKIE['showMimeType']) echo       '<td><font size=2 color=888888>'.$mtype.'</font></td>';
+        echo                                    '<td><a href="'. $path .'">'.$fileName.'</a></td>';
+        if($_COOKIE['showComment']) echo        '<td><font size=2>'. getComent($data) .'</font></td>';
+        if($_COOKIE['showSize']) echo           '<td><font size=2>'. bytesToHumanReadable(getSizeInBytes($data)) .'</font></td>';
+        if($_COOKIE['showMimeType']) echo       '<td><font size=2 color=888888>'. getMimeType($data) .'</font></td>';
         echo                                    '</tr>';
-
     }
-
+    
     echo "</table><hr>";
     echo 'Used '. bytesToHumanReadable(getTotalUseageInBytes()).'/ '. bytesToHumanReadable($conf['maxSize']).'<br>';
     echo 'Used '.getTotalLogLines().' Files/ '. $conf['logMax'].'Files<br>';
@@ -371,7 +368,7 @@ function createData($id,$fileExtension,$comment,$ip,$time,$size,$mimeType,$passw
     return array($id,$fileExtension,$comment,$ip,$time,$size,$mimeType,$password,$orignalFileName);
 }
 function createDataFromString($str){
-    return explode("<>",$line);
+    return explode("<>",$str);
 }
 
 /* helper libs */

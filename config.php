@@ -28,7 +28,7 @@ $conf = [
     'extentionsToBeConvertedToText' => ['htm','mht','cgi','php','html','sh','shtml','xml','svg'],
     'defualtCookieValues' => ['showDeleteButton' => 'checked','showComment' => 'checked','showFileSize' => 'checked','showMimeType' => ''],
     'ip' => '1337',
-    'deleteAfterMax' => false, //whether to delete files after max file limit reached or throw error
+    'deleteAfterMax' => false, //whether to delete the oldest file after max file limit reached or throw an error
 ];
 
 // Which file information to display? ('checked' for it to be shown, '' for not shown)--------

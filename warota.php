@@ -166,7 +166,7 @@ function drawFileListing($page=1){
         $currentLine++;
     }
     
-    $cookie = loadCookieSettings();
+    $cookie = getSplitCookie();
     // Main header (please adjust the width if you change the display items)
     echo                                    '<hr><table width="100%" style="font-size:10pt;"><tr>';
     if($cookie['showDeleteButton']) echo    '<td width="4%"><tt><b>DEL</b></tt></td>';
@@ -269,7 +269,7 @@ function drawDeletionForm($fielID){
     </form>"';
 }
 function drawSettingsForm(){
-    $cookie = loadCookieSettings()();
+    $cookie = getSplitCookie();
     echo '
     <hr>
     <strong>client Settings</strong><br>
@@ -569,15 +569,18 @@ function loadCookieSettings(){
 
     if(isset($_POST['action']) && $_POST['action'] == "setUserSettings"){
         // the order of this array must be the same order as $conf['defualtCookieValues']
-        $cookie = implode("<>", array(   $_POST['showDeleteButton']
-                                        ,$_POST['showComment']
-                                        ,$_POST['showFileSize']
-                                        ,$_POST['showMimeType']));
+        $cookie = implode("<>", array(   $_POST['showDeleteButton'] ?? ""
+                                        ,$_POST['showComment'] ?? ""
+                                        ,$_POST['showFileSize'] ?? ""
+                                        ,$_POST['showMimeType'] ?? ""));
     }
 
     setcookie("settings", $cookie,time()+365*24*3600);
-    $settings = array_combine(['showDeleteButton','showComment','showFileSize','showMimeType'], explode("<>",$cookie));
-    return $settings;
+    $_COOKIE['settings'] = $cookie;
+}
+function getSplitCookie(){
+    global $conf;
+    return array_combine(['showDeleteButton','showComment','showFileSize','showMimeType'], explode("<>",$_COOKIE['settings']));
 }
 /* main funcitons */
 

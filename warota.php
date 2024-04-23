@@ -568,9 +568,9 @@ function userUploadedFile(){
 	global $conf;
 	global $antiflood;
 
-    if(function_exists('getIP')) $config['ip'] = call_user_func('getIP');
+    if(function_exists('getIP')) $conf['ip'] = call_user_func('getIP');
     //check if IP is banned from uploading [only usuable if ipcheck module is enabled]
-    if(function_exists('matchIP_to_denylist')) call_user_func('matchIP_to_denylist', $config['ip']);
+    if(function_exists('matchIP_to_denylist')) call_user_func('matchIP_to_denylist', $conf['ip']);
 
     if($_FILES["upfile"]['size'] <= 0){
         drawErrorPageAndExit('please select a file.');
@@ -631,9 +631,9 @@ function userUploadedFile(){
         $password = "*";
     }
    
-    if(function_exists('getIP')) $config['ip'] = call_user_func('getIP');
+    if(function_exists('getIP')) $conf['ip'] = call_user_func('getIP');
 
-    $data = createData( $newID, $fileExtension, $comment, $config['ip'],
+    $data = createData( $newID, $fileExtension, $comment, $conf['ip'],
                         time(), $_FILES['upfile']['size'], $realMimeType, $password,
                         $fileName);
 

@@ -137,7 +137,7 @@ function drawHeader(){
         <br>
         </tt>';
 }
-function drawPageingBar($page, $total){
+function drawPageingBar($page=0){
     global $PHP_SELF,$page_def,$homepage_add;
 
     for ($j = 1; $j * $page_def < $total+$page_def; $j++) {
@@ -151,17 +151,64 @@ function drawPageingBar($page, $total){
     // ▼Yakuba(画像一覧のリンク表示を選択)
     global $sam_look;
     global $base_php;
-    if($page=="all" and $sam_look) 
-        return sprintf ('[<a href="'.$homepage_add.'">Home</a>] [<a href="images.php">Image List</a>] [<b>ALL</b>] %s',$next,$PHP_SELF);
-    elseif($page=="all" and !$sam_look) 
-        return sprintf ('[<a href="'.$homepage_add.'">Home</a>] [<b>ALL</b>] %s',$next,$_SERVER['PHP_SELF']);
-    elseif($page!="all" and $sam_look) 
-        return sprintf ('[<a href="'.$homepage_add.'">Home</a>] [<a href="images.php">Image List</a>] [<a href="'.$_SERVER['PHP_SELF'].'?page=all">ALL</a>] %s',$next,$PHP_SELF);
-    else 
-        return sprintf ('[<a href="'.$homepage_add.'">Home</a>] [<a href="'.$base_php.'?page=all">ALL</a>] %s',$next,$PHP_SELF);
-}
-function drawFileListingN($n){
 
+    elseif($page=="all"){
+        return sprintf ('[<a href="'.$homepage_add.'">Home</a>] [<b>ALL</b>] %s',$next,$_SERVER['PHP_SELF']);
+    }
+
+    else{
+        return sprintf ('[<a href="'.$homepage_add.'">Home</a>] [<a href="'.$base_php.'?page=all">ALL</a>] %s',$next,$PHP_SELF);
+    }
+}
+
+function drawFileListing($page=0){
+
+    $count = $conf['filesPerListing'];
+    if($page == "all"){
+        $count = getTotalLogLines();
+        $page = 0;
+    }
+
+    $lineOffset = $count * $page;
+
+    $fileHandle = fopen($filePath, 'r');
+
+    //go to the offest
+    $currentLine = 0;
+    while ($currentLine < $lineOffset && !feof($fileHandle)) {
+        fgets($fileHandle);
+        $currentLine++;
+    }
+
+    // Main header (please adjust the width if you change the display items)
+    echo                                    '<hr><table width="100%" style="font-size:10pt;"><tr>';
+    if($_COOKIE['showDeleteButton']) echo   '<td width="4%"><tt><b>DEL</b></tt></td>';
+    echo                                    '<td width="8%"><tt><b>NAME</b></tt></td>';
+    if($_COOKIE['showComment'])  echo       '<td width="58%"><tt><b>COMMENT</b></tt></td>';
+    if($_COOKIE['showSize']) echo           '<td width="7%"><tt><b>SIZE</b></tt></td>';
+    if($_COOKIE['showMimeType']) echo       '<td><tt><b>MIME</b></tt></td>';
+    echo                                    '</tr>';
+
+    // read off the next N amount of lines
+    while ($currentLine < $lineOffset + $count && !feof($fileHandle)) {
+        $line = fgets($fileHandle);
+        $data = createDataFromString($line);
+
+        $fileName = $conf['prefix'] . getID($data) . getFileExtention($data);
+        $path = $conf['uploadDir'] . $fileName;
+
+        if($_COOKIE['showDeleteButton']) echo   '<td><small><a href='. $_SERVER['PHP_SELF'] .'?del=$id>■</a></small></td>';
+        echo                                    '<td><a href="'. $path .'">'.$filename.'</a></td>';
+        if($_COOKIE['showComment']) echo        '<td><font size=2>'.$com.'</font></td>';
+        if($_COOKIE['showSize']) echo           '<td><font size=2>'.$fsize.'</font></td>';
+        if($_COOKIE['showMimeType']) echo       '<td><font size=2 color=888888>'.$mtype.'</font></td>';
+        echo                                    '</tr>';
+
+    }
+
+    echo "</table><hr>";
+    echo 'Used '. bytesToHumanReadable(getTotalUseageInBytes()).'/ '. bytesToHumanReadable($conf['maxSize']).'<br>';
+    echo 'Used '.getTotalLogLines().' Files/ '. $conf['logMax'].'Files<br>';
 }
 function drawFooter(){
     echo '
@@ -322,6 +369,9 @@ function getOriginalFileName($postData){
 }
 function createData($id,$fileExtension,$comment,$ip,$time,$size,$mimeType,$password,$orignalFileName){
     return array($id,$fileExtension,$comment,$ip,$time,$size,$mimeType,$password,$orignalFileName);
+}
+function createDataFromString($str){
+    return explode("<>",$line);
 }
 
 /* helper libs */
@@ -636,6 +686,7 @@ function userDeletePost(){
 
 if(IsBaned($_SERVER['REMOTE_ADDR'])){
     drawErrorPageAndExit('you are banned');
+    die();
 }
 
 $userSettings = loadCookieSettings();
@@ -643,8 +694,13 @@ $userSettings = loadCookieSettings();
 /* deletion form was posted to */
 if(is_numeric($_POST['deleteFileID']) && isset($_POST['deletionPassword'])){
     userDeletePost();
+    die();
 }
-
+/* file is uploading */
+if(file_exists($_FILES['upfile'])){
+    userUploadedFile();
+    die();
+}
 /* draw a form when user is atempting to delete a file */
 if(is_numeric($_GET['deleteFileID'])){
     drawHeader();
@@ -652,58 +708,20 @@ if(is_numeric($_GET['deleteFileID'])){
     drawFooter();
     die();
 }
-
-// file is uploading
-if(file_exists($_FILES['upfile'])){
-    userUploadedFile();
+if(is_numeric($_GET['page']) || $_GET['page'] == "all"){
+    $page = $_GET['page'];
+    drawHeader();
+    drawUploadForm();
+    drawPageingBar($page);
+    drawActionLinks();
+    drawFileListing($page);
+    drawFooter();
+    die();
 }
-
-/* Log start position */
-$st = ($page) ? ($page - 1) * $page_def : 0;
-if(!$page) $page = 1;
-if($page == "all"){
-  $st = 0;
-  $page_def = count($lines);
-}
-echo paging($page, count($lines));
-
-
-// Main header (please adjust the width if you change the display items)
-echo '<HR><table width="100%" style="font-size:10pt;"><tr>';
-if($c_act) echo '<td width="4%"><tt><b>DEL</b></tt></td>';
-echo '<td width="8%"><tt><b>NAME</b></tt></td>';
-if($c_com)  echo '<td width="58%"><tt><b>COMMENT</b></tt></td>';
-if($c_size) echo '<td width="7%"><tt><b>SIZE</b></tt></td>';
-if($c_mime) echo '<td><tt><b>MIME</b></tt></td>';
-echo '</tr>';
-
-//Main display
-for($i = $st; $i < $st+$page_def; $i++){
-  if($lines[$i]=="") continue;
-  list($id,$ext,$com,$host,$now,$size,$mtype,$pas,)=explode("<>",$lines[$i]);
-  $fsize = FormatByte($size);
-  if($auto_link) $com = ereg_replace("(https?|ftp|news)(://[[:alnum:]\+\$\;\?\.%,!#~*/:@&=_-]+)","<a href=\"\\1\\2\" target=\"_blank\">\\1\\2</a>",$com);
-
-  $filename = $prefix.$id.".$ext";
-  $target = $updir.$filename;
-
-  echo "<tr><!--$host-->";
-  if($c_act) echo "<td><small><a href='$PHP_SELF?del=$id'>■</a></small></td>";
-  echo "<td><a href='$target'>$filename</a></td>";
-  if($c_com) echo "<td><font size=2>$com</font></td>";
-  if($c_size) echo "<td><font size=2>$fsize</font></td>";
-  if($c_mime) echo "<td><font size=2 color=888888>$mtype</font></td>";
-  echo "</tr>\n";
-  }
-
-
-echo "</table><HR>";
-echo 'Used '.$size_all_hyouzi.'/ '.FormatByte($max_all_size).'<br>';
-echo 'Used '.count($lines).' Files/ '.$logmax.'Files<br>';
-// echo paging($page,count($lines));
 
 drawHeader();
 drawUploadForm();
+drawPageingBar();
 drawActionLinks();
 drawFileListing();
 drawFooter();

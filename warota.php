@@ -101,12 +101,30 @@ $homepage_add = '../../';    // [Home]のリンク先(相対、絶対両方可�
 /* defualt enviorment settings. changes the look of the site */
 $D_showDeleteButton  = 'checked';
 $D_showComment  = 'checked';
-$D_showSize = 'checked';
+$D_showFileSize = 'checked';
 $D_showMimeType = '';
 //$D_showDateUploaded = ''; // dose not work
 //$D_openInNewWinow = ''; // dose not work
 //$D_showOriginalFileName = '';// dose not work
 
+
+$conf = [
+    'timeZone' => 'UTC',
+    'filesPerListing' => 3,
+    'logFile' => "souko.log",
+    'adminPassword' => "lolpenis",
+    'prefix' => "",
+    'uploadDir' => "src/",
+    'maxUploadSize' => 20971520,//max size in bytes
+    'maxTotalSize' => 21474836480, //total max allowd
+    'maxAmountOfFiles' => 20,//max files
+    'allowedExtensions' =>  ['dat','htm','torrent','deb','lzh','ogm','doc','class','js','swift','cc','tga','ape','woff2','cab','whl','mpe','rmvb','srt','pdf','xz','exe','m4a','crx','vob','tif','gz','roq','m4v','gif','rb','3g2','m4a','rvb','sid','ai','wma','pea','bmp','py','mp4','m4p','ods','jpeg','command','azw4','otf','ebook','rtf','ttf','mobi','ra','flv','ogv','mpg','xls','jpg','mkv','nsv','mp3','kmz','java','lua','m2v','deb','rst','csv','pls','pak','egg','tlz','c','cbz','xcodeproj','iso','xm','azw','webm','3ds','azw6','azw3','cue','kml','woff','zipx','3gp','po','mpa','mng','wps','wpd','a','s7z','ics','tex','go','ps','org','yml','msg','xml','cpio','epub','docx','lha','flac','odp','wmv','vcxproj','mar','eot','less','asf','apk','css','mp2','odt','patch','wav','msi','rs','gsm','ogg','cbr','azw1','m','dds','h','dmg','mid','psd','dwg','aac','s3m','cs','cpp','au','aiff','diff','avi','bat','html','pages','bin','txt','rpm','m3u','max','vcf','svg','ppt','clj','png','svi','tiff','tgz','mxf','7z','drc','yuv','mov','tbz2','bz2','gpx','shar','xcf','dxf','jar','qt','tar','xpi','zip','thm','cxx','3dm','rar','md','scss','mpv','webp','war','pl','xlsx','mpeg','aaf','avchd','mod','rm','it','wasm','el','eps','nes','smc','sfc','md','smd','gen','gg','z64','v64','n64','gb','gbc','gba','srl','gcm','gcz','nds','dsi','wbfs','wad','cia','3ds','ngp','ngc','pce','vb','ws','wsc','dsv','sav','ps2','mcr','mpk','eep','st0','dta','srm','afa','zpaq','arc','paq','lpaq','swf','pdn','lol','php','sh','img','ico','asc', 'm2ts', 'nzb', 'appimage', 'json'],
+    'extentionsToBeConvertedToText' => ['htm','mht','cgi','php','html','sh','shtml','xml','svg'],
+    'defualtCookieValues' => ['showDeleteButton' => 'checked','showComment' => 'checked','showFileSize' => 'checked','showMimeType' => ''],
+    'commentRequired' => true,
+    'maxCommentSize' => 128,
+    'home' => "https://cgi.heyuri.net/goatse/",
+];
 
 date_default_timezone_set($conf['timeZone']);
 
@@ -121,6 +139,10 @@ function drawHeader(){
     <META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=Shift_JIS">
     <meta name="Berry" content="no">
     <meta name="ROBOTS" content="NOINDEX,NOFOLLOW">
+    <meta http-equiv="cache-control" content="max-age=0">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT">
     <meta http-equiv="pragma" content="no-cache">
     <title>'.$page_title.'</title>
     </head>
@@ -141,71 +163,74 @@ function drawPageingBar($page=1){
     global $conf;
     
     $fileCount = getTotalLogLines();
-    $pages = $fileCount / $conf['filesPerListing'];
+    $pages = ceil($fileCount / $conf['filesPerListing']) + 1;
 
-    if($page == "all"){
-        $count = getTotalLogLines();
-        $page = 0;
+    if($page === "all"){
         echo '[<a href="'.$conf['home'].'">Home</a>] [<b>ALL</b>] [<a href="'.$_SERVER['PHP_SELF'].'?page=1">1</a>]';
         return;
     }
 
     echo '[<a href="'.$conf['home'].'">Home</a>] [<a href="'.$_SERVER['PHP_SELF'].'?page=all">ALL</a>]';
 
-    for($i = 1; $i <= $pages; $i++) {
-        echo '[<a href="'.$_SERVER['PHP_SELF'].'?page='.$i.'"'.$i.'</a>]'; 
+    for($i = 1; $i < $pages; $i++) {
+        if($i == $page){
+            echo '[<b>'.$i.'</b>]'; 
+        }else{
+            echo '[<a href="'.$_SERVER['PHP_SELF'].'?page='.$i.'">'.$i.'</a>]'; 
+        }
     }
-    
 }
-
-function drawFileListing($page=0){
-
+function drawFileListing($page=1){
     global $conf;
     $count = $conf['filesPerListing'];
     if($page == "all"){
         $count = getTotalLogLines();
         $page = 0;
+    }else{
+        $page = $page - 1;
     }
 
     $lineOffset = $count * $page;
+    $currentLine = 0;
 
     $fileHandle = fopen($conf['logFile'], 'r');
-
     //go to the offest
-    $currentLine = 0;
-    while ($currentLine < $lineOffset && !feof($fileHandle)) {
+    while ($currentLine < $lineOffset  && !feof($fileHandle)) {
         fgets($fileHandle);
         $currentLine++;
     }
-
+    
+    $cookie = getSplitCookie();
     // Main header (please adjust the width if you change the display items)
     echo                                    '<hr><table width="100%" style="font-size:10pt;"><tr>';
-    if($_COOKIE['showDeleteButton']) echo   '<td width="4%"><tt><b>DEL</b></tt></td>';
+    if($cookie['showDeleteButton']) echo    '<td width="4%"><tt><b>DEL</b></tt></td>';
     echo                                    '<td width="8%"><tt><b>NAME</b></tt></td>';
-    if($_COOKIE['showComment'])  echo       '<td width="58%"><tt><b>COMMENT</b></tt></td>';
-    if($_COOKIE['showSize']) echo           '<td width="7%"><tt><b>SIZE</b></tt></td>';
-    if($_COOKIE['showMimeType']) echo       '<td><tt><b>MIME</b></tt></td>';
+    if($cookie['showComment'])  echo        '<td width="58%"><tt><b>COMMENT</b></tt></td>';
+    if($cookie['showFileSize']) echo        '<td width="7%"><tt><b>SIZE</b></tt></td>';
+    if($cookie['showMimeType']) echo        '<td><tt><b>MIME</b></tt></td>';
     echo                                    '</tr>';
 
-    // read off the next N amount of lines
-    while ($currentLine < $lineOffset + $count && !feof($fileHandle)) {
+    $lineOffset = $currentLine + $count;
+    while ($currentLine < $lineOffset && !feof($fileHandle)) {
         $line = fgets($fileHandle);
         $data = createDataFromString($line);
 
-        $fileName = $conf['prefix'] . getID($data) . getFileExtention($data);
+        $fileName = $conf['prefix'] . getID($data) .'.'. getFileExtention($data);
         $path = $conf['uploadDir'] . $fileName;
 
-        if($_COOKIE['showDeleteButton']) echo   '<td><small><a href='. $_SERVER['PHP_SELF'] .'?del=$id>■</a></small></td>';
+        if($cookie['showDeleteButton']) echo    '<td><small><a href='. $_SERVER['PHP_SELF'] .'?deleteFileID='.getID($data).'>■</a></small></td>';
         echo                                    '<td><a href="'. $path .'">'.$fileName.'</a></td>';
-        if($_COOKIE['showComment']) echo        '<td><font size=2>'. getComent($data) .'</font></td>';
-        if($_COOKIE['showSize']) echo           '<td><font size=2>'. bytesToHumanReadable(getSizeInBytes($data)) .'</font></td>';
-        if($_COOKIE['showMimeType']) echo       '<td><font size=2 color=888888>'. getMimeType($data) .'</font></td>';
+        if($cookie['showComment']) echo         '<td><font size=2>'. getComent($data) .'</font></td>';
+        if($cookie['showFileSize']) echo        '<td><font size=2>'. bytesToHumanReadable(getSizeInBytes($data)) .'</font></td>';
+        if($cookie['showMimeType']) echo        '<td><font size=2 color=888888>'. getMimeType($data) .'</font></td>';
         echo                                    '</tr>';
+
+        $currentLine = $currentLine + 1;
     }
     
     echo "</table><hr>";
-    echo 'Used '. bytesToHumanReadable(getTotalUseageInBytes()).'/ '. bytesToHumanReadable($conf['maxSize']).'<br>';
-    echo 'Used '.getTotalLogLines().' Files/ '. $conf['logMax'].'Files<br>';
+    echo 'Used '. bytesToHumanReadable(getTotalUseageInBytes()).'/ '. bytesToHumanReadable($conf['maxTotalSize']).'<br>';
+    echo 'Used '.getTotalLogLines().' Files/ '. $conf['maxAmountOfFiles'].'Files<br>';
 }
 function drawFooter(){
     echo '
@@ -257,14 +282,14 @@ function drawUploadForm(){
         <form method="post" enctype="multipart/form-data" action="'. $_SERVER['PHP_SELF'] .'">
         <input type="hidden" name="MAX_FILE_SIZE" value="'. $conf['maxUploadSize'] .'">
             MAX UPLOAD SIZE: '. bytesToHumanReadable($conf['maxUploadSize']) .'<br>
-            <input type=file  name="40" name="upfile"> 
+            <input type=file name="upfile"> 
 
             DELETION KEY: <input type=password size="10" name="password" maxlength="10"><br>
             COMMENT<i><small>(※If no comment is entered, the page will be reloaded / URL will be auto-linked.)</small></i><br>
-            <input type="text" size="45" value="ｷﾀ━━━(ﾟ∀ﾟ)━━━!!" name="com">
+            <input type="text" size="45" value="ｷﾀ━━━(ﾟ∀ﾟ)━━━!!" name="comment">
             <input type=submit value="Up/Reload">
             <input type=reset value="Cancel"><br>
-            <small>Allowed extensions:'. $conf['allowedExtensions'] .'</small>
+            <small>Allowed extensions: '.  implode(", ", $conf['allowedExtensions']) .'</small>
         </form>
         ';
     }
@@ -278,6 +303,7 @@ function drawDeletionForm($fielID){
     </form>"';
 }
 function drawSettingsForm(){
+    $cookie = getSplitCookie();
     echo '
     <hr>
     <strong>client Settings</strong><br>
@@ -286,16 +312,16 @@ function drawSettingsForm(){
     <ul>
         <li><strong>display</strong>
         <ul>
-            <input type=checkbox name=showDeleteButtons value=checked '.$_COOKIE['showDeleteButtons'].'>ACT<br>
-            <input type=checkbox name=showComments  value=checked '.$_COOKIE['showComments'].'>COMMENT<br>
-            <input type=checkbox name=showFileSizes value=checked '.$_COOKIE['showFileSizes'].'>SIZE<br>
-            <input type=checkbox name=showMimeTypes value=checked '.$_COOKIE['showMimeTypes'].'>MIME<br>
+            <input type=checkbox name=showDeleteButton value=checked '.$cookie['showDeleteButton'].'>show delete button<br>
+            <input type=checkbox name=showComment  value=checked '.$cookie['showComment'].'>show comments<br>
+            <input type=checkbox name=showFileSize value=checked '.$cookie['showFileSize'].'>show file size<br>
+            <input type=checkbox name=showMimeType value=checked '.$cookie['showMimeType'].'>show MIME types<br>
         </ul>
     <ul><br>
     <br><br>
 
-    <input type=submit value=\"登録\">
-    <input type=reset value=\"元に戻す\">
+    <input type=submit value="save">
+    <input type=reset value="clear">
     </form>
     <a href="'.$_SERVER['PHP_SELF'].'">[Back]</a>';
 }
@@ -419,7 +445,6 @@ function getTotalUseageInBytes(){
     $totalSize=0;
     $openFile = fopen($logFile,"r");
 
-    //while not at the end of file
     //id<>fileExtention<>comment<>host<>dateUploaded<>sizeInBytes<>mimeType<>Password<>orginalFileName
     while(!feof($openFile)){ 
         $line = fgets($openFile);
@@ -428,6 +453,7 @@ function getTotalUseageInBytes(){
         $totalSize = $totalSize + $size;
     } 
     fclose($openFile);
+    return $totalSize;
 }
 function getTotalLogLines(){
     global $conf;
@@ -568,25 +594,29 @@ function deleteDataFromLogByID($id){
 }
 function loadCookieSettings(){
     global $conf;
-    $defualt = $conf['defualtCookieValues'];
 
     if(isset($_COOKIE['settings']) == false){
         $cookie = implode("<>", $conf['defualtCookieValues']);
+    }else{
+        $cookie = $_COOKIE['settings'];
     }
 
-    if($_POST['action']=="setUserSettings"){
+    if(isset($_POST['action']) && $_POST['action'] == "setUserSettings"){
         // the order of this array must be the same order as $conf['defualtCookieValues']
         $cookie = implode("<>", array(   $_POST['showDeleteButton']
                                         ,$_POST['showComment']
-                                        ,$_POST['showSize']
+                                        ,$_POST['showFileSize']
                                         ,$_POST['showMimeType']));
-        setcookie ("settings", $cookie,time()+365*24*3600);
     }
-    
-    $settings = array_combine($defualt, explode("<>",$cookie));
+
+    setcookie("settings", $cookie,time()+365*24*3600);
+    $settings = array_combine(['showDeleteButton','showComment','showFileSize','showMimeType'], explode("<>",$cookie));
     return $settings;
 }
-
+function getSplitCookie(){
+    global $conf;
+    return array_combine(['showDeleteButton','showComment','showFileSize','showMimeType'], explode("<>",$_COOKIE['settings']));
+}
 /* main funcitons */
 
 function userUploadedFile(){
@@ -597,7 +627,7 @@ function userUploadedFile(){
     if(strlen($_POST['comment']) > $conf['maxCommentSize']){
         drawErrorPageAndExit('Comment is too big.');
     }
-    if($_FILES["upfile"]['size'] > $conf['maxFileSize']){
+    if($_FILES["upfile"]['size'] > $conf['maxUploadSize']){
         drawErrorPageAndExit('File is too big.');
     }
 
@@ -611,7 +641,7 @@ function userUploadedFile(){
     $fileName = $fileInfo['filename'];
     $fileExtension = strtolower($fileInfo['extension']);
 
-    if(!in_array($fileExtension, $conf['allowedExtentions'])){
+    if(!in_array($fileExtension, $conf['allowedExtensions'])){
         drawErrorPageAndExit("invlaid extension","file can not be uploaded with that extension");
     }
 
@@ -649,7 +679,7 @@ function userUploadedFile(){
         $password = "*";
     }
 
-    $data = createData( $newID, $fileExtension, $comment, $_SERVER['REMOTE_HOST'],
+    $data = createData( $newID, $fileExtension, $comment, $_SERVER['REMOTE_ADDR'],
                         time(), $_FILES['upfile']['size'], $realMimeType, $password,
                         $fileName);
 
@@ -689,23 +719,35 @@ if(IsBaned($_SERVER['REMOTE_ADDR'])){
 $userSettings = loadCookieSettings();
 
 /* deletion form was posted to */
-if(is_numeric($_POST['deleteFileID']) && isset($_POST['deletionPassword'])){
+if(isset($_POST['deleteFileID']) && isset($_POST['deletionPassword'])){
+    if(is_numeric($_POST['deleteFileID']) == false){
+        drawErrorPageAndExit("failed to delete", "deleteFileID is not a number");
+    }
     userDeletePost();
     die();
 }
 /* file is uploading */
-if(file_exists($_FILES['upfile'])){
+if(isset($_FILES['upfile'])){
     userUploadedFile();
     die();
 }
 /* draw a form when user is atempting to delete a file */
-if(is_numeric($_GET['deleteFileID'])){
+if(isset($_GET['deleteFileID'])){
     drawHeader();
     drawDeletionForm(htmlspecialchars($_GET['deleteFileID']));
     drawFooter();
     die();
 }
-if(is_numeric($_GET['page']) || $_GET['page'] == "all"){
+if(isset($_GET['goingto'])){
+    switch($_GET['goingto']){
+        case "settings":
+            drawHeader();
+            drawSettingsForm();
+            drawFooter();
+            die();
+    }
+}
+if(isset($_GET['page'])){
     $page = $_GET['page'];
     drawHeader();
     drawUploadForm();
@@ -718,7 +760,7 @@ if(is_numeric($_GET['page']) || $_GET['page'] == "all"){
 
 drawHeader();
 drawUploadForm();
-drawPageingBar();
+drawPageingBar(1);
 drawActionLinks();
-drawFileListing();
+drawFileListing(1);
 drawFooter();

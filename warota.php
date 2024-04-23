@@ -111,6 +111,14 @@ function drawHeader(){
     <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT">
     <meta http-equiv="pragma" content="no-cache">
     <title>'.$conf['boardTitle'].'</title>
+    <style>
+        a:link    {color:#0000ee;}
+        a:hover   {color:#5555ee;}
+        a:visited {color:#0000ee;}
+        tr:nth-child(odd) {background-color: #f7efea;}
+        tr:hover {background-color: #f0e0d6;}
+        table {border-collapse: collapse;}
+    </style>
     </head>
     <body bgcolor="#ffffee" text="#800000" link="#0000ee" alink="#5555ee" vlink="#0000ee">
         <table width="100%">
@@ -179,6 +187,10 @@ function drawFileListing($page=1){
     $lineOffset = $currentLine + $count;
     while ($currentLine < $lineOffset && !feof($fileHandle)) {
         $line = fgets($fileHandle);
+        if ($line == false || trim($line) == '') {
+            continue;
+            //empty line
+        }
         $data = createDataFromString($line);
 
         $fileName = $conf['prefix'] . getID($data) .'.'. getFileExtention($data);
@@ -263,8 +275,8 @@ function drawUploadForm(){
 function drawDeletionForm($fielID){
     echo'
     <form action='.$_SERVER['PHP_SELF'].' method="post">
-        <input type=hidden name=deletePostID value="'.$fielID.'">
-        Enter your password: <input type=password size=12 name=deletePassword>
+        <input type=hidden name=deleteFileID value="'.$fielID.'">
+        Enter your password: <input type=password size=12 name=password>
         <input type=submit value="Delete">
     </form>"';
 }
@@ -414,6 +426,9 @@ function getTotalUseageInBytes(){
     //id<>fileExtention<>comment<>host<>dateUploaded<>sizeInBytes<>mimeType<>Password<>orginalFileName
     while(!feof($openFile)){ 
         $line = fgets($openFile);
+        if ($line == false && trim($line) == '') {
+            continue;
+        }
         $array = explode("<>",$line);
         $size = getSizeInBytes($array);
         $totalSize = $totalSize + $size;
@@ -427,8 +442,10 @@ function getTotalLogLines(){
     $fileHandle = fopen($conf['logFile'], 'r'); 
 
     while (!feof($fileHandle)) {
-        fgets($fileHandle);
-        $lineCount++; 
+        $line = fgets($fileHandle);
+        if ($line !== false && trim($line) !== '') {
+            $lineCount++;
+        }
     }
     fclose($fileHandle); 
 
@@ -598,8 +615,6 @@ function userUploadedFile(){
     if(strlen($_POST['comment']) > $conf['maxCommentSize']){
         drawErrorPageAndExit('Comment is too big.');
     }
-
-
     if(isRateLimited()){
         drawErrorPageAndExit('you are posting to fast. try again later');
     }
@@ -645,7 +660,7 @@ function userUploadedFile(){
     if(isset($_POST['password'])){
         $password = $_POST['password'];
     }else{
-        $password = "*";
+        $password = '';
     }
 
     $data = createData( $newID, $fileExtension, $comment, $_SERVER['REMOTE_ADDR'],
@@ -662,13 +677,20 @@ function userUploadedFile(){
 function userDeletePost(){
     global $conf;
     $fileID = $_POST['deleteFileID'];
-    $password = $_POST['deletionPassword'];
+    $password = $_POST['password'];
 
     $postData = getDataByID($fileID);
     if(is_null($postData)){
         drawErrorPageAndExit('Deletion Error','The file cannot be found.');
     }
-    if($password == $conf['adminPassword'] || $password == getPassword($postData)){
+    if($password == $conf['adminPassword']){
+        deleteDataFromLogByID($fileID);
+        drawMessageAndRedirectHome('file has been deleted.','If this page dose not change, click "Back".');
+    }
+    elseif(getPassword($postData) == ''){
+        drawErrorPageAndExit('Deletion Error','there was not a password when this post was created. contact a admin from the same ip you posted with');
+    }
+    elseif($password == getPassword($postData)){
         deleteDataFromLogByID($fileID);
         drawMessageAndRedirectHome('file has been deleted.','If this page dose not change, click "Back".');
     }else{
@@ -688,7 +710,7 @@ if(IsBaned($_SERVER['REMOTE_ADDR'])){
 loadCookieSettings();
 
 /* deletion form was posted to */
-if(isset($_POST['deleteFileID']) && isset($_POST['deletionPassword'])){
+if(isset($_POST['deleteFileID']) && isset($_POST['password'])){
     if(is_numeric($_POST['deleteFileID']) == false){
         drawErrorPageAndExit("failed to delete", "deleteFileID is not a number");
     }

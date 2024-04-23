@@ -42,12 +42,12 @@ define('ROOTPATH', './'); // main path for project
   $homepage_add = '../../';              // Link of [Home] (both relative and absolute are OK)
   // ▲Yakuba
 
-// Initial state of item display (preferences) ('checked' for it to be shown, '' for not shown)--------
+// Which file information to display? ('checked' for it to be shown, '' for not shown)--------
   $f_act  = 'checked';          //ACT (Link for deleting files)
   $f_com  = 'checked';          //Comment
   $f_size = 'checked';          //Filesize
   $f_mime = '';                 //MIME type
-  $f_date = '';                 //Date
+  $f_date = '';                 //Date of upload
   $f_anot = 'checked';          //Open files in a new tab
   $f_orig = '';
   $secret = 'yuzuyu';           //Original filename

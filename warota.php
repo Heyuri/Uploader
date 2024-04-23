@@ -68,70 +68,36 @@ error_reporting(E_ALL);
  * Heyuri's file uploader.
  */
 
-$page_title   = 'Everything';          // Board title.
-$title_sub    = 'Home for your files'; // Board description.
-$logfile      = 'souko.log';           // Log file (You may want to change this or block direct access from internet)
-$logmax       = 5000;                  // Maximum amount of files that can be uploaded
-$limitk       = 20*1024;               // max size in KB (normal size is 2Mb)
-$max_all_flag = 1;                     // 総容量規制を使用する=1(未実装)
-$max_all_size = 200*1024*1024*1024;    // Total board capacity (in bytes). 200*1024*1024*1024B = 200GB.
-$updir        = './src/';              // File storage directory
-$prefix       = '';                    // Filename prefix (eg. set to "up" for filenames to be up001.txt, up002.jpg)
-$commax       = 250;                   // Maximum comment lenght (In bytes. It's half this value for fullwidth characters)
-$page_def     = 20;                    // Number of files to display per page.
-$admin        = 'adminpassword';       // Admin deletion password. You can delete any file using this as the PW. MAKE SURE TO CHANGE.
-$auto_link    = 0;                     // コメントの自動リンク（Yes=1;No=0);
-$last_time    = 0;                     // 同一IPからの連続投稿許可する間隔(分)(0で無制限)
-$last_file    = 'last.log';            // 連続投稿制限用ファイル(空ファイルで666)
-$count_look   = 0;                     // カウンタ表示(Yes=1,No=0)
-$count_file   = 'count.log';           // カウンタファイル(空ファイルで666)
-$count_start  = '2009/09/01';          // カウンタ開始日
-$sam_look     = 0;                     // 画像一覧表示(Yes=1,No=0)←img.php必須
-$denylist     = array('192.168.0.1','sex.com','annony'); //アクセス拒否ホスト
-
-//Allow extensions (these must be in lowercase or it will give an error)
-$arrowext     = array('dat','htm','torrent','deb','lzh','ogm','doc','class','js','swift','cc','tga','ape','woff2','cab','whl','mpe','rmvb','srt','pdf','xz','exe','m4a','crx','vob','tif','gz','roq','m4v','gif','rb','3g2','m4a','rvb','sid','ai','wma','pea','bmp','py','mp4','m4p','ods','jpeg','command','azw4','otf','ebook','rtf','ttf','mobi','ra','flv','ogv','mpg','xls','jpg','mkv','nsv','mp3','kmz','java','lua','m2v','deb','rst','csv','pls','pak','egg','tlz','c','cbz','xcodeproj','iso','xm','azw','webm','3ds','azw6','azw3','cue','kml','woff','zipx','3gp','po','mpa','mng','wps','wpd','a','s7z','ics','tex','go','ps','org','yml','msg','xml','cpio','epub','docx','lha','flac','odp','wmv','vcxproj','mar','eot','less','asf','apk','css','mp2','odt','patch','wav','msi','rs','gsm','ogg','cbr','azw1','m','dds','h','dmg','mid','psd','dwg','aac','s3m','cs','cpp','au','aiff','diff','avi','bat','html','pages','bin','txt','rpm','m3u','max','vcf','svg','ppt','clj','png','svi','tiff','tgz','mxf','7z','drc','yuv','mov','tbz2','bz2','gpx','shar','xcf','dxf','jar','qt','tar','xpi','zip','thm','cxx','3dm','rar','md','scss','mpv','webp','war','pl','xlsx','mpeg','aaf','avchd','mod','rm','it','wasm','el','eps','nes','smc','sfc','md','smd','gen','gg','z64','v64','n64','gb','gbc','gba','srl','gcm','gcz','nds','dsi','wbfs','wad','cia','3ds','ngp','ngc','pce','vb','ws','wsc','dsv','sav','ps2','mcr','mpk','eep','st0','dta','srm','afa','zpaq','arc','paq','lpaq','swf','pdn','lol','php','sh','img','ico','asc', 'm2ts', 'nzb', 'appimage', 'json');
-
-// ▼Yakuba(設定追加)
-$b_changeext  = array('htm','mht','cgi','php','html','sh','shtml','xml','svg');
-$a_changeext  = 'txt';       // 強制変換後の拡張子
-$homepage_add = '../../';    // [Home]のリンク先(相対、絶対両方可能)
-// ▲Yakuba
-
-/* defualt enviorment settings. changes the look of the site */
-$D_showDeleteButton  = 'checked';
-$D_showComment  = 'checked';
-$D_showFileSize = 'checked';
-$D_showMimeType = '';
-//$D_showDateUploaded = ''; // dose not work
-//$D_openInNewWinow = ''; // dose not work
-//$D_showOriginalFileName = '';// dose not work
-
-
 $conf = [
-    'timeZone' => 'UTC',
-    'filesPerListing' => 3,
-    'logFile' => "souko.log",
+    'boardTitle' => 'Everything',
+    'boardSubTitle' => 'Home for your files',
+    'home' => "https://cgi.heyuri.net/goatse/",
     'adminPassword' => "lolpenis",
-    'prefix' => "",
-    'uploadDir' => "src/",
-    'maxUploadSize' => 20971520,//max size in bytes
-    'maxTotalSize' => 21474836480, //total max allowd
-    'maxAmountOfFiles' => 20,//max files
+
+    'timeZone' => 'UTC',        // timezone
+    'logFile' => "souko.log",   // name of flat file
+    'uploadDir' => "src/",      // upload location (slash is required).
+
+    'maxAmountOfFiles' => 20,       // max files allowed on server
+    'maxTotalSize' => 21474836480,  // total sized allowed in bytes
+    'filesPerListing' => 3,         // how many files listed per page
+    'maxUploadSize' => 20971520,    // max upload size in bytes
+    'commentRequired' => true,      // comment is requires or not
+    'maxCommentSize' => 128,        // max comment length
+
+    'denylist' => ['0.0.0.0'],
+
+    'prefix' => "", // front part of a file name
     'allowedExtensions' =>  ['dat','htm','torrent','deb','lzh','ogm','doc','class','js','swift','cc','tga','ape','woff2','cab','whl','mpe','rmvb','srt','pdf','xz','exe','m4a','crx','vob','tif','gz','roq','m4v','gif','rb','3g2','m4a','rvb','sid','ai','wma','pea','bmp','py','mp4','m4p','ods','jpeg','command','azw4','otf','ebook','rtf','ttf','mobi','ra','flv','ogv','mpg','xls','jpg','mkv','nsv','mp3','kmz','java','lua','m2v','deb','rst','csv','pls','pak','egg','tlz','c','cbz','xcodeproj','iso','xm','azw','webm','3ds','azw6','azw3','cue','kml','woff','zipx','3gp','po','mpa','mng','wps','wpd','a','s7z','ics','tex','go','ps','org','yml','msg','xml','cpio','epub','docx','lha','flac','odp','wmv','vcxproj','mar','eot','less','asf','apk','css','mp2','odt','patch','wav','msi','rs','gsm','ogg','cbr','azw1','m','dds','h','dmg','mid','psd','dwg','aac','s3m','cs','cpp','au','aiff','diff','avi','bat','html','pages','bin','txt','rpm','m3u','max','vcf','svg','ppt','clj','png','svi','tiff','tgz','mxf','7z','drc','yuv','mov','tbz2','bz2','gpx','shar','xcf','dxf','jar','qt','tar','xpi','zip','thm','cxx','3dm','rar','md','scss','mpv','webp','war','pl','xlsx','mpeg','aaf','avchd','mod','rm','it','wasm','el','eps','nes','smc','sfc','md','smd','gen','gg','z64','v64','n64','gb','gbc','gba','srl','gcm','gcz','nds','dsi','wbfs','wad','cia','3ds','ngp','ngc','pce','vb','ws','wsc','dsv','sav','ps2','mcr','mpk','eep','st0','dta','srm','afa','zpaq','arc','paq','lpaq','swf','pdn','lol','php','sh','img','ico','asc', 'm2ts', 'nzb', 'appimage', 'json'],
     'extentionsToBeConvertedToText' => ['htm','mht','cgi','php','html','sh','shtml','xml','svg'],
     'defualtCookieValues' => ['showDeleteButton' => 'checked','showComment' => 'checked','showFileSize' => 'checked','showMimeType' => ''],
-    'commentRequired' => true,
-    'maxCommentSize' => 128,
-    'home' => "https://cgi.heyuri.net/goatse/",
 ];
 
 date_default_timezone_set($conf['timeZone']);
 
 /* draw functions */
 function drawHeader(){
-    global $page_title;
-    global $title_sub;
+    global $conf;
 
     echo '
     <html>
@@ -144,17 +110,17 @@ function drawHeader(){
     <meta http-equiv="expires" content="0">
     <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT">
     <meta http-equiv="pragma" content="no-cache">
-    <title>'.$page_title.'</title>
+    <title>'.$conf['boardTitle'].'</title>
     </head>
     <body bgcolor="#ffffee" text="#800000" link="#0000ee" alink="#5555ee" vlink="#0000ee">
         <table width="100%">
             <tr><td bgcolor="#eeaa88">
-                <strong><font size="4">'.$page_title.'</font></strong>
+                <strong><font size="4">'.$conf['boardTitle'].'</font></strong>
             </td></tr>
         </table>
         <tt><br>
         <br>
-        '.$title_sub.'<br>
+        '.$conf['boardSubTitle'].'<br>
         <br>
         <br>
         </tt>';
@@ -200,7 +166,7 @@ function drawFileListing($page=1){
         $currentLine++;
     }
     
-    $cookie = getSplitCookie();
+    $cookie = loadCookieSettings();
     // Main header (please adjust the width if you change the display items)
     echo                                    '<hr><table width="100%" style="font-size:10pt;"><tr>';
     if($cookie['showDeleteButton']) echo    '<td width="4%"><tt><b>DEL</b></tt></td>';
@@ -258,12 +224,12 @@ function drawMessageAndRedirectHome($mes1,$mes2=""){
     drawHeader();
     echo '
     <hr>
-    center>
+    <center>
         <strong>'.$mes1.'</strong><br>
         <p>'.$mes2.'</p>
     </center>
     [<a href="'.$_SERVER['PHP_SELF'].'">Back</a>]
-    <script type="text/javascript">setTimeout("location.href="'.$_SERVER['PHP_SELF'].'",0)</script>';
+    <script type="text/javascript">setTimeout(location.href="'.$_SERVER['PHP_SELF'].'",0)</script>';
     drawFooter();
     exit;
 }
@@ -303,7 +269,7 @@ function drawDeletionForm($fielID){
     </form>"';
 }
 function drawSettingsForm(){
-    $cookie = getSplitCookie();
+    $cookie = loadCookieSettings()();
     echo '
     <hr>
     <strong>client Settings</strong><br>
@@ -543,8 +509,8 @@ function bytesToHumanReadable($size){
     return $format;
 }
 function IsBaned($host){
-    global $denylist;
-    foreach($denylist as $line) {
+    global $conf;
+    foreach($conf['denylist'] as $line) {
 		if(strstr($host, $line)){
             return true;
         }
@@ -612,10 +578,6 @@ function loadCookieSettings(){
     setcookie("settings", $cookie,time()+365*24*3600);
     $settings = array_combine(['showDeleteButton','showComment','showFileSize','showMimeType'], explode("<>",$cookie));
     return $settings;
-}
-function getSplitCookie(){
-    global $conf;
-    return array_combine(['showDeleteButton','showComment','showFileSize','showMimeType'], explode("<>",$_COOKIE['settings']));
 }
 /* main funcitons */
 
@@ -716,7 +678,7 @@ if(IsBaned($_SERVER['REMOTE_ADDR'])){
     die();
 }
 
-$userSettings = loadCookieSettings();
+loadCookieSettings();
 
 /* deletion form was posted to */
 if(isset($_POST['deleteFileID']) && isset($_POST['deletionPassword'])){

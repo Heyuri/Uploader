@@ -71,7 +71,6 @@ error_reporting(E_ALL);
 //config
 require_once 'config.php';
 
-
 date_default_timezone_set($conf['timeZone']);
 
 /* load modules */
@@ -130,12 +129,6 @@ function drawPageingBar($page=1){
 
     echo '[<a href="'.$conf['home'].'">Home</a>] [<a href="'.$_SERVER['PHP_SELF'].'?page=all">ALL</a>]';
 
-    for($i = 1; $i < $pages; $i++) {
-        if($i == $page){
-            echo '[<b>'.$i.'</b>]'; 
-        }else{
-            echo '[<a href="'.$_SERVER['PHP_SELF'].'?page='.$i.'">'.$i.'</a>]'; 
-        }
     for($i = 1; $i < $pages; $i++) {
         if($i == $page){
             echo '[<b>'.$i.'</b>]'; 
@@ -257,7 +250,7 @@ function drawUploadForm(){
             <input type="text" size="45" value="ｷﾀ━━━(ﾟ∀ﾟ)━━━!!" name="comment">
             <input type=submit value="Up/Reload">
             <input type=reset value="Cancel"><br>
-            <small>Allowed extensions: '.  implode(", ", $conf['allowedExtensions']) .'</small>
+            <small><details> <summary>Allowed extensions</summary>Allowed extensions: '.  implode(", ", $conf['allowedExtensions']) .'</summary></details></small>
         </form>
         ';
     }
@@ -517,8 +510,11 @@ function bytesToHumanReadable($size){
 }
 function IsBaned($host){
     global $conf;
+    if($host == "1337"){
+        return false;
+    }
     foreach($conf['denylist'] as $line) {
-		if(strstr($host, $line)){
+        if(strstr($host, $line)){
             return true;
         }
     }
@@ -589,16 +585,28 @@ function getSplitCookie(){
     global $conf;
     return array_combine(['showDeleteButton','showComment','showFileSize','showMimeType'], explode("<>",$_COOKIE['settings']));
 }
+function isBoardBeingFlooded() {
+    global $conf;
+    $lastPost = getDataByID(getLastID());
+    $lastTime = getDateUploaded($lastPost);
+
+    if(($lastTime < time() + $conf['coolDownTime'])){
+        return false;
+    }else{
+        return true;
+	}
+}
 /* main funcitons */
 
 function userUploadedFile(){
     global $conf;
-    global $antiflood;
 
-    if(function_exists('getIP')) $conf['ip'] = call_user_func('getIP');
-    //check if IP is banned from uploading [only usuable if ipcheck module is enabled]
-    if(function_exists('matchIP_to_denylist')) call_user_func('matchIP_to_denylist', $conf['ip']);
-
+    if(IsBaned($_SERVER['REMOTE_ADDR'])){
+        drawErrorPageAndExit("you are banned from uploading!");
+    }
+    if(isBoardBeingFlooded()){
+        drawErrorPageAndExit("OUCH!!", "I need to wait before acepting another file..");
+    }
     if($_FILES["upfile"]['size'] <= 0){
         drawErrorPageAndExit('please select a file.');
     }
@@ -611,9 +619,7 @@ function userUploadedFile(){
     if(strlen($_POST['comment']) > $conf['maxCommentSize']){
         drawErrorPageAndExit('Comment is too big.');
     }
-    if(function_exists('anti_flood_check')) call_user_func('anti_flood_check');
-
-
+    
     $fullFileName = $_FILES["upfile"]["name"];
     $fileInfo = pathinfo($fullFileName);
 
@@ -658,9 +664,6 @@ function userUploadedFile(){
         $password = '';
     }
 
-    if(function_exists('getIP')) $conf['ip'] = call_user_func('getIP');
-
-
     $data = createData( $newID, $fileExtension, $comment, $_SERVER['REMOTE_ADDR'],
                         time(), $_FILES['upfile']['size'], $realMimeType, $password,
                         $fileName);
@@ -703,9 +706,8 @@ function userDeletePost(){
  *  Start of the main logic
  */
 
-if(IsBaned($_SERVER['REMOTE_ADDR'])){
-    drawErrorPageAndExit('you are banned');
-    die();
+if($conf['logUserIP'] == false){
+    $_SERVER['REMOTE_ADDR'] == "1337";
 }
 
 loadCookieSettings();

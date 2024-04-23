@@ -178,7 +178,7 @@ function drawFileListing($page=1){
     
     echo "</table><hr>";
     echo 'Used '. bytesToHumanReadable(getTotalUseageInBytes()).'/ '. bytesToHumanReadable($conf['maxTotalSize']).'<br>';
-    echo 'Used '.getTotalLogLines().' Files/ '. $conf['maxAmountOfFiles'].'Files<br>';
+    echo 'Used '.getTotalLogLines().' Files/ '. $conf['maxAmountOfFiles'].' Files<br>';
 }
 function drawFooter(){
     echo '
@@ -639,7 +639,8 @@ function userUploadedFile(){
 
     // if over max. delete last file
     if(getTotalLogLines() >= $conf['maxAmountOfFiles']){
-        removeLastData();
+	    if($conf['deleteAfterMax']) removeLastData(); //remove file if deleteAfterMax is true
+	    drawErrorPageAndExit("File limit reached, contact administrator.");
     }
     writeDataToLogs($data);
     drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');

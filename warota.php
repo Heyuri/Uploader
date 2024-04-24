@@ -515,7 +515,7 @@ function bytesToHumanReadable($size){
 
     return $format;
 }
-function IsBaned($host){
+function IsBanned($host){
     global $conf;
     if($host == "1337"){
         return false;
@@ -527,7 +527,7 @@ function IsBaned($host){
     }
     return false;
 }
-function isGlobalBaned($host){
+function isGlobalBanned($host){
     global $conf;
     if($host == "1337"){
         return false;
@@ -624,7 +624,7 @@ function isBoardBeingFlooded() {
 function userUploadedFile(){
     global $conf;
 
-    if(IsBaned($_SERVER['REMOTE_ADDR'])){
+    if(IsBanned($_SERVER['REMOTE_ADDR'])){
 	drawErrorPageAndExit("you are banned from uploading!");
     }
     if(isBoardBeingFlooded()){
@@ -734,7 +734,7 @@ if($conf['logUserIP'] == false){
 }
 
 //check if user is hard banned (cannot lurk)
-if(isGlobalBaned($_SERVER['REMOTE_ADDR'])){
+if(isGlobalBanned($_SERVER['REMOTE_ADDR'])){
        	drawErrorPageAndExit("You have been banned by the administrator. ヽ(ー_ー )ノ");
 }
 

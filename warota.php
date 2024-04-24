@@ -1,8 +1,47 @@
 <?php
 
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+
+function customErrorHandler($errno, $errstr, $errfile, $errline) {
+    if (!(error_reporting() & $errno)) {
+        // This error code is not included in error_reporting
+        return;
+    }
+    
+    switch ($errno) {
+    case E_USER_ERROR:
+        echo "<b>My ERROR</b> [$errno] $errstr<br />\n";
+        echo "  Fatal error on line $errline in file $errfile";
+        echo ", PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
+        echo "Aborting...<br />\n";
+        exit(1);
+
+    case E_USER_WARNING:
+        echo "<b>My WARNING</b> [$errno] $errstr<br />\n";
+        break;
+
+    case E_USER_NOTICE:
+    case E_NOTICE:
+        echo "<b>My NOTICE</b> [$errno] $errstr in $errfile on line $errline<br />\n";
+        echo "Stack trace:<br />\n";
+        debug_print_backtrace();
+        break;
+
+    default:
+        echo "Unknown error type: [$errno] $errstr<br />\n";
+        break;
+    }
+
+    /* Don't execute PHP internal error handler */
+    return true;
+}
+
+// Set to the user-defined error handler
+set_error_handler("customErrorHandler");
 
 
 /***************************************************************************
@@ -69,14 +108,9 @@ error_reporting(E_ALL);
  */
 
 //config
-require_once 'config.php';
+$conf = require_once 'config.php';
 
 date_default_timezone_set($conf['timeZone']);
-
-/* load modules */
-if($ipcheck) require_once $module_List['mod_ipcheck']; // ip log module
-if($antiflood) require_once $module_List['mod_antiflood']; // anti-flood script
-
 
 /* draw functions */
 function drawHeader(){
@@ -304,7 +338,7 @@ function getLastID(){
     $firstLine = fgets($openFile);
     $array = explode("<>",$firstLine);
     fclose($openFile);
-    return getID($array);
+    return getID($array) ?? 1;
 }
 function getDataByID($id){
     global $conf;
@@ -357,7 +391,12 @@ function createData($id,$fileExtension,$comment,$ip,$time,$size,$mimeType,$passw
 function createDataFromString($str){
     return explode("<>",$str);
 }
-
+function isDataEmpty($data) {
+    if(count($data) < 8){
+        return true;
+    }
+    return false;
+}
 /* helper libs */
 function writeDataToLogs($data){
     global $conf;
@@ -588,12 +627,16 @@ function getSplitCookie(){
 function isBoardBeingFlooded() {
     global $conf;
     $lastPost = getDataByID(getLastID());
-    $lastTime = getDateUploaded($lastPost);
-
-    if(($lastTime < time() + $conf['coolDownTime'])){
+    if(isDataEmpty($lastPost)){
+        // cant flood if there is not even a single post
         return false;
-    }else{
+    }
+
+    $lastTime = getDateUploaded($lastPost);
+    if($lastTime + $conf['coolDownTime'] > time()){
         return true;
+    }else{
+        return false;
 	}
 }
 /* main funcitons */
@@ -642,7 +685,7 @@ function userUploadedFile(){
     finfo_close($finfo);
 
     // get a ID for this new post
-    $newID = sprintf("%03d", getLastID() + 1);
+    $newID = sprintf("%03d", (int)getLastID() + 1);
     $newname = $conf['prefix'] . $newID . "." . $fileExtension;
 
     rename($_FILES['upfile']['tmp_name'], $conf['uploadDir'].$newname);
@@ -707,7 +750,7 @@ function userDeletePost(){
  */
 
 if($conf['logUserIP'] == false){
-    $_SERVER['REMOTE_ADDR'] == "1337";
+    $_SERVER['REMOTE_ADDR'] = "1337";
 }
 
 loadCookieSettings();

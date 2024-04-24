@@ -261,7 +261,7 @@ function drawDeletionForm($fielID){
         <input type=hidden name=deleteFileID value="'.$fielID.'">
         Enter your password: <input type=password size=12 name=password>
         <input type=submit value="Delete">
-    </form>"';
+    </form>';
 }
 function drawSettingsForm(){
     $cookie = getSplitCookie();

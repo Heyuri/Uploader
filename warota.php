@@ -1,48 +1,8 @@
 <?php
 
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-
-function customErrorHandler($errno, $errstr, $errfile, $errline) {
-    if (!(error_reporting() & $errno)) {
-        // This error code is not included in error_reporting
-        return;
-    }
-    
-    switch ($errno) {
-    case E_USER_ERROR:
-        echo "<b>My ERROR</b> [$errno] $errstr<br />\n";
-        echo "  Fatal error on line $errline in file $errfile";
-        echo ", PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
-        echo "Aborting...<br />\n";
-        exit(1);
-
-    case E_USER_WARNING:
-        echo "<b>My WARNING</b> [$errno] $errstr<br />\n";
-        break;
-
-    case E_USER_NOTICE:
-    case E_NOTICE:
-        echo "<b>My NOTICE</b> [$errno] $errstr in $errfile on line $errline<br />\n";
-        echo "Stack trace:<br />\n";
-        debug_print_backtrace();
-        break;
-
-    default:
-        echo "Unknown error type: [$errno] $errstr<br />\n";
-        break;
-    }
-
-    /* Don't execute PHP internal error handler */
-    return true;
+if(file_exists("debug.php")){
+    require_once("debug.php");
 }
-
-// Set to the user-defined error handler
-set_error_handler("customErrorHandler");
-
 
 /***************************************************************************
   PHPぁぷろだ by ToR(http://php.s3.to)
@@ -475,7 +435,7 @@ function getTotalLogLines(){
 }
 function delteFileByData($data){
     global $conf;
-    $path = $conf['uploadDir'] ."/". $conf['prefix'] . getID($data) . getFileExtention($data);
+    $path = $conf['uploadDir'] . $conf['prefix'] . getID($data) . '.' . getFileExtention($data);
     unlink($path);
 }
 function removeLastData(){
@@ -568,6 +528,7 @@ function deleteDataFromLogByID($id){
     $openLogFile = fopen($logFile, "r");
     $dataIsFoundInFile = false;
     $newFileContent = [];
+    $foundData = null;
 
     // while not at the end of the file.
     while (!feof($openLogFile)) {
@@ -576,6 +537,7 @@ function deleteDataFromLogByID($id){
 
         if ($data[0] == $id) {
             $dataIsFoundInFile = true;
+            $foundData = $data;
         } else {
             $newFileContent[] = $line;
         }
@@ -596,7 +558,7 @@ function deleteDataFromLogByID($id){
     }
     fclose($openLogFile);
     
-    delteFileByData($data);
+    delteFileByData($foundData);
 
     return true;
 }

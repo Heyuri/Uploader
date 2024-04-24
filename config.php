@@ -20,7 +20,7 @@ return $conf = [
     'timeZone' => 'UTC',        // timezone
     'logFile' => "souko.log",   // name of flat file
     'uploadDir' => "src/",      // upload location (slash is required).
-    'prefix' => "",             // prefix to add infront of your file name
+    'prefix' => "",             // prefix to add in front of your file name. Don't change after setting
     'coolDownTime' => 5,        // time in seconds untill can be uploaded to again. (set to -1 for no cool down)
 
 
@@ -32,8 +32,8 @@ return $conf = [
     'maxCommentSize' => 128,                // max comment length
     'deleteOldestOnMaxFiles' => false,      // delete oldest file if user uploads when maxxed out.
 
-    'denylist' => ['0.0.0.0'], //IPs that are blocked from uploading but can still view the rest of the page | DONT LEAVE BLANK
-    'hardBanList' => ['0.0.0.0'], //IPs in here Will recieve an error message when attempting to load the page => cannot interact at all | DONT LEAVE BLANK
+    'denylist' => ['0.0.0.0'], //IPs that are blocked from uploading but can still view the rest of the page | DON'T LEAVE BLANK
+    'hardBanList' => ['0.0.0.0'], //IPs in here will recieve an error message when attempting to load the page => cannot interact at all | DON'T LEAVE BLANK
 
     'allowedExtensions' =>  [
         'dat','htm','torrent','deb','lzh','ogm','doc','class','js','swift','cc','tga','ape','woff2','cab','whl','mpe',

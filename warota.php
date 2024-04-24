@@ -1,6 +1,47 @@
 <?php
 
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+
+function customErrorHandler($errno, $errstr, $errfile, $errline) {
+    if (!(error_reporting() & $errno)) {
+        // This error code is not included in error_reporting
+        return;
+    }
+    
+    switch ($errno) {
+    case E_USER_ERROR:
+        echo "<b>My ERROR</b> [$errno] $errstr<br />\n";
+        echo "  Fatal error on line $errline in file $errfile";
+        echo ", PHP " . PHP_VERSION . " (" . PHP_OS . ")<br />\n";
+        echo "Aborting...<br />\n";
+        exit(1);
+
+    case E_USER_WARNING:
+        echo "<b>My WARNING</b> [$errno] $errstr<br />\n";
+        break;
+
+    case E_USER_NOTICE:
+    case E_NOTICE:
+        echo "<b>My NOTICE</b> [$errno] $errstr in $errfile on line $errline<br />\n";
+        echo "Stack trace:<br />\n";
+        debug_print_backtrace();
+        break;
+
+    default:
+        echo "Unknown error type: [$errno] $errstr<br />\n";
+        break;
+    }
+
+    /* Don't execute PHP internal error handler */
+    return true;
+}
+
+// Set to the user-defined error handler
+set_error_handler("customErrorHandler");
 
 
 /***************************************************************************
@@ -67,15 +108,9 @@ error_reporting(E_ALL);
  */
 
 //config
-require_once 'config.php';
-
+$conf = require_once 'config.php';
 
 date_default_timezone_set($conf['timeZone']);
-
-/* load modules */
-if($ipcheck) require_once $module_List['mod_ipcheck']; // ip log module
-if($antiflood) require_once $module_List['mod_antiflood']; // anti-flood script
-
 
 /* draw functions */
 function drawHeader(){
@@ -92,6 +127,14 @@ function drawHeader(){
     <meta http-equiv="expires" content="0">
     <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT">
     <meta http-equiv="pragma" content="no-cache">
+    <style>
+        a:link    {color:#0000ee;}
+        a:hover   {color:#5555ee;}
+        a:visited {color:#0000ee;}
+        tr:nth-child(odd) {background-color: #f7efea;}
+        tr:hover {background-color: #f0e0d6;}
+        table {border-collapse: collapse;}
+    </style>
     <title>'.$conf['boardTitle'].'</title>
     </head>
     <body bgcolor="#ffffee" text="#800000" link="#0000ee" alink="#5555ee" vlink="#0000ee">
@@ -161,6 +204,10 @@ function drawFileListing($page=1){
     $lineOffset = $currentLine + $count;
     while ($currentLine < $lineOffset && !feof($fileHandle)) {
         $line = fgets($fileHandle);
+        if ($line == false || trim($line) == '') {
+            continue;
+            //empty line
+        }
         $data = createDataFromString($line);
 
         $fileName = $conf['prefix'] . getID($data) .'.'. getFileExtention($data);
@@ -178,7 +225,7 @@ function drawFileListing($page=1){
     
     echo "</table><hr>";
     echo 'Used '. bytesToHumanReadable(getTotalUseageInBytes()).'/ '. bytesToHumanReadable($conf['maxTotalSize']).'<br>';
-    echo 'Used '.getTotalLogLines().' Files/ '. $conf['maxAmountOfFiles'].' Files<br>';
+    echo 'Used '.getTotalLogLines().' Files/ '. $conf['maxAmountOfFiles'].'Files<br>';
 }
 function drawFooter(){
     echo '
@@ -245,8 +292,8 @@ function drawUploadForm(){
 function drawDeletionForm($fielID){
     echo'
     <form action='.$_SERVER['PHP_SELF'].' method="post">
-        <input type=hidden name="deleteFileID" value="'.$fielID.'">
-        Enter your password: <input type=password size=12 name="deletionPassword">
+        <input type=hidden name=deleteFileID value="'.$fielID.'">
+        Enter your password: <input type=password size=12 name=password>
         <input type=submit value="Delete">
     </form>"';
 }
@@ -277,7 +324,7 @@ function drawActionLinks(){
     echo '
     <HR size=1>
     <small>
-        <a href="'.$_SERVER['PHP_SELF'].'?goingto=settings">settings</a> | <a href="'.$_SERVER['PHP_SELF'].'">reload</a> | <a href="sam.php">image list</a>
+        <a href="'.$_SERVER['PHP_SELF'].'?goingto=settings">settings</a> | <a href="'.$_SERVER['PHP_SELF'].'">reload</a> | <a href="images.php">image list</a>
     </small>
     <HR size=1>';
 }
@@ -291,9 +338,8 @@ function getLastID(){
     $firstLine = fgets($openFile);
     $array = explode("<>",$firstLine);
     fclose($openFile);
-    return getID($array);
+    return getID($array) ?? 1;
 }
-
 function getDataByID($id){
     global $conf;
     $logFile = $conf['logFile'];
@@ -345,7 +391,12 @@ function createData($id,$fileExtension,$comment,$ip,$time,$size,$mimeType,$passw
 function createDataFromString($str){
     return explode("<>",$str);
 }
-
+function isDataEmpty($data) {
+    if(count($data) < 8){
+        return true;
+    }
+    return false;
+}
 /* helper libs */
 function writeDataToLogs($data){
     global $conf;
@@ -397,6 +448,9 @@ function getTotalUseageInBytes(){
     //id<>fileExtention<>comment<>host<>dateUploaded<>sizeInBytes<>mimeType<>Password<>orginalFileName
     while(!feof($openFile)){ 
         $line = fgets($openFile);
+        if ($line == false && trim($line) == '') {
+            continue;
+        }
         $array = explode("<>",$line);
         $size = getSizeInBytes($array);
         $totalSize = $totalSize + $size;
@@ -410,8 +464,10 @@ function getTotalLogLines(){
     $fileHandle = fopen($conf['logFile'], 'r'); 
 
     while (!feof($fileHandle)) {
-        fgets($fileHandle);
-        $lineCount++; 
+        $line = fgets($fileHandle);
+        if ($line !== false && trim($line) !== '') {
+            $lineCount++;
+        }
     }
     fclose($fileHandle); 
 
@@ -493,13 +549,19 @@ function bytesToHumanReadable($size){
 }
 function IsBaned($host){
     global $conf;
+    if($host == "1337"){
+        return false;
+    }
     foreach($conf['denylist'] as $line) {
-		if(strstr($host, $line)){
+        if(strstr($host, $line)){
             return true;
         }
     }
 }
-	
+function isRateLimited(){
+    //hachi this one is for you to fill in
+    return false;
+}
 function deleteDataFromLogByID($id){
     global $conf;
     $logFile = $conf['logFile'];
@@ -562,16 +624,32 @@ function getSplitCookie(){
     global $conf;
     return array_combine(['showDeleteButton','showComment','showFileSize','showMimeType'], explode("<>",$_COOKIE['settings']));
 }
+function isBoardBeingFlooded() {
+    global $conf;
+    $lastPost = getDataByID(getLastID());
+    if(isDataEmpty($lastPost)){
+        // cant flood if there is not even a single post
+        return false;
+    }
+
+    $lastTime = getDateUploaded($lastPost);
+    if($lastTime + $conf['coolDownTime'] > time()){
+        return true;
+    }else{
+        return false;
+	}
+}
 /* main funcitons */
 
 function userUploadedFile(){
-	global $conf;
-	global $antiflood;
+    global $conf;
 
-    if(function_exists('getIP')) $conf['ip'] = call_user_func('getIP');
-    //check if IP is banned from uploading [only usuable if ipcheck module is enabled]
-    if(function_exists('matchIP_to_denylist')) call_user_func('matchIP_to_denylist', $conf['ip']);
-
+    if(IsBaned($_SERVER['REMOTE_ADDR'])){
+        drawErrorPageAndExit("you are banned from uploading!");
+    }
+    if(isBoardBeingFlooded()){
+        drawErrorPageAndExit("OUCH!!", "I need to wait before acepting another file..");
+    }
     if($_FILES["upfile"]['size'] <= 0){
         drawErrorPageAndExit('please select a file.');
     }
@@ -584,9 +662,7 @@ function userUploadedFile(){
     if(strlen($_POST['comment']) > $conf['maxCommentSize']){
         drawErrorPageAndExit('Comment is too big.');
     }
-    if(function_exists('anti_flood_check')) call_user_func('anti_flood_check');
-
-
+    
     $fullFileName = $_FILES["upfile"]["name"];
     $fileInfo = pathinfo($fullFileName);
 
@@ -609,7 +685,7 @@ function userUploadedFile(){
     finfo_close($finfo);
 
     // get a ID for this new post
-    $newID = sprintf("%03d", intval(getLastID()) + 1);
+    $newID = sprintf("%03d", (int)getLastID() + 1);
     $newname = $conf['prefix'] . $newID . "." . $fileExtension;
 
     rename($_FILES['upfile']['tmp_name'], $conf['uploadDir'].$newname);
@@ -628,18 +704,18 @@ function userUploadedFile(){
     if(isset($_POST['password'])){
         $password = $_POST['password'];
     }else{
-        $password = "*";
+        $password = '';
     }
-   
-    if(function_exists('getIP')) $conf['ip'] = call_user_func('getIP');
 
-    $data = createData( $newID, $fileExtension, $comment, $conf['ip'],
+    $data = createData( $newID, $fileExtension, $comment, $_SERVER['REMOTE_ADDR'],
                         time(), $_FILES['upfile']['size'], $realMimeType, $password,
                         $fileName);
 
     // if over max. delete last file
     if(getTotalLogLines() >= $conf['maxAmountOfFiles']){
-	    if($conf['deleteAfterMax']) removeLastData(); //remove file if deleteAfterMax is true
+        if($conf['deleteAfterMax']){
+            removeLastData(); //remove file if deleteAfterMax is true
+        }
 	    drawErrorPageAndExit("File limit reached, contact administrator.");
     }
     writeDataToLogs($data);
@@ -648,13 +724,20 @@ function userUploadedFile(){
 function userDeletePost(){
     global $conf;
     $fileID = $_POST['deleteFileID'];
-    $password = $_POST['deletionPassword'];
+    $password = $_POST['password'];
 
     $postData = getDataByID($fileID);
     if(is_null($postData)){
         drawErrorPageAndExit('Deletion Error','The file cannot be found.');
     }
-    if($password == $conf['adminPassword'] || $password == getPassword($postData)){
+    if($password == $conf['adminPassword']){
+        deleteDataFromLogByID($fileID);
+        drawMessageAndRedirectHome('file has been deleted.','If this page dose not change, click "Back".');
+    }
+    elseif(getPassword($postData) == ''){
+        drawErrorPageAndExit('Deletion Error','there was not a password when this post was created. contact a admin from the same ip you posted with');
+    }
+    elseif($password == getPassword($postData)){
         deleteDataFromLogByID($fileID);
         drawMessageAndRedirectHome('file has been deleted.','If this page dose not change, click "Back".');
     }else{
@@ -666,15 +749,14 @@ function userDeletePost(){
  *  Start of the main logic
  */
 
-if(IsBaned($_SERVER['REMOTE_ADDR'])){
-    drawErrorPageAndExit('you are banned');
-    die();
+if($conf['logUserIP'] == false){
+    $_SERVER['REMOTE_ADDR'] = "1337";
 }
 
 loadCookieSettings();
 
 /* deletion form was posted to */
-if(isset($_POST['deleteFileID']) && isset($_POST['deletionPassword'])){
+if(isset($_POST['deleteFileID']) && isset($_POST['password'])){
     if(is_numeric($_POST['deleteFileID']) == false){
         drawErrorPageAndExit("failed to delete", "deleteFileID is not a number");
     }

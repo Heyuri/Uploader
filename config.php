@@ -58,8 +58,7 @@ return $conf = [
         'showDeleteButton' => 'checked',
         'showComment' => 'checked',
         'showFileSize' => 'checked',
-        'showMimeType' => '',
-        'showImagePreview' => 'checked'
+        'showMimeType' => ''
     ],
 ];
 

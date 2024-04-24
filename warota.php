@@ -475,7 +475,7 @@ function getTotalLogLines(){
 }
 function delteFileByData($data){
     global $conf;
-    $path = $conf['uploadDir'] ."/". $conf['prefix'] . getID($data) . getFileExtention($data);
+    $path = $conf['uploadDir'] . $conf['prefix'] . getID($data) . '.' . getFileExtention($data);
     unlink($path);
 }
 function removeLastData(){
@@ -568,6 +568,7 @@ function deleteDataFromLogByID($id){
     $openLogFile = fopen($logFile, "r");
     $dataIsFoundInFile = false;
     $newFileContent = [];
+    $foundData = null;
 
     // while not at the end of the file.
     while (!feof($openLogFile)) {
@@ -576,6 +577,7 @@ function deleteDataFromLogByID($id){
 
         if ($data[0] == $id) {
             $dataIsFoundInFile = true;
+            $foundData = $data;
         } else {
             $newFileContent[] = $line;
         }
@@ -596,7 +598,7 @@ function deleteDataFromLogByID($id){
     }
     fclose($openLogFile);
     
-    delteFileByData($data);
+    delteFileByData($foundData);
 
     return true;
 }

@@ -77,6 +77,8 @@ $conf = require_once $configFile;
 
 date_default_timezone_set($conf['timeZone']);
 
+if(!file_exists($conf['logFile'])) die($conf['logFile']. " is missing. Please create it.");
+
 
 /* draw functions */
 function drawHeader(){

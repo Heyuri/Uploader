@@ -1,12 +1,4 @@
 <?php
-
-if(file_exists("debug.php")){
-    require_once("debug.php");
-}
-
-// Define config file here. This all you need to do in this file.
-$configFile = 'config.php';
-
 /***************************************************************************
   PHPぁぷろだ by ToR(http://php.s3.to)
   source by ずるぽん(http://zurubon.virtualave.net/)
@@ -64,21 +56,31 @@ $configFile = 'config.php';
       .txtでも、中身がHTMLだと表示されちゃうので注意
 
 **************************************************************************/
-//
 
 /*
  * Heyuri's file uploader.
  */
 
+if(file_exists("debug.php")){
+    require_once("debug.php");
+}
+
+
+
+$configFile = 'config.php';
 if (!file_exists($configFile)) {
     die("Error: Configuration file <i>$configFile</i> is missing.");
 }
 $conf = require_once $configFile;
 
+define("IMAGE_EXTENTIONS", ["png", "jpg", "jpeg", "webp", "gif", "tiff", "svg"]);
+define("VIDEO_EXTENTIONS", ["mp4", "webm", "avi", "mov", "mkv"]);
+define("AUDIO_EXTENTIONS", ["mp3", "wav", "flac", "ogg"]);
 date_default_timezone_set($conf['timeZone']);
 
-if(!file_exists($conf['logFile'])) die($conf['logFile']. " is missing. Please create it.");
-
+if(!file_exists($conf['logFile'])){
+    die($conf['logFile']. " is missing. Please create it.");
+}
 
 /* draw functions */
 function drawHeader(){
@@ -164,6 +166,7 @@ function drawFileListing($page=1){
     echo                                    '<hr><table width="100%" style="font-size:10pt;"><tr>';
     if($cookie['showDeleteButton']) echo    '<td width="4%"><tt><b>DEL</b></tt></td>';
     echo                                    '<td width="8%"><tt><b>NAME</b></tt></td>';
+    if($cookie['showImagePreview']) echo    '<td width="10%"><tt><b>PREVIEW</b></tt></td>';
     if($cookie['showComment'])  echo        '<td width="58%"><tt><b>COMMENT</b></tt></td>';
     if($cookie['showFileSize']) echo        '<td width="7%"><tt><b>SIZE</b></tt></td>';
     if($cookie['showMimeType']) echo        '<td><tt><b>MIME</b></tt></td>';
@@ -183,11 +186,21 @@ function drawFileListing($page=1){
 
         if($cookie['showDeleteButton']) echo    '<td><small><a href='. $_SERVER['PHP_SELF'] .'?deleteFileID='.getID($data).'>■</a></small></td>';
         echo                                    '<td><a href="'. $path .'">'.$fileName.'</a></td>';
+        
+        if($cookie['showImagePreview'] &&  in_array(getFileExtention($data), IMAGE_EXTENTIONS)){
+            echo                                '<td><small><details><summary>preview</summary><img src="'.$path.'" width="250" height="250" title="'.$fileName.'"></small></td>';
+        }elseif($cookie['showImagePreview'] &&  in_array(getFileExtention($data), VIDEO_EXTENTIONS)){
+            echo                                '<td><small><details><summary>preview</summary><video controls="controls" loop="loop" src="'.$path.'" width="250" height="250" title="'.$fileName.'"></small></td>';
+        }elseif($cookie['showImagePreview'] &&  in_array(getFileExtention($data), AUDIO_EXTENTIONS)){
+            echo                                '<td><small><details><summary>preview</summary><audio controls=""><source src="'.$path.'" type="audio/mpeg"></audio></small></td>';
+        }elseif($cookie['showImagePreview']){
+            echo                                '<td></td>';
+        }
+
         if($cookie['showComment']) echo         '<td><font size=2>'. getComent($data) .'</font></td>';
         if($cookie['showFileSize']) echo        '<td><font size=2>'. bytesToHumanReadable(getSizeInBytes($data)) .'</font></td>';
         if($cookie['showMimeType']) echo        '<td><font size=2 color=888888>'. getMimeType($data) .'</font></td>';
         echo                                    '</tr>';
-
         $currentLine = $currentLine + 1;
     }
     
@@ -279,6 +292,7 @@ function drawSettingsForm(){
             <input type=checkbox name=showComment  value=checked '.$cookie['showComment'].'>show comments<br>
             <input type=checkbox name=showFileSize value=checked '.$cookie['showFileSize'].'>show file size<br>
             <input type=checkbox name=showMimeType value=checked '.$cookie['showMimeType'].'>show MIME types<br>
+            <input type=checkbox name=showImagePreview value=checked '.$cookie['showImagePreview'].'>show Previews types<br>
         </ul>
     <ul><br>
     <br><br>
@@ -594,7 +608,9 @@ function loadCookieSettings(){
         $cookie = implode("<>", array(   $_POST['showDeleteButton'] ?? ""
                                         ,$_POST['showComment'] ?? ""
                                         ,$_POST['showFileSize'] ?? ""
-                                        ,$_POST['showMimeType'] ?? ""));
+                                        ,$_POST['showMimeType'] ?? ""
+                                        ,$_POST['showImagePreview'] ?? ""));
+
     }
 
     setcookie("settings", $cookie,time()+365*24*3600);
@@ -602,7 +618,7 @@ function loadCookieSettings(){
 }
 function getSplitCookie(){
     global $conf;
-    return array_combine(['showDeleteButton','showComment','showFileSize','showMimeType'], explode("<>",$_COOKIE['settings']));
+    return array_combine(['showDeleteButton','showComment','showFileSize','showMimeType','showImagePreview'], explode("<>",$_COOKIE['settings']));
 }
 function isBoardBeingFlooded() {
     global $conf;

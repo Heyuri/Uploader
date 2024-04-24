@@ -72,6 +72,7 @@ $conf = require_once 'config.php';
 
 date_default_timezone_set($conf['timeZone']);
 
+
 /* draw functions */
 function drawHeader(){
     global $conf;
@@ -185,7 +186,7 @@ function drawFileListing($page=1){
     
     echo "</table><hr>";
     echo 'Used '. bytesToHumanReadable(getTotalUseageInBytes()).'/ '. bytesToHumanReadable($conf['maxTotalSize']).'<br>';
-    echo 'Used '.getTotalLogLines().' Files/ '. $conf['maxAmountOfFiles'].'Files<br>';
+    echo 'Used '.getTotalLogLines().' Files/ '. $conf['maxAmountOfFiles'].' Files<br>';
 }
 function drawFooter(){
     echo '
@@ -517,11 +518,21 @@ function IsBaned($host){
             return true;
         }
     }
-}
-function isRateLimited(){
-    //hachi this one is for you to fill in
     return false;
 }
+function isGlobalBaned($host){
+    global $conf;
+    if($host == "1337"){
+        return false;
+    }
+    foreach($conf['hardBanList'] as $line) {
+        if(strstr($host, $line)){
+            return true;
+        }
+    }
+    return false;
+}
+
 function deleteDataFromLogByID($id){
     global $conf;
     $logFile = $conf['logFile'];
@@ -607,7 +618,7 @@ function userUploadedFile(){
     global $conf;
 
     if(IsBaned($_SERVER['REMOTE_ADDR'])){
-        drawErrorPageAndExit("you are banned from uploading!");
+	drawErrorPageAndExit("you are banned from uploading!");
     }
     if(isBoardBeingFlooded()){
         drawErrorPageAndExit("OUCH!!", "I need to wait before acepting another file..");
@@ -714,6 +725,12 @@ function userDeletePost(){
 if($conf['logUserIP'] == false){
     $_SERVER['REMOTE_ADDR'] = "1337";
 }
+
+//check if user is hard banned (cannot lurk)
+if(isGlobalBaned($_SERVER['REMOTE_ADDR'])){
+       	drawErrorPageAndExit("You have been banned by the administrator. ヽ(ー_ー )ノ");
+}
+
 
 loadCookieSettings();
 

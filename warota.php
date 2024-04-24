@@ -4,6 +4,9 @@ if(file_exists("debug.php")){
     require_once("debug.php");
 }
 
+// Define config file here. This all you need to do in this file.
+$configFile = 'config.php';
+
 /***************************************************************************
   PHPぁぷろだ by ToR(http://php.s3.to)
   source by ずるぽん(http://zurubon.virtualave.net/)
@@ -67,8 +70,10 @@ if(file_exists("debug.php")){
  * Heyuri's file uploader.
  */
 
-//config
-$conf = require_once 'config.php';
+if (!file_exists($configFile)) {
+    die("Error: Configuration file <i>$configFile</i> is missing.");
+}
+$conf = require_once $configFile;
 
 date_default_timezone_set($conf['timeZone']);
 

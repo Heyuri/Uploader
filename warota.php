@@ -625,19 +625,19 @@ function userUploadedFile(){
     global $conf;
 
     if(IsBanned($_SERVER['REMOTE_ADDR'])){
-	drawErrorPageAndExit("you are banned from uploading!");
+	drawErrorPageAndExit("You are banned from uploading!");
     }
     if(isBoardBeingFlooded()){
         drawErrorPageAndExit("OUCH!!", "I need to wait before acepting another file..");
     }
     if($_FILES["upfile"]['size'] <= 0){
-        drawErrorPageAndExit('please select a file.');
+        drawErrorPageAndExit('Please select a file.');
     }
     if($_FILES["upfile"]['size'] > $conf['maxUploadSize']){
         drawErrorPageAndExit('File is too big.');
     }
     if($_POST['comment'] == "" && $conf['commentRequired']){
-        drawErrorPageAndExit('comment is required.');
+        drawErrorPageAndExit('Comment is required.');
     }
     if(strlen($_POST['comment']) > $conf['maxCommentSize']){
         drawErrorPageAndExit('Comment is too big.');
@@ -650,7 +650,7 @@ function userUploadedFile(){
     $fileExtension = strtolower($fileInfo['extension']);
 
     if(!in_array($fileExtension, $conf['allowedExtensions'])){
-        drawErrorPageAndExit("invlaid extension","file can not be uploaded with that extension");
+        drawErrorPageAndExit("Invalid extension","file can not be uploaded with that extension");
     }
 
     $originalExtension = $fileExtension;
@@ -671,10 +671,10 @@ function userUploadedFile(){
     rename($_FILES['upfile']['tmp_name'], $conf['uploadDir'].$newname);
     chmod($conf['uploadDir'] . $newname, 0644);
 
-    //remove line breaks from the comment
+    // remove line breaks from the comment
     $comment = str_replace(array("\0","\t","\r","\n","\r\n"), "", $_POST['comment']);
     
-    // check if the extention has been converted to somthing safe
+    // check if the extention has been converted to something safe
     if($originalExtension != $fileExtension){
         //show the converstion
         $comment = $comment . '<font color="#ff0000">('. $fileExtension .'←'. $originalExtension .')</font>';
@@ -733,7 +733,7 @@ if($conf['logUserIP'] == false){
     $_SERVER['REMOTE_ADDR'] = "1337";
 }
 
-//check if user is hard banned (cannot lurk)
+// check if user is hard banned (cannot lurk)
 if(isGlobalBanned($_SERVER['REMOTE_ADDR'])){
        	drawErrorPageAndExit("You have been banned by the administrator. ヽ(ー_ー )ノ");
 }

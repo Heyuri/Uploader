@@ -6,7 +6,7 @@ function newBoard($name, $subName, $adminPassword, $delitionPassword, $anonimize
     mkdir(__DIR__ . '/boards/'.$name);
     mkdir(__DIR__ . '/boards/'.$name.'/src');
     symlink(__DIR__ . "/base.php", __DIR__ . '/boards/'.$name.'/index.php');
-    symlink(__DIR__ . "/mod.php", __DIR__ . '/boards/'.$name.'/mod.php');
+    //symlink(__DIR__ . "/mod.php", __DIR__ . '/boards/'.$name.'/mod.php');
     //copy(__DIR__ . "/debug.php", __DIR__ . '/boards/'.$name.'/debug.php');
 
     touch(__DIR__ . '/boards/'.$name.'/md5.block');

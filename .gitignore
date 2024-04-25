@@ -1,8 +1,3 @@
-count.log
-last.log
-souko.log
+boards/*
 debug.php
-
-#chen's shit
-test.php
 .vscode

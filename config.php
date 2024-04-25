@@ -6,34 +6,44 @@ define('ROOTPATH', './'); // main path for project
 
 
 /*
- *  the reason for configs like this is it makes it really easy to dump this table into a web veiw
- *  or update them and save them with out having to ssh in and edit it manualy. there is no varable export for using defines.
+ *  these are the defualt configs for each new board. please set what you want user boards to have here.
+ *  please note some things users can over write. 
+ *  check the newBoard() funciton in admin.php to get a idea of what can be over written
  */
 
 return $conf = [
-    'boardTitle' => 'Everything',
-    'boardSubTitle' => 'Home for your files',
-    'home' => "https://cgi.heyuri.net/goatse/",
+    'boardTitle' => 'fileUploader',
+    'boardSubTitle' => 'for long term storage of bigger files',
+    'home' => "https://up.example.com",
+    'cssFile' => '../../styles.css',
     'adminPassword' => "lolpenis",
-    'logUserIP' => false,
+    'deletionPassword' => "123",    // this is the password for delete a board
+    'logUserIP' => true,
+    'boardListed' => true,
 
-    'timeZone' => 'UTC',        // timezone
-    'logFile' => "souko.log",   // name of flat file
-    'uploadDir' => "src/",      // upload location (slash is required).
-    'prefix' => "",             // prefix to add in front of your file name. Don't change after setting
-    'coolDownTime' => 5,        // time in seconds untill can be uploaded to again. (set to -1 for no cool down)
+    'timeZone' => 'UTC',            // timezone
+    'logFile' => "userPosts.block", // name of file that will hold each post's data (in your webserver settings. disallow acsses to anyting with *.block)
+    'uploadDir' => "src/",          // upload location (slash is required).
+    'prefix' => "",                 // prefix to add in front of your file name. Don't change after setting
+    'coolDownTime' => 10,           // time in seconds untill can be uploaded to again. (set to -1 for no cool down)
 
-
-    'maxAmountOfFiles' => 20,               // max files allowed on server
-    'maxTotalSize' => 200*1024*1024*1024,   // total sized allowed in bytes
-    'filesPerListing' => 7,                 // how many files listed per page
-    'maxUploadSize' => 20*1024*1024,        // max upload size in bytes
+    'maxAmountOfFiles' => 300,              // max files allowed on server
+    'maxTotalSize' => 200*1024*1024*1024,   // total sized allowed in bytes (defualt is 20gb)
+    'filesPerListing' => 10,                // how many files listed per page
+    'maxUploadSize' => 20*1024*1024,        // max upload size in bytes (defualt is 20mb, make sure you change php.ini and your webserver to allow higher limits)
+    
     'commentRequired' => true,              // comment is requires or not
     'maxCommentSize' => 128,                // max comment length
-    'deleteOldestOnMaxFiles' => false,      // delete oldest file if user uploads when maxxed out.
+    'deleteOldestOnMaxFiles' => false,      // delete oldest file if user uploads when maxxed out (bug, if you lower max files with this on. uploads will fail and delete last post)
+    'defaultComment' => '',                 // default comment tfilled into the form (wont auto fill empty comment)
 
-    'denylist' => ['0.0.0.0'], //IPs that are blocked from uploading but can still view the rest of the page | DON'T LEAVE BLANK
-    'hardBanList' => ['0.0.0.0'], //IPs in here will recieve an error message when attempting to load the page => cannot interact at all | DON'T LEAVE BLANK
+    'pageBarOnBottom' => true,              // if there should be a paging on the bottom as well
+    'allowDrawUsage' => true,               // will draw usage if set
+    'allowDrawDateUploaded' => true,        // set to false to not let others see when a file was uploaded
+    'allowDrawOriginalName' => true,        // set to false to not let others see what the original file name was
+
+    'denylist' => ['0.0.0.0'],      //IPs that are blocked from uploading but can still view the rest of the page | DON'T LEAVE BLANK
+    'hardBanList' => ['0.0.0.0'],   //IPs in here will recieve an error message when attempting to load the page => cannot interact at all | DON'T LEAVE BLANK
 
     'allowedExtensions' =>  [
         'dat','htm','torrent','deb','lzh','ogm','doc','class','js','swift','cc','tga','ape','woff2','cab','whl','mpe',
@@ -51,15 +61,17 @@ return $conf = [
         'mcr','mpk','eep','st0','dta','srm','afa','zpaq','arc','paq','lpaq','swf','pdn','lol','php','sh','img','ico','asc',
         'm2ts', 'nzb', 'appimage', 'json'
     ],
-    'extentionsToBeConvertedToText' => [
+    'extentionsToBeConvertedToText' => [ // keep these defualts or you risk remote code execution.
         'htm','mht','cgi','php','html','sh','shtml','xml','svg'
     ],
-    'defualtCookieValues' => [
+    'defualtCookieValues' => [// leve it either checked or empty string
         'showDeleteButton' => 'checked',
         'showComment' => 'checked',
         'showFileSize' => 'checked',
         'showMimeType' => '',
-        'showImagePreview' => 'checked'
+        'showImagePreview' => 'checked',
+        'showOriginalName' => 'checked',
+        'showDateUploaded' => 'checked',
     ],
 ];
 

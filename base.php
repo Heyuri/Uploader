@@ -56,30 +56,29 @@
       .txtでも、中身がHTMLだと表示されちゃうので注意
 
 **************************************************************************/
+//
+
+// these files will be symlinked into boards/boardname/ "base.php" "mod.php"
+// "config.php" will be cloned and put into boards/boardname/
 
 /*
  * Heyuri's file uploader.
  */
 
+
 if(file_exists("debug.php")){
     require_once("debug.php");
 }
 
-
-
-$configFile = 'config.php';
-if (!file_exists($configFile)) {
-    die("Error: Configuration file <i>$configFile</i> is missing.");
-}
-$conf = require_once $configFile;
+$conf = require_once 'config.php';
 
 define("IMAGE_EXTENTIONS", ["png", "jpg", "jpeg", "webp", "gif", "tiff", "svg"]);
 define("VIDEO_EXTENTIONS", ["mp4", "webm", "avi", "mov", "mkv"]);
 define("AUDIO_EXTENTIONS", ["mp3", "wav", "flac", "ogg"]);
 date_default_timezone_set($conf['timeZone']);
 
-if(!file_exists($conf['logFile'])){
-    die($conf['logFile']. " is missing. Please create it.");
+if(is_link(__FILE__)){
+    die("File not found.");
 }
 
 /* draw functions */
@@ -89,7 +88,7 @@ function drawHeader(){
     echo '
     <html>
     <head>
-    <META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=Shift_JIS">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="Berry" content="no">
     <meta name="ROBOTS" content="NOINDEX,NOFOLLOW">
     <meta http-equiv="cache-control" content="max-age=0">
@@ -97,28 +96,38 @@ function drawHeader(){
     <meta http-equiv="expires" content="0">
     <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT">
     <meta http-equiv="pragma" content="no-cache">
-    <style>
-        a:link    {color:#0000ee;}
-        a:hover   {color:#5555ee;}
-        a:visited {color:#0000ee;}
-        tr:nth-child(odd) {background-color: #f7efea;}
-        tr:hover {background-color: #f0e0d6;}
-        table {border-collapse: collapse;}
-    </style>
+    <meta name="robots" content="follow,archive">
+    <link rel="stylesheet" type="text/css" href="'.$conf['cssFile'].'" />
     <title>'.$conf['boardTitle'].'</title>
     </head>
     <body bgcolor="#ffffee" text="#800000" link="#0000ee" alink="#5555ee" vlink="#0000ee">
         <table width="100%">
-            <tr><td bgcolor="#eeaa88">
+            <tr><td>
                 <strong><font size="4">'.$conf['boardTitle'].'</font></strong>
             </td></tr>
         </table>
         <tt><br>
-        <br>
         '.$conf['boardSubTitle'].'<br>
         <br>
-        <br>
         </tt>';
+}
+function drawBoardListing(){
+    // symlink black magic
+    $boards = __DIR__ . "/boards";
+    echo "boards: ";
+    foreach (new DirectoryIterator($boards) as $fileInfo) {
+        if ($fileInfo->isDir() && !$fileInfo->isDot()) {
+            $boardName = $fileInfo->getFilename();
+            $configFile = $boards . "/" . $boardName . "/config.php";
+    
+            if (file_exists($configFile)) {
+                $conf = require $configFile;
+                if($conf['boardListed']){
+                    echo '[<a href="../'.$conf['boardTitle'] .'">'.$conf['boardTitle'] .'</a>]';
+                }
+            }
+        }
+    }
 }
 function drawPageingBar($page=1){
     global $conf;
@@ -163,14 +172,19 @@ function drawFileListing($page=1){
     
     $cookie = getSplitCookie();
     // Main header (please adjust the width if you change the display items)
-    echo                                    '<hr><table width="100%" style="font-size:10pt;"><tr>';
-    if($cookie['showDeleteButton']) echo    '<td width="4%"><tt><b>DEL</b></tt></td>';
-    echo                                    '<td width="8%"><tt><b>NAME</b></tt></td>';
-    if($cookie['showImagePreview']) echo    '<td width="10%"><tt><b>PREVIEW</b></tt></td>';
-    if($cookie['showComment'])  echo        '<td width="58%"><tt><b>COMMENT</b></tt></td>';
-    if($cookie['showFileSize']) echo        '<td width="7%"><tt><b>SIZE</b></tt></td>';
-    if($cookie['showMimeType']) echo        '<td><tt><b>MIME</b></tt></td>';
-    echo                                    '</tr>';
+    echo 
+    '<hr><table width="100%" style="font-size:10pt;">
+    <tr>';
+        if($cookie['showDeleteButton']) echo                                    '<td width="2%"><tt><b>DELETE</b></tt></td>';
+        echo                                                                    '<td width="4%"><tt><b>FILE</b></tt></td>';
+        if($cookie['showImagePreview']) echo                                    '<td width="15%"><tt><b>PREVIEW</b></tt></td>';
+        if($cookie['showComment'])  echo                                        '<td width="15%"><tt><b>COMMENT</b></tt></td>';
+        if($cookie['showOriginalName']&& $conf['allowDrawOriginalName']) echo   '<td width="8%"><tt><b>ORIGINAL NAME</b></tt></td>';
+        if($cookie['showDateUploaded'] && $conf['allowDrawDateUploaded']) echo  '<td width="4%"><tt><b>UPLOAD DATE</b></tt></td>';
+        if($cookie['showFileSize']) echo                                        '<td width="4%"><tt><b>SIZE</b></tt></td>';
+        if($cookie['showMimeType']) echo                                        '<td width="4%"><tt><b>MIME</b></tt></td>';
+        echo 
+    '</tr>';
 
     $lineOffset = $currentLine + $count;
     while ($currentLine < $lineOffset && !feof($fileHandle)) {
@@ -188,25 +202,24 @@ function drawFileListing($page=1){
         echo                                    '<td><a href="'. $path .'">'.$fileName.'</a></td>';
         
         if($cookie['showImagePreview'] &&  in_array(getFileExtention($data), IMAGE_EXTENTIONS)){
-            echo                                '<td><small><details><summary>preview</summary><img src="'.$path.'" width="250" height="250" title="'.$fileName.'"></small></td>';
+            echo                                '<td><details><summary>preview</summary><img loading="lazy" src="'.$path.'" width="250" height="250" title="'.$fileName.'"></td>';
         }elseif($cookie['showImagePreview'] &&  in_array(getFileExtention($data), VIDEO_EXTENTIONS)){
-            echo                                '<td><small><details><summary>preview</summary><video controls="controls" loop="loop" src="'.$path.'" width="250" height="250" title="'.$fileName.'"></small></td>';
+            echo                                '<td><details><summary>preview</summary><video loading="lazy" controls="controls" loop="loop" src="'.$path.'" width="250" height="250" title="'.$fileName.'"></td>';
         }elseif($cookie['showImagePreview'] &&  in_array(getFileExtention($data), AUDIO_EXTENTIONS)){
-            echo                                '<td><small><details><summary>preview</summary><audio controls=""><source src="'.$path.'" type="audio/mpeg"></audio></small></td>';
+            echo                                '<td><details><summary>preview</summary><audio loading="lazy" controls=""><source src="'.$path.'" type="audio/mpeg"></audio></td>';
         }elseif($cookie['showImagePreview']){
             echo                                '<td></td>';
         }
 
         if($cookie['showComment']) echo         '<td><font size=2>'. getComent($data) .'</font></td>';
+        if($cookie['showOriginalName'] && $conf['allowDrawDateUploaded'])  echo '<td><font size=2>'. getOriginalFileName($data) .'</font></td>';
+        if($cookie['showDateUploaded'] && $conf['allowDrawDateUploaded']) echo '<td><font size=2>'.  date('Y-m-d H:i:s', getDateUploaded($data)) .'</font></td>';
         if($cookie['showFileSize']) echo        '<td><font size=2>'. bytesToHumanReadable(getSizeInBytes($data)) .'</font></td>';
         if($cookie['showMimeType']) echo        '<td><font size=2 color=888888>'. getMimeType($data) .'</font></td>';
         echo                                    '</tr>';
         $currentLine = $currentLine + 1;
     }
-    
     echo "</table><hr>";
-    echo 'Used '. bytesToHumanReadable(getTotalUseageInBytes()).'/ '. bytesToHumanReadable($conf['maxTotalSize']).'<br>';
-    echo 'Used '.getTotalLogLines().' Files/ '. $conf['maxAmountOfFiles'].' Files<br>';
 }
 function drawFooter(){
     echo '
@@ -247,10 +260,16 @@ function drawUploadForm(){
     // Post form header (Yakuba modification)
     // Check if the overall filesize limit for the board has been exceeded
     global $conf;
-    if(getTotalUseageInBytes() >= $conf['maxTotalSize']){
+    if(getTotalLogLines() >= $conf['maxAmountOfFiles'] && $conf['deleteOldestOnMaxFiles'] == false){
         echo '
-        The total capacity has exceeded the limit and is currently under posting restriction.<br>
-        Please notify the administrator.<br>
+        board has reached file limit.<br>
+        Please notify the administrator to resolve this.<br>
+        <br>';
+    }
+    elseif(getTotalUseageInBytes() >= $conf['maxTotalSize']){
+        echo '
+        board has reached storage limit.<br>
+        Please notify the administrator to resolve this..<br>
         <br>';
     }
     else{
@@ -261,9 +280,11 @@ function drawUploadForm(){
             <input type=file name="upfile"> 
 
             DELETION KEY: <input type=password size="10" name="password" maxlength="10"><br>
-            COMMENT<i><small>(※If no comment is entered, the page will be reloaded / URL will be auto-linked.)</small></i><br>
-            <input type="text" size="45" value="ｷﾀ━━━(ﾟ∀ﾟ)━━━!!" name="comment">
-            <input type=submit value="Up/Reload">
+            COMMENT';if($conf['commentRequired']){
+                echo '<b>(※ THIS IS REQUIRED)</b>';
+            } echo '
+            <input type="text" size="45" value="'.$conf['defaultComment'].'" name="comment">
+            <input type=submit value="submit">
             <input type=reset value="Cancel"><br>
             <small><details> <summary>Allowed extensions</summary>Allowed extensions: '.  implode(", ", $conf['allowedExtensions']) .'</summary></details></small>
         </form>
@@ -292,14 +313,15 @@ function drawSettingsForm(){
             <input type=checkbox name=showComment  value=checked '.$cookie['showComment'].'>show comments<br>
             <input type=checkbox name=showFileSize value=checked '.$cookie['showFileSize'].'>show file size<br>
             <input type=checkbox name=showMimeType value=checked '.$cookie['showMimeType'].'>show MIME types<br>
-            <input type=checkbox name=showImagePreview value=checked '.$cookie['showImagePreview'].'>show Previews types<br>
+            <input type=checkbox name=showImagePreview value=checked '.$cookie['showImagePreview'].'>show previews<br>
+            <input type=checkbox name=showOriginalName value=checked '.$cookie['showOriginalName'].'>show original file names<br>
+            <input type=checkbox name=showDateUploaded value=checked '.$cookie['showDateUploaded'].'>show date uploaded<br>
         </ul>
     <ul><br>
-    <br><br>
-
     <input type=submit value="save">
-    <input type=reset value="clear">
+    <input type=reset value="undo">
     </form>
+    <br><br>
     <a href="'.$_SERVER['PHP_SELF'].'">[Back]</a>';
 }
 function drawActionLinks(){
@@ -309,6 +331,16 @@ function drawActionLinks(){
         <a href="'.$_SERVER['PHP_SELF'].'?goingto=settings">settings</a> | <a href="'.$_SERVER['PHP_SELF'].'">reload</a> | <a href="images.php">image list</a>
     </small>
     <HR size=1>';
+}
+
+function drawUsage(){
+    global $conf;
+    if($conf['allowDrawUsage'] == false){
+        return;
+    }
+    echo '<br>';
+    echo 'Used '. bytesToHumanReadable(getTotalUseageInBytes()).'/ '. bytesToHumanReadable($conf['maxTotalSize']).'<br>';
+    echo 'Used '.getTotalLogLines().' Files/ '. $conf['maxAmountOfFiles'].' Files<br>';
 }
 
 /* data getters */
@@ -509,19 +541,19 @@ function bytesToHumanReadable($size){
         $format = "";
     }
     elseif($size <= 1024){
-        $format = $size."B";
+        $format = $size." B";
     }
     elseif($size <= (1024*1024)){
-        $format = sprintf ("%dKB",($size/1024));
+        $format = sprintf ("%d KB",($size/1024));
     }
     elseif($size <= (1000*1024*1024)){
-        $format = sprintf ("%.2fMB",($size/(1024*1024)));
+        $format = sprintf ("%.2f MB",($size/(1024*1024)));
     }
     elseif($size <= (1000*1024*1024*1024)){
-        $format = sprintf ("%.2fGB",($size/(1024*1024*1024)));
+        $format = sprintf ("%.2f GB",($size/(1024*1024*1024)));
     }
     elseif($size <= (1000*1024*1024*1024*1024)  || $size >= (1000*1024*1024*1024*1024)){
-        $format = sprintf ("%.2fTB",($size/(1024*1024*1024*1024)));
+        $format = sprintf ("%.2f TB",($size/(1024*1024*1024*1024)));
     }
     else{ 
         $format = $size."B";
@@ -552,6 +584,10 @@ function isGlobalBanned($host){
         }
     }
     return false;
+}
+function isDuplicateFile($md5Hash){
+    $hashes = file("md5.block");
+    return in_array($md5Hash . "\n", $hashes);
 }
 
 function deleteDataFromLogByID($id){
@@ -609,7 +645,9 @@ function loadCookieSettings(){
                                         ,$_POST['showComment'] ?? ""
                                         ,$_POST['showFileSize'] ?? ""
                                         ,$_POST['showMimeType'] ?? ""
-                                        ,$_POST['showImagePreview'] ?? ""));
+                                        ,$_POST['showImagePreview'] ?? ""
+                                        ,$_POST['showOriginalName'] ?? ""
+                                        ,$_POST['showDateUploaded'] ?? ""));
 
     }
 
@@ -618,7 +656,7 @@ function loadCookieSettings(){
 }
 function getSplitCookie(){
     global $conf;
-    return array_combine(['showDeleteButton','showComment','showFileSize','showMimeType','showImagePreview'], explode("<>",$_COOKIE['settings']));
+    return array_combine(['showDeleteButton','showComment','showFileSize','showMimeType','showImagePreview','showOriginalName','showDateUploaded'], explode("<>",$_COOKIE['settings']));
 }
 function isBoardBeingFlooded() {
     global $conf;
@@ -635,19 +673,37 @@ function isBoardBeingFlooded() {
         return false;
 	}
 }
+
+function deleteBoard($password){
+    global $conf;
+    if($password == $conf['deletionPassword']){
+        rmdir(__DIR__ . "/boards/". $conf['boardTitle']);
+    }
+}
+function isAuth($password){
+    global $conf;
+    if($password == $conf['adminPassword']){
+        return true;
+    }
+    return false;
+}
+
 /* main funcitons */
 
 function userUploadedFile(){
     global $conf;
 
     if(IsBanned($_SERVER['REMOTE_ADDR'])){
-	drawErrorPageAndExit("You are banned from uploading!");
+	    drawErrorPageAndExit("You are banned from uploading!");
     }
     if(isBoardBeingFlooded()){
         drawErrorPageAndExit("OUCH!!", "I need to wait before acepting another file..");
     }
     if($_FILES["upfile"]['size'] <= 0){
-        drawErrorPageAndExit('Please select a file.');
+        if($_FILES['upfile']['error']){
+            drawErrorPageAndExit('the file you uploaded is to big<small>php error! no file size.<small>');
+        }
+        drawErrorPageAndExit('file has no size...');
     }
     if($_FILES["upfile"]['size'] > $conf['maxUploadSize']){
         drawErrorPageAndExit('File is too big.');
@@ -659,6 +715,12 @@ function userUploadedFile(){
         drawErrorPageAndExit('Comment is too big.');
     }
     
+    $fileHash = hash_file('md5', $_FILES['upfile']['tmp_name']);
+
+    if(isDuplicateFile($fileHash)){
+        drawErrorPageAndExit('this file has been uploaded already');
+    }
+
     $fullFileName = $_FILES["upfile"]["name"];
     $fileInfo = pathinfo($fullFileName);
 
@@ -709,12 +771,14 @@ function userUploadedFile(){
 
     // if over max. delete last file
     if(getTotalLogLines() >= $conf['maxAmountOfFiles']){
-        if($conf['deleteAfterMax']){
+        if($conf['deleteOldestOnMaxFiles']){
             removeLastData(); //remove file if deleteAfterMax is true
+            drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');
         }
 	    drawErrorPageAndExit("File limit reached, contact administrator.");
     }
     writeDataToLogs($data);
+    file_put_contents("md5.block", $fileHash . "\n", FILE_APPEND);
     drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');
 }
 function userDeletePost(){
@@ -750,10 +814,9 @@ if($conf['logUserIP'] == false){
 }
 
 // check if user is hard banned (cannot lurk)
-if(isGlobalBanned($_SERVER['REMOTE_ADDR'])){
-       	drawErrorPageAndExit("You have been banned by the administrator. ヽ(ー_ー )ノ");
+if(isGlobalBanned($_SERVER['REMOTE_ADDR'] && $_SERVER['REMOTE_ADDR'] =! "1337")){
+    drawErrorPageAndExit("You have been banned by the administrator. ヽ(ー_ー )ノ");
 }
-
 
 loadCookieSettings();
 
@@ -789,17 +852,27 @@ if(isset($_GET['goingto'])){
 if(isset($_GET['page'])){
     $page = $_GET['page'];
     drawHeader();
+    drawBoardListing();
     drawUploadForm();
     drawPageingBar($page);
     drawActionLinks();
     drawFileListing($page);
+    if($conf['pageBarOnBottom']){
+        drawPageingBar($page);
+    }
+    drawUsage();
     drawFooter();
     die();
 }
 
 drawHeader();
+drawBoardListing();
 drawUploadForm();
 drawPageingBar(1);
 drawActionLinks();
 drawFileListing(1);
+if($conf['pageBarOnBottom']){
+    drawPageingBar(1);
+}
+drawUsage();
 drawFooter();

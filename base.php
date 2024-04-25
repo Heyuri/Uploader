@@ -77,7 +77,7 @@ define("VIDEO_EXTENTIONS", ["mp4", "webm", "avi", "mov", "mkv"]);
 define("AUDIO_EXTENTIONS", ["mp3", "wav", "flac", "ogg"]);
 date_default_timezone_set($conf['timeZone']);
 
-if(!is_link(__FILE__)){
+if(!is_link($_SERVER['SCRIPT_FILENAME'])){
     die("File not found.");
 }
 

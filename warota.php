@@ -366,6 +366,16 @@ function isDataEmpty($data) {
     return false;
 }
 /* helper libs */
+
+//generate thumbnail
+function thumbnailImage($imagePath, $thumbPath, $w, $h) {
+    $img = new Imagick(realpath($imagePath));
+    $img->setbackgroundcolor('rgb(64, 64, 64)');
+    $img->thumbnailImage($w, $h, true);
+    
+    $img->writeImage($thumbPath);
+}
+    
 function writeDataToLogs($data){
     global $conf;
 
@@ -642,7 +652,7 @@ function userUploadedFile(){
     if(strlen($_POST['comment']) > $conf['maxCommentSize']){
         drawErrorPageAndExit('Comment is too big.');
     }
-    
+
     $fullFileName = $_FILES["upfile"]["name"];
     $fileInfo = pathinfo($fullFileName);
 
@@ -693,12 +703,19 @@ function userUploadedFile(){
 
     // if over max. delete last file
     if(getTotalLogLines() >= $conf['maxAmountOfFiles']){
-        if($conf['deleteAfterMax']){
-            removeLastData(); //remove file if deleteAfterMax is true
+        if($conf['deleteOldestOnMaxFiles']){
+            removeLastData(); //remove file if deleteOldestOnMaxFiles is true
         }
 	    drawErrorPageAndExit("File limit reached, contact administrator.");
     }
     writeDataToLogs($data);
+	
+    //create thumbnail if file type is image
+    if($fileExtension == 'jpg' || $fileExtension == 'jpeg' || $fileExtension == 'png' || $fileExtension == 'gif') { 
+	$imagePath = $conf['uploadDir'].$newID.'.'.$fileExtension;
+    	thumbnailImage($imagePath, $conf['thumbDir'].$newID.'_thumb.'.$fileExtension, 250, 300); 
+    }
+    
     drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');
 }
 function userDeletePost(){

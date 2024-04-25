@@ -16,17 +16,19 @@ return $conf = [
     'home' => "https://cgi.heyuri.net/goatse/",
     'adminPassword' => "lolpenis",
     'logUserIP' => false,
+    'mainScript' => 'warota.php',
 
     'timeZone' => 'UTC',        // timezone
     'logFile' => "souko.log",   // name of flat file
     'uploadDir' => "src/",      // upload location (slash is required).
+    'thumbDir' => "thmb/",	// thumbnail directory
     'prefix' => "",             // prefix to add in front of your file name. Don't change after setting
     'coolDownTime' => 5,        // time in seconds untill can be uploaded to again. (set to -1 for no cool down)
 
 
     'maxAmountOfFiles' => 20,               // max files allowed on server
     'maxTotalSize' => 200*1024*1024*1024,   // total sized allowed in bytes
-    'filesPerListing' => 7,                 // how many files listed per page
+    'filesPerListing' => 5,                 // how many files listed per page
     'maxUploadSize' => 20*1024*1024,        // max upload size in bytes
     'commentRequired' => true,              // comment is requires or not
     'maxCommentSize' => 128,                // max comment length

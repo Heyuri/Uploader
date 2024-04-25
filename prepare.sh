@@ -9,3 +9,7 @@ if [ ! -e src ]
 then
 	mkdir src
 fi
+if [ ! -e thmb ]
+then
+	mkdir thmb
+fi

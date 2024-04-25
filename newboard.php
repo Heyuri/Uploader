@@ -1,5 +1,8 @@
 <?php
 function newBoard($name, $subName, $adminPassword, $delitionPassword, $anonimize, $commentRequired, $autoDeleteOldest, $boardListed, $defaultComment=""){
+    if (!is_dir(__DIR__ . '/boards/')) {
+        mkdir(__DIR__ . '/boards/', 0755);
+    }
     if (file_exists(__DIR__ . "/boards/".$name)){
         drawErrorPageAndExit("this board already exist");
     }

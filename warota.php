@@ -687,7 +687,7 @@ function userUploadedFile(){
     chmod($conf['uploadDir'] . $newname, 0644);
 
     // remove line breaks from the comment
-    $comment = str_replace(array("\0","\t","\r","\n","\r\n"), "", $_POST['comment']);
+    $comment = htmlspecialchars(str_replace(array("\0","\t","\r","\n","\r\n"), "", $_POST['comment']));
     
     // check if the extention has been converted to something safe
     if($originalExtension != $fileExtension){

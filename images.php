@@ -1,5 +1,9 @@
 <?php
 
+/* WIP, buggy. But it werks as a gallery. */
+
+
+
 $conf = require_once 'config.php';
 
 /* draw functions */

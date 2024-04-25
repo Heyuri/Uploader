@@ -192,7 +192,7 @@ function drawFileListing($page=1){
     }
     
     echo "</table><hr>";
-    echo 'Used '. bytesToHumanReadable(getTotalUseageInBytes()).'/ '. bytesToHumanReadable($conf['maxTotalSize']).'<br>';
+    echo 'Used '. bytesToHumanReadable(getTotalUsageInBytes()).'/ '. bytesToHumanReadable($conf['maxTotalSize']).'<br>';
     echo 'Used '.getTotalLogLines().' Files/ '. $conf['maxAmountOfFiles'].' Files<br>';
 }
 function drawFooter(){
@@ -234,7 +234,7 @@ function drawUploadForm(){
     // Post form header (Yakuba modification)
     // Check if the overall filesize limit for the board has been exceeded
     global $conf;
-    if(getTotalUseageInBytes() >= $conf['maxTotalSize']){
+    if(getTotalUsageInBytes() >= $conf['maxTotalSize']){
         echo '
         The total capacity has exceeded the limit and is currently under posting restriction.<br>
         Please notify the administrator.<br>
@@ -416,7 +416,7 @@ function writeDataToLogs($data){
 
     return true;
 }
-function getTotalUseageInBytes(){
+function getTotalUsageInBytes(){
     // Total file size calculation
     global $conf;
     $logFile = $conf['logFile'];

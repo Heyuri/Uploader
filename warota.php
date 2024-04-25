@@ -369,11 +369,16 @@ function isDataEmpty($data) {
 
 //generate thumbnail
 function thumbnailImage($imagePath, $thumbPath, $w, $h) {
-    $img = new Imagick(realpath($imagePath));
-    $img->setbackgroundcolor('rgb(64, 64, 64)');
-    $img->thumbnailImage($w, $h, true);
+	global $conf;
+    try {
+    	$img = new Imagick(realpath($imagePath));
+    	$img->setbackgroundcolor('rgb(64, 64, 64)');
+    	$img->thumbnailImage($w, $h, true);
     
-    $img->writeImage($thumbPath);
+	$img->writeImage($thumbPath);
+    } catch (Exception $e) {
+    	drawErrorPageAndExit("There was an error with thumbnailImage() in ".$conf['mainScript'].". Please contact the administrator.", $e->getMessage());
+    }
 }
     
 function writeDataToLogs($data){
@@ -712,8 +717,8 @@ function userUploadedFile(){
 	
     //create thumbnail if file type is image
     if($fileExtension == 'jpg' || $fileExtension == 'jpeg' || $fileExtension == 'png' || $fileExtension == 'gif') { 
-	$imagePath = $conf['uploadDir'].$newID.'.'.$fileExtension;
-    	thumbnailImage($imagePath, $conf['thumbDir'].$newID.'_thumb.'.$fileExtension, 250, 300); 
+	$imagePath = $conf['uploadDir'].$conf['prefix'].$newID.'.'.$fileExtension;
+    	thumbnailImage($imagePath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$fileExtension, 250, 300); 
     }
     
     drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');

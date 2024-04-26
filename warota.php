@@ -179,10 +179,15 @@ function drawFileListing($page=1){
         $data = createDataFromString($line);
 
         $fileName = $conf['prefix'] . getID($data) .'.'. getFileExtention($data);
-        $path = $conf['uploadDir'] . $fileName;
+	$thumbName = $conf['prefix'] . getID($data) .'_thumb.'. getFileExtention($data);
+	
+	$path = $conf['uploadDir'] . $fileName;
+	$thumbPath = $conf['thumbDir'].$thumbName;
+
+	if(!file_exists($thumbPath)) $thumbPath = $path;
 
         if($cookie['showDeleteButton']) echo    '<td><small><a href='. $_SERVER['PHP_SELF'] .'?deleteFileID='.getID($data).'>■</a></small></td>';
-        echo                                    '<td><a href="'. $path .'">'.$fileName.'</a></td>';
+        echo                                    '<td><a href="'. $path .'"><div><img src="'.$thumbPath.'" height=100></div>'.$fileName.'</a> </td>';
         if($cookie['showComment']) echo         '<td><font size=2>'. getComent($data) .'</font></td>';
         if($cookie['showFileSize']) echo        '<td><font size=2>'. bytesToHumanReadable(getSizeInBytes($data)) .'</font></td>';
         if($cookie['showMimeType']) echo        '<td><font size=2 color=888888>'. getMimeType($data) .'</font></td>';
@@ -456,7 +461,7 @@ function getTotalLogLines(){
 
     return $lineCount;
 }
-function delteFileByData($data){
+function deleteFileByData($data){
     global $conf;
     $path = $conf['uploadDir'] . $conf['prefix'] . getID($data) . '.' . getFileExtention($data);
     unlink($path);
@@ -591,7 +596,7 @@ function deleteDataFromLogByID($id){
     }
     fclose($openLogFile);
     
-    delteFileByData($foundData);
+    deleteFileByData($foundData);
 
     return true;
 }
@@ -687,7 +692,7 @@ function userUploadedFile(){
     chmod($conf['uploadDir'] . $newname, 0644);
 
     // remove line breaks from the comment
-    $comment = str_replace(array("\0","\t","\r","\n","\r\n"), "", $_POST['comment']);
+    $comment = htmlspecialchars(str_replace(array("\0","\t","\r","\n","\r\n"), "", $_POST['comment']));
     
     // check if the extention has been converted to something safe
     if($originalExtension != $fileExtension){
@@ -715,10 +720,10 @@ function userUploadedFile(){
     }
     writeDataToLogs($data);
 	
-    //create thumbnail if file type is image
-    if($fileExtension == 'jpg' || $fileExtension == 'jpeg' || $fileExtension == 'png' || $fileExtension == 'gif') { 
+    //create thumbnail if file type is image and size is above 4mb
+    if(($fileExtension == 'jpg' || $fileExtension == 'jpeg' || $fileExtension == 'png' || $fileExtension == 'gif') && $_FILES["upfile"]['size'] >= 4*1024*1024) { 
 	$imagePath = $conf['uploadDir'].$conf['prefix'].$newID.'.'.$fileExtension;
-    	thumbnailImage($imagePath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$fileExtension, 250, 300); 
+    	thumbnailImage($imagePath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$fileExtension, 100, 100); 
     }
     
     drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');
@@ -732,16 +737,15 @@ function userDeletePost(){
     if(is_null($postData)){
         drawErrorPageAndExit('Deletion Error','The file cannot be found.');
     }
-    if($password == $conf['adminPassword']){
-        deleteDataFromLogByID($fileID);
+    elseif($password == getPassword($postData) || $password == $conf['adminPassword']){
+	deleteDataFromLogByID($fileID);
+	$thumbPath = $conf['thumbDir'] . $conf['prefix'] . getID($postData) . '_thumb.' . getFileExtention($postData);
+	unlink($thumbPath);
+
         drawMessageAndRedirectHome('file has been deleted.','If this page dose not change, click "Back".');
     }
     elseif(getPassword($postData) == ''){
-        drawErrorPageAndExit('Deletion Error','there was not a password when this post was created. contact a admin from the same ip you posted with');
-    }
-    elseif($password == getPassword($postData)){
-        deleteDataFromLogByID($fileID);
-        drawMessageAndRedirectHome('file has been deleted.','If this page dose not change, click "Back".');
+        drawErrorPageAndExit('Deletion Error','There was not a password when this post was created. Contact the administrator to request deletion');
     }else{
         drawErrorPageAndExit('Deletion Error','The password is incorrect.');
     }

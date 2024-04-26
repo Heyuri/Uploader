@@ -28,10 +28,8 @@ function drawHeader(){
 	table {border-collapse: collapse; max-width: 100%; }
 	.entry {
 		position: absolute;
-		min-width: 100px;
-		min-height: 200px;
 		overflow-y: hidden;
-
+		max-height: 200px;
 		vertical-align: top;
 		padding: 0.5em 0;
 	}
@@ -155,10 +153,13 @@ function drawCatalogListing($page=1){
 	$data = createDataFromString($line);
 	$fileName = $conf['prefix'] . getID($data) .'.'. getFileExtention($data);
         $thumbName = $conf['prefix'] . getID($data) .'_thumb.'. getFileExtention($data);
-	$path = $conf['thumbDir'] . $thumbName;
 	
-	echo  '<div class="entry"><td style="display: inline-block; margin: 10px;"><a href="'.$conf['uploadDir'].$fileName.'"><img src="'.$path.'" width=200px; width=200px;> </a></td></div>';
+	$path = $conf['uploadDir'] . $fileName;
+	$thumbPath = $conf['thumbDir'] . $thumbName;
 
+	if(!file_exists($thumbPath)) $thumbPath = $path;
+
+	echo  '<div class="entry"><td style="display: inline-block; margin: 10px;"><a href="'.$conf['uploadDir'].$fileName.'"><img src="'.$path.'" width=200px> </a></td></div>';
 
     }
     

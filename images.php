@@ -29,13 +29,15 @@ function drawHeader(){
 	.entry {
 		position: absolute;
 		overflow-y: hidden;
-		max-height: 200px;
 		vertical-align: top;
 		padding: 0.5em 0;
 	}
+	.entryImage {
+		max-height: 200px;
+		max-width: 300px;
+	}
 	.catalog {
-		
-		max-width: 100%;
+	#temporary empty
 	}
     </style>
     <title>'.$conf['boardTitle'].'</title>
@@ -69,16 +71,17 @@ function createDataFromString($str){
     return explode("<>",$str);
 }
 
+function getID($postData){
+    return $postData[0];    
+}
 
 function getFileExtention($postData){
     return $postData[1];
 }
 
-
-function getID($postData){
-    return $postData[0];    
+function getComment($postData){
+    return $postData[2];
 }
-
 
 function getTotalLogLines(){
     global $conf;
@@ -159,8 +162,9 @@ function drawCatalogListing($page=1){
 
 	if(!file_exists($thumbPath)) $thumbPath = $path;
 
-	echo  '<div class="entry"><td style="display: inline-block; margin: 10px;"><a href="'.$conf['uploadDir'].$fileName.'"><img src="'.$path.'" width=200px> </a></td></div>';
+	echo  '<div class="entry"><td style="display: inline-block; margin: 10px;"><a href="'.$conf['uploadDir'].$fileName.'"><img class="entryImage" src="'.$path.'"> </a><br><center>'.getComment($data).'</center></div></td>';
 
+	$currentLine = $currentLine + 1;
     }
     
 	echo '</tr></table>';

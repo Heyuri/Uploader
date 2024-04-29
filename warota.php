@@ -102,6 +102,12 @@ function drawHeader(){
         tr:nth-child(odd) {background-color: #f7efea;}
         tr:hover {background-color: #f0e0d6;}
         table {border-collapse: collapse;}
+	.imagePreview {
+	 height: 100px;
+	 max-width: 200px;
+	 padding-right: 5px;
+	 padding-top: 2px;
+	}    	
     </style>
     <title>'.$conf['boardTitle'].'</title>
     </head>
@@ -148,7 +154,7 @@ function drawFileListing($page=1){
     }else{
         $page = $page - 1;
     }
-
+   
     $lineOffset = $count * $page;
     $currentLine = 0;
 
@@ -187,10 +193,11 @@ function drawFileListing($page=1){
 	if(!file_exists($thumbPath)) $thumbPath = $path;
 
         if($cookie['showDeleteButton']) echo    '<td><small><a href='. $_SERVER['PHP_SELF'] .'?deleteFileID='.getID($data).'>■</a></small></td>';
-        echo                                    '<td><a href="'. $path .'"><div><img src="'.$thumbPath.'" height=100></div>'.$fileName.'</a> </td>';
-        if($cookie['showComment']) echo         '<td><font size=2>'. getComent($data) .'</font></td>';
-        if($cookie['showFileSize']) echo        '<td><font size=2>'. bytesToHumanReadable(getSizeInBytes($data)) .'</font></td>';
-        if($cookie['showMimeType']) echo        '<td><font size=2 color=888888>'. getMimeType($data) .'</font></td>';
+	
+	if($cookie['showPreviewImage']) echo    '<td><a href="'. $path .'"><img class="imagePreview" src="'.$thumbPath.'" ><br>'.$fileName.'</a> </td>'; else echo '<td> <a href="'. $path .'">'.$fileName.'</td>';
+	if($cookie['showComment'])	echo	'<td><font size=2>'. getComment($data) .'</font></td>';
+	if($cookie['showFileSize'])	echo	'<td><font size=2>'. bytesToHumanReadable(getSizeInBytes($data)) .'</font></td>';
+        if($cookie['showMimeType'])	echo	'<td><font size=2 color=888888>'. getMimeType($data) .'</font></td>';
         echo                                    '</tr>';
 
         $currentLine = $currentLine + 1;
@@ -282,7 +289,8 @@ function drawSettingsForm(){
         <ul>
             <input type=checkbox name=showDeleteButton value=checked '.$cookie['showDeleteButton'].'>show delete button<br>
             <input type=checkbox name=showComment  value=checked '.$cookie['showComment'].'>show comments<br>
-            <input type=checkbox name=showFileSize value=checked '.$cookie['showFileSize'].'>show file size<br>
+	    <input type=checkbox name=showPreviewImage value=checked '.$cookie['showPreviewImage'].'>show preview<br>
+	    <input type=checkbox name=showFileSize value=checked '.$cookie['showFileSize'].'>show file size<br>
             <input type=checkbox name=showMimeType value=checked '.$cookie['showMimeType'].'>show MIME types<br>
         </ul>
     <ul><br>
@@ -337,7 +345,7 @@ function getID($postData){
 function getFileExtention($postData){
     return $postData[1];
 }
-function getComent($postData){
+function getComment($postData){
     return $postData[2];
 }
 function getHost($postData){
@@ -613,7 +621,8 @@ function loadCookieSettings(){
         // the order of this array must be the same order as $conf['defualtCookieValues']
         $cookie = implode("<>", array(   $_POST['showDeleteButton'] ?? ""
                                         ,$_POST['showComment'] ?? ""
-                                        ,$_POST['showFileSize'] ?? ""
+					,$_POST['showPreviewImage'] ?? ""
+					,$_POST['showFileSize'] ?? ""
                                         ,$_POST['showMimeType'] ?? ""));
     }
 
@@ -622,7 +631,7 @@ function loadCookieSettings(){
 }
 function getSplitCookie(){
     global $conf;
-    return array_combine(['showDeleteButton','showComment','showFileSize','showMimeType'], explode("<>",$_COOKIE['settings']));
+    return array_combine(['showDeleteButton', 'showComment', 'showPreviewImage', 'showFileSize', 'showMimeType'], explode("<>",$_COOKIE['settings']));
 }
 function isBoardBeingFlooded() {
     global $conf;
@@ -693,7 +702,7 @@ function userUploadedFile(){
 
     // remove line breaks from the comment
     $comment = htmlspecialchars(str_replace(array("\0","\t","\r","\n","\r\n"), "", $_POST['comment']));
-    
+   
     // check if the extention has been converted to something safe
     if($originalExtension != $fileExtension){
         //show the converstion

@@ -1,10 +1,19 @@
-For installation you can follow this:
+this repo uses flatfiles for storage of data. this may include users IP.
+to protect on this i have the extention for anything with sensitive text with .block
 
-1- clone repo into web directory<br />
-2- cd into Uploader<br />
-3- run `chmod +x prepare.sh`<br />
-4- run the `prepare.sh` script<br />
-5- `chown -R webuser:webuser /path/to/Uploader`<br />
-6- DONE!!
+this should be some where in ur site configs if you are using nginx
+```
+    location ~* \.block$ {
+        deny all;
+    }
+```
 
-After that it should work fine. You may want to change the $logfile's name from default "souko.log" into something else or block access to it, so it wouldn't be directly accessible from internet.
+##For installation you can follow this:
+
+1- clone repo into web directory<br/>
+2- set everything to use web user `chown -R webuser:webuser /path/to/Uploader`
+3- cd into Uploader<br/>
+4- edit your superAdmin password in the basse config
+5- change some limits in php.ini acording to how much upload you want
+
+After that it should work fine.

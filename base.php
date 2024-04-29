@@ -332,7 +332,6 @@ function drawActionLinks(){
     </small>
     <HR size=1>';
 }
-
 function drawUsage(){
     global $conf;
     if($conf['allowDrawUsage'] == false){
@@ -575,7 +574,7 @@ function IsBanned($host){
 }
 function isGlobalBanned($host){
     global $conf;
-    if($host == "1337"){
+    if($host == ""){
         return false;
     }
     foreach($conf['hardBanList'] as $line) {
@@ -765,9 +764,9 @@ function userUploadedFile(){
         $password = '';
     }
 
-    $data = createData( $newID, $fileExtension, $comment, $_SERVER['REMOTE_ADDR'],
+    $data = createData( $newID, htmlspecialchars($fileExtension), htmlspecialchars($comment), $_SERVER['REMOTE_ADDR'],
                         time(), $_FILES['upfile']['size'], $realMimeType, $password,
-                        $fileName);
+                        htmlspecialchars($fileName));
 
     // if over max. delete last file
     if(getTotalLogLines() >= $conf['maxAmountOfFiles']){
@@ -810,11 +809,11 @@ function userDeletePost(){
  */
 
 if($conf['logUserIP'] == false){
-    $_SERVER['REMOTE_ADDR'] = "1337";
+    $_SERVER['REMOTE_ADDR'] = "";
 }
 
 // check if user is hard banned (cannot lurk)
-if(isGlobalBanned($_SERVER['REMOTE_ADDR'] && $_SERVER['REMOTE_ADDR'] =! "1337")){
+if(isGlobalBanned($_SERVER['REMOTE_ADDR'])){
     drawErrorPageAndExit("You have been banned by the administrator. ヽ(ー_ー )ノ");
 }
 

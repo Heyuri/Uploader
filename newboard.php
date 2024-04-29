@@ -67,7 +67,7 @@ function drawFooter(){
     echo '
     <br>
     <h5 align="right">
-        <a href="https://github.com/Heyuri/Uploader/">Heyuri</a> + <a href="http://zurubon.strange-x.com/uploader/">ずるぽんあぷろだ</a> + <a href="http://php.s3.to/">ﾚｯﾂ PHP!</a> + <a href="http://t-jun.kemoren.com/">隠れ里の村役場</a><BR>
+        <a href="https://github.com/Heyuri/Uploader/">Heyuri x nashikouen</a> + <a href="http://zurubon.strange-x.com/uploader/">ずるぽんあぷろだ</a> + <a href="http://php.s3.to/">ﾚｯﾂ PHP!</a> + <a href="http://t-jun.kemoren.com/">隠れ里の村役場</a><BR>
     </h5>
     </body>
     </html>';
@@ -166,45 +166,60 @@ if (isset($_POST["action"]) && $_POST["action"] == "newBoard") {
 }
 
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Configuration Form</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=0.47">
+    <title>creation Form</title>
 </head>
-<body>
+<body alink="#ff0000" link="#ffff00" text="#00ff00" vlink="#0000ff" background="static/bg.png">
+    <center>
     <h1>new Board</h1>
     <form action="admin.php" method="post">
         <input type="hidden" name="action" value="newBoard">
-        <label for="name">board name(this will be used of the url):</label>
-        <input type="text" id="name" name="name" required maxlength="16"><br><br>
-
-        <label for="subName">board discripton:</label>
-        <input type="text" id="subName" name="subName" required maxlength="50"><br><br>
-
-        <label for="adminPassword">board's admin password:</label>
-        <input type="password" id="adminPassword" name="adminPassword" required maxlength="50"><br><br>
-
-        <label for="delitionPassword">board deletion Password:</label>
-        <input type="password" id="delitionPassword" name="delitionPassword" required maxlength="50"><br><br>
-
-        <label for="anonimize">make board fully anonyuse</label>
-        <input type="checkbox" id="anonimize" name="anonimize" ><br><br>
-
-        <label for="commentRequired">required a comment to post:</label>
-        <input type="checkbox" id="commentRequired" name="commentRequired" ><br><br>
-
-        <label for="boardListed">is board listed:</label>
-        <input type="checkbox" id="boardListed" name="boardListed" ><br><br>
-
-        <label for="autoDeleteOldest">auto delete oldest post:</label>
-        <input type="checkbox" id="autoDeleteOldest" name="autoDeleteOldest" ><br><br>
-
-        <label for="defaultComment">Default Comment:</label>
-        <input type="text" id="defaultComment" name="defaultComment" maxlength="128"><br><br>
-
-        <input type="submit" value="Submit">
+        <table border="1"><tbody>
+        <tr>
+            <td><label for="name">board name(this will be used of the url):</label></td>
+            <td><input type="text" id="name" name="name" required maxlength="16"></td>
+        </tr>
+        <tr>
+            <td><label for="subName">board discripton:</label></td>
+            <td><input type="text" id="subName" name="subName" required maxlength="50"></td>
+        </tr>
+        <tr>
+            <td><label for="adminPassword">board's admin password:</label></td>
+            <td><input type="password" id="adminPassword" name="adminPassword" required maxlength="50"></td>
+        </tr>
+        <tr>
+            <td><label for="delitionPassword">board deletion Password:</label></td>
+            <td><input type="password" id="delitionPassword" name="delitionPassword" required maxlength="50"></td>
+        </tr>
+        <tr>
+            <td><label for="defaultComment">Default Comment:</label></td>
+            <td><input type="text" id="defaultComment" name="defaultComment" maxlength="128"></td>
+        </tr>
+        <tr>
+            <td><label for="anonimize">make board fully anonyuse</label></td>
+            <td><input type="checkbox" id="anonimize" name="anonimize"></td>
+        </tr>
+        <tr>
+            <td><label for="commentRequired">required a comment to post:</label></td>
+            <td><input type="checkbox" id="commentRequired" name="commentRequired"></td>
+        </tr>
+        <tr>
+            <td><label for="boardListed">is board listed:</label></td>
+            <td><input type="checkbox" id="boardListed" name="boardListed"></td>
+        </tr>
+        <tr>
+            <td><label for="autoDeleteOldest">auto delete oldest post:</label></td>
+            <td><input type="checkbox" id="autoDeleteOldest" name="autoDeleteOldest"></td>
+            <td><input type="submit" value="Submit"></td>   
+        </tr>
+        </tbody>
+        </table>
     </form>
+    </center>
 </body>
 </html>
-

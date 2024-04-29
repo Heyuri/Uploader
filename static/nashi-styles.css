@@ -1,0 +1,15 @@
+a:link    {color:#0000ee;}
+a:hover   {color:#5555ee;}
+a:visited {color:#0000ee;}
+tr:nth-child(even) {background-color: #fffa96;}
+tr:nth-child(odd) {background-color: #fff869;}
+tr:first-child {background-color: #d09ac6;}
+tr:hover {background-color: #91b74c;}
+table {
+    border-collapse: collapse;
+    border-bottom: 1px solid #800043;
+    border-top: 2px solid white;
+    border-right: 2px solid #800043;
+    border-left: 1px solid white;
+}
+body{background: #dbff99;}

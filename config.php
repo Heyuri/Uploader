@@ -1,10 +1,4 @@
 <?php
-/* MAIN CONFIGURATION FILE FOR WAROTA.PHP*/
-
-//Paths
-define('ROOTPATH', './'); // main path for project
-
-
 /*
  *  these are the defualt configs for each new board. please set what you want user boards to have here.
  *  please note some things users can over write. 

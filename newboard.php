@@ -1,23 +1,24 @@
 <?php
-function newBoard($name, $subName, $adminPassword, $delitionPassword, $anonimize, $commentRequired, $autoDeleteOldest, $boardListed, $defaultComment=""){
+function newBoard($url, $name, $subName, $adminPassword, $delitionPassword, $anonimize, $commentRequired, $autoDeleteOldest, $boardListed, $defaultComment=""){
     if (!is_dir(__DIR__ . '/boards/')) {
         mkdir(__DIR__ . '/boards/', 0755);
     }
-    if (file_exists(__DIR__ . "/boards/".$name)){
+    if (file_exists(__DIR__ . "/boards/".$url)){
         drawErrorPageAndExit("this board already exist");
     }
-    mkdir(__DIR__ . '/boards/'.$name);
-    mkdir(__DIR__ . '/boards/'.$name.'/src');
-    symlink(__DIR__ . "/base.php", __DIR__ . '/boards/'.$name.'/index.php');
-    //symlink(__DIR__ . "/mod.php", __DIR__ . '/boards/'.$name.'/mod.php');
-    //copy(__DIR__ . "/debug.php", __DIR__ . '/boards/'.$name.'/debug.php');
+    mkdir(__DIR__ . '/boards/'.$url);
+    mkdir(__DIR__ . '/boards/'.$url.'/src');
+    symlink(__DIR__ . "/base.php", __DIR__ . '/boards/'.$url.'/index.php');
+    //symlink(__DIR__ . "/mod.php", __DIR__ . '/boards/'.$url.'/mod.php');
+    //copy(__DIR__ . "/debug.php", __DIR__ . '/boards/'.$url.'/debug.php');
 
-    touch(__DIR__ . '/boards/'.$name.'/md5.block');
-    touch(__DIR__ . '/boards/'.$name.'/userPosts.block');
+    touch(__DIR__ . '/boards/'.$url.'/md5.block');
+    touch(__DIR__ . '/boards/'.$url.'/userPosts.block');
 
     $conf = require_once "config.php";
     // these configs cant be changes after the board is created
     // somconfigs only admins can change
+    $conf['boardURL'] = $url;
     $conf['boardTitle'] = $name;
     $conf['boardSubTitle'] = $subName;
     $conf['adminPassword'] = $adminPassword;
@@ -44,10 +45,10 @@ function newBoard($name, $subName, $adminPassword, $delitionPassword, $anonimize
 
     $newConf = '<?php return ' . var_export($conf, true) . ';';
 
-    if (file_put_contents(__DIR__ . '/boards/'.$name.'/config.php', $newConf) === false) {
+    if (file_put_contents(__DIR__ . '/boards/'.$url.'/config.php', $newConf) === false) {
         drawErrorPageAndExit("Failed to write configuration. contact the admin");
     }
-    header('Location: boards/'.$name.'/index.php');
+    header('Location: boards/'.$url.'/index.php');
     exit;
 }
 function drawErrorPageAndExit($mes1,$mes2=""){
@@ -94,43 +95,44 @@ function drawHeader(){
 }
 function userSubmitedBoard(){
     // Check all required fields are present
-    $requiredFields = ['name', 'subName', 'adminPassword', 'delitionPassword'];
+    $requiredFields = ['url', 'name', 'subName', 'adminPassword', 'delitionPassword'];
     foreach ($requiredFields as $field) {
         if (empty($_POST[$field])) {
             die("Error: All fields except Default Comment are required.");
         }
     }
-    if (!preg_match("/^[a-zA-Z0-9_-]+$/", $_POST['name'])) {
-        // Redirect back to form with error message if validation fails
-        $errorMessage = "Name can only contain letters, numbers, dashes, and underscores.";
+    // Sanitize and check lengths of other fields
+    $name = strip_tags($_POST['name']);
+    if (strlen($name) > 32) {
+        $errorMessage = "Name must be no longer than 32 characters.";
         drawErrorPageAndExit("$errorMessage");
-        exit; // Stop further execution of the script
+        exit;
     }
 
-    // Validate the 'name'
-    if (!preg_match("/^[a-zA-Z0-9_-]+$/", $_POST['name']) || strlen($_POST['name']) > 50) {
-        $errorMessage = "Name can only contain alphanumeric characters, dashes, underscores and must be no longer than 16 characters.";
+    $url = strip_tags($_POST['url']);
+    if (!preg_match("/^[a-zA-Z0-9_-]+$/", $_POST['url']) || strlen($_POST['url']) > 16) {
+        $errorMessage = "url can only contain alphanumeric characters, dashes, underscores and must be no longer than 16 characters.";
         drawErrorPageAndExit("$errorMessage");
         exit;
     }
 
     // Sanitize and check lengths of other fields
     $subName = strip_tags($_POST['subName']);
-    if (strlen($subName) > 50) {
+    if (strlen($subName) > 256) {
         $errorMessage = "Sub Name must be no longer than 50 characters.";
         drawErrorPageAndExit("$errorMessage");
         exit;
     }
 
     $adminPassword = strip_tags($_POST['adminPassword']);
-    if (strlen($adminPassword) > 50) {
-        $errorMessage = "Admin Password must be no longer than 50 characters.";
+    if (strlen($adminPassword) > 16) {
+        $errorMessage = "mod Password must be no longer than 50 characters.";
         drawErrorPageAndExit("$errorMessage");
         exit;
     }
 
     $delitionPassword = strip_tags($_POST['delitionPassword']);
-    if (strlen($delitionPassword) > 50) {
+    if (strlen($delitionPassword) > 16) {
         $errorMessage = "Deletion Password must be no longer than 50 characters.";
         drawErrorPageAndExit("$errorMessage");
         exit;
@@ -143,7 +145,7 @@ function userSubmitedBoard(){
         exit;
     }
 
-
+    $url = $_POST['url'];
     $name = $_POST['name'];
     // Strip HTML tags from other inputs
     $subName = strip_tags($_POST['subName']);
@@ -157,7 +159,7 @@ function userSubmitedBoard(){
     $autoDeleteOldest = isset($_POST['autoDeleteOldest']) ? filter_var($_POST['autoDeleteOldest'], FILTER_VALIDATE_BOOLEAN) : false;
     $boardListed = isset($_POST['boardListed']) ? filter_var($_POST['boardListed'], FILTER_VALIDATE_BOOLEAN) : false;
 
-    newBoard($name, $subName, $adminPassword, $delitionPassword, $anonimize, $commentRequired, $autoDeleteOldest,$boardListed, $defaultComment);
+    newBoard($url, $name, $subName, $adminPassword, $delitionPassword, $anonimize, $commentRequired, $autoDeleteOldest,$boardListed, $defaultComment);
     exit;
 }
 
@@ -177,31 +179,36 @@ if (isset($_POST["action"]) && $_POST["action"] == "newBoard") {
 <body alink="#ff0000" link="#ffff00" text="#00ff00" vlink="#0000ff" background="static/bg.png">
     <center>
     <h1>new Board</h1>
-    <form action="admin.php" method="post">
+    <form action="newboard.php" method="post">
         <input type="hidden" name="action" value="newBoard">
         <table border="1"><tbody>
         <tr>
-            <td><label for="name">board name(this will be used of the url):</label></td>
-            <td><input type="text" id="name" name="name" required maxlength="16"></td>
+            <td><label for="url">board url</label></td>
+            <td><input type="text" id="url" name="url" required maxlength="16"></td>
+        </tr>
+        <tr>
+            <td><label for="name">board name</label></td>
+            <td><input type="text" id="name" name="name" required maxlength="32"></td>
         </tr>
         <tr>
             <td><label for="subName">board discripton:</label></td>
-            <td><input type="text" id="subName" name="subName" required maxlength="50"></td>
+            <td><textarea tabindex="6" maxlength="256" cols="48" rows="4" name="subName"></textarea></td>
         </tr>
         <tr>
             <td><label for="adminPassword">board's admin password:</label></td>
-            <td><input type="password" id="adminPassword" name="adminPassword" required maxlength="50"></td>
+            <td><input type="password" id="adminPassword" name="adminPassword" required maxlength="16"></td>
         </tr>
         <tr>
             <td><label for="delitionPassword">board deletion Password:</label></td>
-            <td><input type="password" id="delitionPassword" name="delitionPassword" required maxlength="50"></td>
+            <td><input type="password" id="delitionPassword" name="delitionPassword" required maxlength="16"></td>
         </tr>
         <tr>
             <td><label for="defaultComment">Default Comment:</label></td>
             <td><input type="text" id="defaultComment" name="defaultComment" maxlength="128"></td>
         </tr>
         <tr>
-            <td><label for="anonimize">make board fully anonyuse</label></td>
+            <td><label for="anonimize">make board fully anonyuse</label><br>
+                <label for="anonimize">this wont log IPs and original file names.</label></td>
             <td><input type="checkbox" id="anonimize" name="anonimize"></td>
         </tr>
         <tr>

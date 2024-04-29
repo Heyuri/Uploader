@@ -7,11 +7,14 @@
 
 return $conf = [
     'boardTitle' => 'fileUploader',
+    'boardURL' => '',
     'boardSubTitle' => 'for long term storage of bigger files',
-    'home' => "https://up.example.com",
+    'home' => "https://up.example.com",     // set this to where ever you want
+    'linkBack' => true,                    // set this to true if you want the above config to be displayed on the site
     'cssFile' => '../../styles.css',
-    'adminPassword' => "lolpenis",
-    'deletionPassword' => "123",    // this is the password for delete a board
+    'modPassword' => "placeHolder",
+    'adminPassword' => 'CHANGEME!!!',       // change this
+    'deletionPassword' => "placeHolder",
     'logUserIP' => true,
     'boardListed' => true,
 

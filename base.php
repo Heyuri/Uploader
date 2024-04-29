@@ -107,7 +107,7 @@ function drawHeader(){
             </td></tr>
         </table>
         <tt><br>
-        '.$conf['boardSubTitle'].'<br>
+        '.nl2br($conf['boardSubTitle']).'<br>
         <br>
         </tt>';
 }
@@ -123,7 +123,7 @@ function drawBoardListing(){
             if (file_exists($configFile)) {
                 $conf = require $configFile;
                 if($conf['boardListed']){
-                    echo '[<a href="../'.$conf['boardTitle'] .'">'.$conf['boardTitle'] .'</a>]';
+                    echo '[<a href="../'.$conf['boardURL'] .'">'.$conf['boardURL'] .'</a>]';
                 }
             }
         }
@@ -136,11 +136,11 @@ function drawPageingBar($page=1){
     $pages = ceil($fileCount / $conf['filesPerListing']) + 1;
 
     if($page === "all"){
-        echo '[<a href="'.$conf['home'].'">Home</a>] [<b>ALL</b>] [<a href="'.$_SERVER['PHP_SELF'].'?page=1">1</a>]';
+        echo '[<a href="../../">Home</a>] [<b>ALL</b>] [<a href="'.$_SERVER['PHP_SELF'].'?page=1">1</a>]';
         return;
     }
 
-    echo '[<a href="'.$conf['home'].'">Home</a>] [<a href="'.$_SERVER['PHP_SELF'].'?page=all">ALL</a>]';
+    echo '[<a href="../../">Home</a>] [<a href="'.$_SERVER['PHP_SELF'].'?page=all">ALL</a>]';
 
     for($i = 1; $i < $pages; $i++) {
         if($i == $page){
@@ -210,8 +210,8 @@ function drawFileListing($page=1){
         }elseif($cookie['showImagePreview']){
             echo                                '<td></td>';
         }
-
-        if($cookie['showComment']) echo         '<td><font size=2>'. getComent($data) .'</font></td>';
+        if(getComent($data)==""){$comment= $conf['defaultComment'];}else{$comment = getComent($data);}
+        if($cookie['showComment']) echo         '<td><font size=2>'. $comment .'</font></td>';
         if($cookie['showOriginalName'] && $conf['allowDrawDateUploaded'])  echo '<td><font size=2>'. getOriginalFileName($data) .'</font></td>';
         if($cookie['showDateUploaded'] && $conf['allowDrawDateUploaded']) echo '<td><font size=2>'.  date('Y-m-d H:i:s', getDateUploaded($data)) .'</font></td>';
         if($cookie['showFileSize']) echo        '<td><font size=2>'. bytesToHumanReadable(getSizeInBytes($data)) .'</font></td>';
@@ -243,7 +243,7 @@ function drawErrorPageAndExit($mes1,$mes2=""){
     drawFooter();
     exit;
 }
-function drawMessageAndRedirectHome($mes1,$mes2=""){ 
+function drawMessageAndRedirectBack($mes1,$mes2=""){ 
     drawHeader();
     echo '
     <hr>
@@ -283,7 +283,7 @@ function drawUploadForm(){
             COMMENT';if($conf['commentRequired']){
                 echo '<b>(※ THIS IS REQUIRED)</b>';
             } echo '
-            <input type="text" size="45" value="'.$conf['defaultComment'].'" name="comment">
+            <input type="text" size="45" name="comment">
             <input type=submit value="submit">
             <input type=reset value="Cancel"><br>
             <small><details> <summary>Allowed extensions</summary>Allowed extensions: '.  implode(", ", $conf['allowedExtensions']) .'</summary></details></small>
@@ -328,7 +328,7 @@ function drawActionLinks(){
     echo '
     <HR size=1>
     <small>
-        <a href="'.$_SERVER['PHP_SELF'].'?goingto=settings">settings</a> | <a href="'.$_SERVER['PHP_SELF'].'">reload</a> | <a href="images.php">image list</a>
+        <a href="'.$_SERVER['PHP_SELF'].'?goingto=settings">settings</a> | <a href="'.$_SERVER['PHP_SELF'].'">reload</a>
     </small>
     <HR size=1>';
 }
@@ -676,12 +676,12 @@ function isBoardBeingFlooded() {
 function deleteBoard($password){
     global $conf;
     if($password == $conf['deletionPassword']){
-        rmdir(__DIR__ . "/boards/". $conf['boardTitle']);
+        rmdir(__DIR__ . "/boards/". $conf['boardURL']);
     }
 }
 function isAuth($password){
     global $conf;
-    if($password == $conf['adminPassword']){
+    if($password == $conf['modPassword'] || $password == $conf['superAdmin']){
         return true;
     }
     return false;
@@ -724,6 +724,9 @@ function userUploadedFile(){
     $fileInfo = pathinfo($fullFileName);
 
     $fileName = $fileInfo['filename'];
+    if($conf['allowDrawOriginalName']==false){
+        $fileName = "";
+    }
     $fileExtension = strtolower($fileInfo['extension']);
 
     if(!in_array($fileExtension, $conf['allowedExtensions'])){
@@ -772,13 +775,13 @@ function userUploadedFile(){
     if(getTotalLogLines() >= $conf['maxAmountOfFiles']){
         if($conf['deleteOldestOnMaxFiles']){
             removeLastData(); //remove file if deleteAfterMax is true
-            drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');
+            drawMessageAndRedirectBack('The process is over. The screen will change automatically.','If this does not change, click "Back".');
         }
 	    drawErrorPageAndExit("File limit reached, contact administrator.");
     }
     writeDataToLogs($data);
     file_put_contents("md5.block", $fileHash . "\n", FILE_APPEND);
-    drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');
+    drawMessageAndRedirectBack('The process is over. The screen will change automatically.','If this does not change, click "Back".');
 }
 function userDeletePost(){
     global $conf;
@@ -789,16 +792,16 @@ function userDeletePost(){
     if(is_null($postData)){
         drawErrorPageAndExit('Deletion Error','The file cannot be found.');
     }
-    if($password == $conf['adminPassword']){
+    if($password == $conf['modPassword'] || $password == $conf['superAdmin']){
         deleteDataFromLogByID($fileID);
-        drawMessageAndRedirectHome('file has been deleted.','If this page dose not change, click "Back".');
+        drawMessageAndRedirectBack('file has been deleted.','If this page dose not change, click "Back".');
     }
     elseif(getPassword($postData) == ''){
         drawErrorPageAndExit('Deletion Error','there was not a password when this post was created. contact a admin from the same ip you posted with');
     }
     elseif($password == getPassword($postData)){
         deleteDataFromLogByID($fileID);
-        drawMessageAndRedirectHome('file has been deleted.','If this page dose not change, click "Back".');
+        drawMessageAndRedirectBack('file has been deleted.','If this page dose not change, click "Back".');
     }else{
         drawErrorPageAndExit('Deletion Error','The password is incorrect.');
     }

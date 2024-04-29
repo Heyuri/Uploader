@@ -8,12 +8,11 @@ this should be some where in ur site configs if you are using nginx
     }
 ```
 
-##For installation you can follow this:
+## For installation you can follow this:
 
 1- clone repo into web directory<br/>
-2- set everything to use web user `chown -R webuser:webuser /path/to/Uploader`
-3- cd into Uploader<br/>
-4- edit your superAdmin password in the basse config
-5- change some limits in php.ini acording to how much upload you want
+2- set everything to use web user `chown -R webuser:webuser /path/to/Uploader`<br/>
+3- edit your superAdmin password in the basse config <br/>
+4- change some limits in php.ini acording to how much upload you want
 
 After that it should work fine.

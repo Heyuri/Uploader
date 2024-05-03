@@ -4,6 +4,7 @@
 
 $conf = require_once 'config.php';
 
+require_once '../../globalconf.php';
 /* draw functions */
 function drawHeader(){
     global $conf;
@@ -85,6 +86,7 @@ function getMimeType($postData){
     return $postData[6];
 }
 
+
 function getTotalLogLines(){
     global $conf;
     $lineCount = 0; 
@@ -163,10 +165,11 @@ function drawCatalogListing($page=1){
 	$thumbPath = $conf['thumbDir'] . $thumbName;
 
 	if(!file_exists($thumbPath)) $thumbPath = $path;
-	if(preg_match('/video/i', getMimeType($data))) $thumbPath = 'static/images/video_overlay.png'; //if file is a video it will use a default image 
-	if(preg_match('/audio/i', getMimeType($data))) $thumbPath = 'static/images/audio_overlay.png'; //if file is an audio it will use a default image 
+
+	if(preg_match('/video/i', getMimeType($data))) $thumbPath = STATICPATH.'images/video_overlay.png'; //if file is a video it will use a default image 
+	if(preg_match('/audio/i', getMimeType($data))) $thumbPath = STATICPATH.'images/audio_overlay.png'; //if file is an audio it will use a default image 
 	
-	echo  '<div class="entry"><td style="display: inline-block; margin: 10px;"><a href="'.$conf['uploadDir'].$fileName.'"><img class="entryImage" src="'.$thumbPath.'"> </a><br><center>'.getComment($data).'</center></div></td>';
+	echo  '<div class="entry"><td style="display: inline-block; margin: 10px;"><a href="'.$conf['uploadDir'].$fileName.'"><center><img class="entryImage" src="'.$thumbPath.'"></center> </a><br><center>'.getComment($data).'</center></div></td>';
 
 	$currentLine = $currentLine + 1;
     }

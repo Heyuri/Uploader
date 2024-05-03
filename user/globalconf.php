@@ -1,3 +1,3 @@
 <?php
 /* provides path vars for user boards & scripts*/
-define("STATICPATH", './static/'); //used for static resources.
+define("STATICPATH", '/experiment/Uploader/user/static/');

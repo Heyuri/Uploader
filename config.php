@@ -56,7 +56,7 @@ return $conf = [
     'extentionsToBeConvertedToText' => [
         'htm','mht','cgi','php','html','sh','shtml','xml','svg'
     ],
-    'defualtCookieValues' => [
+    'defaultCookieValues' => [
         'showDeleteButton' => 'checked',
         'showComment' => 'checked',
         'showFileSize' => 'checked',

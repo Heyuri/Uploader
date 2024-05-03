@@ -1,12 +1,0 @@
---2024-05-03 21:33:43--  https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fimages.clipartpanda.com%2Fspeaker-clipart-Simple-Speaker.png
-Loaded CA certificate '/etc/ssl/certs/ca-certificates.crt'
-Resolving external-content.duckduckgo.com (external-content.duckduckgo.com)... 104.209.88.197
-Connecting to external-content.duckduckgo.com (external-content.duckduckgo.com)|104.209.88.197|:443... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: unspecified [image/png]
-Saving to: ‘index.html?u=http:%2F%2Fimages.clipartpanda.com%2Fspeaker-clipart-Simple-Speaker.png’
-
-                        index.html?u=http:%2F%2     [<=>                                                                                                     ]       0  --.-KB/s               index.html?u=http:%2F%2Fimages.clipartpanda.com     [ <=>                                                                                                    ]  49.77K  --.-KB/s    in 0.02s   
-
-2024-05-03 21:33:44 (2.28 MB/s) - ‘index.html?u=http:%2F%2Fimages.clipartpanda.com%2Fspeaker-clipart-Simple-Speaker.png’ saved [50966]
-

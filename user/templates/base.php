@@ -97,6 +97,7 @@ function drawHeader(){
     <meta http-equiv="expires" content="0">
     <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT">
     <meta http-equiv="pragma" content="no-cache">
+    <link rel="stylesheet" href="csrc/custom.css">
     <style>
         a:link    {color:#0000ee;}
         a:hover   {color:#5555ee;}
@@ -213,7 +214,7 @@ function drawFileListing($page=1){
 function drawFooter(){
     echo '
     <br>
-    <h5 align="right">
+    <h5 align="right"> <a href="'.$_SERVER['PHP_SELF'].'?goingto=ownersettings">Board Owner Settings</a> <br>
         <a href="https://github.com/Heyuri/Uploader/">Heyuri</a> + <a href="http://zurubon.strange-x.com/uploader/">ずるぽんあぷろだ</a> + <a href="http://php.s3.to/">ﾚｯﾂ PHP!</a> + <a href="http://t-jun.kemoren.com/">隠れ里の村役場</a><BR>
     </h5>
     </body>
@@ -245,6 +246,7 @@ function drawMessageAndRedirectHome($mes1,$mes2=""){
     drawFooter();
     exit;
 }
+
 function drawUploadForm(){
     // Post form header (Yakuba modification)
     // Check if the overall filesize limit for the board has been exceeded
@@ -272,6 +274,7 @@ function drawUploadForm(){
         ';
     }
 }
+
 function drawDeletionForm($fielID){
     echo'
     <form action='.$_SERVER['PHP_SELF'].' method="post">
@@ -304,6 +307,11 @@ function drawSettingsForm(){
     </form>
     <a href="'.$_SERVER['PHP_SELF'].'">[Back]</a>';
 }
+
+function drawOwnerForm(){
+
+}
+
 function drawActionLinks(){
     echo '
     <HR size=1>
@@ -808,7 +816,14 @@ if(isset($_GET['goingto'])){
             drawSettingsForm();
             drawFooter();
             die();
-    }
+    
+	case "ownersettings":
+	    drawHeader();
+    	    drawOwnerForm();
+	    drawFooter();	    
+	    die();
+    }	
+
 }
 if(isset($_GET['page'])){
     $page = $_GET['page'];

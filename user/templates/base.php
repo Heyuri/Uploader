@@ -672,7 +672,11 @@ function userUploadedFile(){
     if(strlen($_POST['comment']) > $conf['maxCommentSize']){
         drawErrorPageAndExit('Comment is too big.');
     }
-
+    //check if password is required
+    if($_POST['password'] != $conf['adminPassword'] && $conf['passwordRequired']) {
+    	drawErrorPageAndExit('Incorrect password');
+    }
+    
     $fullFileName = $_FILES["upfile"]["name"];
     $fileInfo = pathinfo($fullFileName);
 

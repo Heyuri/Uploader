@@ -1,5 +1,5 @@
 <?php
-function newBoard($url, $name, $subName, $adminPassword, $deletionPassword, $anonimize, $commentRequired, $autoDeleteOldest, $boardListed, $defaultComment=""){
+function newBoard($url, $name, $subName, $adminPassword, $deletionPassword, $anonimize, $commentRequired, $autoDeleteOldest, $boardListed, $defaultComment="", $filePrefix="", $passwordRequired=false){
     if (!is_dir(__DIR__ . '/boards/')) {
         mkdir(__DIR__ . '/boards/', 0755);
     }
@@ -29,6 +29,8 @@ function newBoard($url, $name, $subName, $adminPassword, $deletionPassword, $ano
     $conf['adminPassword'] = $adminPassword;
     $conf['deletionPassword'] = $deletionPassword;
     $conf['boardListed'] = $boardListed;
+    $conf['prefix'] = $filePrefix;
+    $conf['passwordRequired'] = $passwordRequired;
     if($anonimize){
         // since we cant ban the user, we will make it's cool down longer
         $conf['coolDownTime'] = $conf['coolDownTime'] + 5;
@@ -157,14 +159,15 @@ function userSubmitedBoard(){
     $adminPassword = $_POST['adminPassword'];
     $deletionPassword = $_POST['deletionPassword'];
     $defaultComment = isset($_POST['defaultComment']) ? strip_tags($_POST['defaultComment']) : '';
-
+    $filePrefix = isset($_POST['filePrefix']) ? strip_tags($_POST['filePrefix']) : '';
     // Validate booleans
     $commentRequired = isset($_POST['commentRequired']) ? filter_var($_POST['commentRequired'], FILTER_VALIDATE_BOOLEAN) : false;
     $anonimize = isset($_POST['anonimize']) ? filter_var($_POST['anonimize'], FILTER_VALIDATE_BOOLEAN) : false;
     $autoDeleteOldest = isset($_POST['autoDeleteOldest']) ? filter_var($_POST['autoDeleteOldest'], FILTER_VALIDATE_BOOLEAN) : false;
     $boardListed = isset($_POST['boardListed']) ? filter_var($_POST['boardListed'], FILTER_VALIDATE_BOOLEAN) : false;
-
-    newBoard($url, $name, $subName, $adminPassword, $deletionPassword, $anonimize, $commentRequired, $autoDeleteOldest,$boardListed, $defaultComment);
+    $passwordRequired = isset($_POST['passRequired']) ? filter_var($_POST['passRequired'], FILTER_VALIDATE_BOOLEAN) : false;
+    
+    newBoard($url, $name, $subName, $adminPassword, $deletionPassword, $anonimize, $commentRequired, $autoDeleteOldest,$boardListed, $defaultComment, $filePrefix, $passwordRequired);
     exit;
 }
 
@@ -212,7 +215,12 @@ if (isset($_POST["action"]) && $_POST["action"] == "newBoard") {
             <td><label for="defaultComment">Default Comment:</label></td>
             <td><input type="text" id="defaultComment" name="defaultComment" maxlength="128"></td>
         </tr>
-        <tr>
+	  <tr>
+            <td><label for="filePrefix">File prefix:</label></td>
+            <td><input  type="text" maxlength="20" name="filePrefix"></td>
+        </tr>
+
+	<tr>
             <td><label for="anonimize">Make board fully anonymous</label><br>
                 <label for="anonimize">This wont log IPs and original file names.</label></td>
             <td><input type="checkbox" id="anonimize" name="anonimize"></td>
@@ -221,10 +229,15 @@ if (isset($_POST["action"]) && $_POST["action"] == "newBoard") {
             <td><label for="commentRequired">Required a comment to post:</label></td>
             <td><input type="checkbox" id="commentRequired" name="commentRequired"></td>
         </tr>
-        <tr>
+<tr>
+            <td><label for="passRequired">Password required for upload:</label></td>
+            <td><input type="checkbox" id="passRequired" name="passRequired"></td>
+        </tr>
+
+	<tr>
             <td><label for="boardListed">Listed:</label></td>
             <td><input type="checkbox" id="boardListed" name="boardListed"></td>
-        </tr>
+	</tr>
         <tr>
             <td><label for="autoDeleteOldest">Auto delete oldest post:</label></td>
             <td><input type="checkbox" id="autoDeleteOldest" name="autoDeleteOldest"></td>

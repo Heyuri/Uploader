@@ -15,6 +15,7 @@ return $conf = [
     'boardSubTitle' => 'Home for your files',
     'home' => "https://cgi.heyuri.net/goatse/",
     'adminPassword' => "lolpenis",
+    'deletionPassword' => "placeholder",
     'logUserIP' => false,
     'mainScript' => 'index.php',
 
@@ -24,6 +25,7 @@ return $conf = [
     'thumbDir' => "thmb/",	// thumbnail directory
     'prefix' => "",             // prefix to add in front of your file name. Don't change after setting
     'coolDownTime' => 5,        // time in seconds untill can be uploaded to again. (set to -1 for no cool down)
+    'passwordRequired' => false,
 
 
     'maxAmountOfFiles' => 20,               // max files allowed on server

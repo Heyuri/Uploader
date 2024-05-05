@@ -59,8 +59,8 @@ return $conf = [
     'defaultCookieValues' => [
         'showDeleteButton' => 'checked',
         'showComment' => 'checked',
+        'showPreviewImage' => '',
         'showFileSize' => 'checked',
         'showMimeType' => ''
     ],
 ];
-

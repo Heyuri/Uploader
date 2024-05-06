@@ -97,6 +97,19 @@ function drawErrorPageAndExit($mes1,$mes2=""){
     drawFooter();
     exit;
 }
+function drawMessageAndRedirectHome($mes1,$mes2=""){ 
+    drawHeader();
+    echo '
+    <hr>
+    <center>
+        <strong>'.$mes1.'</strong><br>
+        <p>'.$mes2.'</p>
+    </center>
+    [<a href="'.$_SERVER['PHP_SELF'].'">Back</a>]
+    <script type="text/javascript">setTimeout(location.href="'.$_SERVER['PHP_SELF'].'",0)</script>';
+    drawFooter();
+    exit;
+}
 
 function drawUploadForm(){
     // Post form header (Yakuba modification)

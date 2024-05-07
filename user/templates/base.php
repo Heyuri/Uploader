@@ -220,6 +220,19 @@ function drawFooter(){
     </body>
     </html>';
 }
+function drawErrorPageAndExit_headless($mes1,$mes2=""){
+    global $conf;
+    echo '
+    <hr>
+    <center>
+        <strong>'.$mes1.'</strong><br>
+        <p>'.$mes2.'</p>
+    </center> 
+    [<a href="'.$conf['mainScript'].'">Back</a>]';
+    drawFooter();
+    exit;
+}
+
 function drawErrorPageAndExit($mes1,$mes2=""){
     global $conf;
     drawHeader();
@@ -308,6 +321,53 @@ function drawSettingsForm(){
     <a href="'.$_SERVER['PHP_SELF'].'">[Back]</a>';
 }
 
+function drawBoardDeletionForm() {
+   global $conf;
+   if(!empty($_POST)) {
+	   if($_POST['deletionPassword'] == $conf['deletionPassword'] && $_POST['deletionPasswordconfirm'] == $conf['deletionPassword'] || $_POST['deletionPassword'] == SUPERADMINPASS) {
+		   //return to index
+		    $protocol = $_SERVER['HTTPS'] == '' ? 'http://' : 'https://';
+		    $webroot = $protocol . $_SERVER['HTTP_HOST'];
+		    echo '
+    			<hr>
+    			<center>
+        			<strong>BOARD DELETED</strong><br>
+    			</center> 
+    			[<a href="../../index.php">Return</a>]';
+		   deleteBoard();
+		   die;
+	   }
+   	   else {
+		drawErrorPageAndExit_headless('Password Incorrect');
+	   }
+   }
+   else {
+   echo '
+    	<center>
+	    <h2>Delete Board</h2> 
+	    <h5>delete user board</h5>
+    
+	    <form action="'.$_SERVER['PHP_SELF'].'?goingto=delete" method="post">
+	    	<input type="hidden" name="goingto" value="delete">
+		<table border="1"><tbody>
+		 <tr>
+        	    <td><label for="deletionPassword">Board deletion Password:</label></td>
+        	    <td><input type="password" id="deletionPassword" name="deletionPassword" required maxlength="16"></td>
+	        </tr>
+		 <tr>
+	            <td><label for="deletionPassword">Board deletion Password CONFIRMATION:</label></td>
+	            <td><input type="password" id="deletionPasswordconfirm" name="deletionPasswordconfirm" required maxlength="16"></td>
+	        </tr>
+		</tbody>
+		</table>
+		<input type="submit" value="Delete Board">
+    	</form>
+	    </center>
+	';
+   }
+}
+
+
 function drawOwnerForm(){
    echo '
     <center>
@@ -353,6 +413,7 @@ function drawOwnerForm(){
       </table>
 	<input type="submit" value="Edit Board">
    </form>
+	<br><br><br> <a href="'.$_SERVER['PHP_SELF'].'?goingto=delete"><h4>DELETE BOARD</h4></a>
  </center>';
 }
 
@@ -434,6 +495,21 @@ function isDataEmpty($data) {
     return false;
 }
 /* helper libs */
+
+function removeDir(string $dir): void {
+    $it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
+    $files = new RecursiveIteratorIterator($it,
+                 RecursiveIteratorIterator::CHILD_FIRST);
+    foreach($files as $file) {
+        if ($file->isDir()){
+            rmdir($file->getPathname());
+        } else {
+            unlink($file->getPathname());
+        }
+    }
+    rmdir($dir);
+}
+
 
 function handleBoardEdit() {
     global $conf;
@@ -790,6 +866,13 @@ function isBoardBeingFlooded() {
         return false;
 	}
 }
+function deleteBoard(){
+    global $conf;
+    removeDir(realpath(ROOTPATH) . "/boards/". $conf['boardURL']);
+}
+
+
+
 /* main funcitons */
 
 function userUploadedFile(){
@@ -948,8 +1031,7 @@ if(isset($_GET['goingto'])){
             drawHeader();
             drawSettingsForm();
             drawFooter();
-            die();
-    
+            die(); 
 	case "ownersettings":
 	    drawHeader();
     	    drawOwnerForm(); 
@@ -957,6 +1039,11 @@ if(isset($_GET['goingto'])){
 	    die();
 	case "edit":
 	    handleBoardEdit();
+	    die();
+	case "delete":
+	    drawHeader();
+	    drawBoardDeletionForm();
+	    drawFooter();
 	    die();
     }
 

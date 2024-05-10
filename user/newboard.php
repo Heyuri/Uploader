@@ -10,11 +10,14 @@ function newBoard($url, $name, $subName, $adminPassword, $deletionPassword, $com
     mkdir(__DIR__ . '/boards/'.$url.'/src');
     mkdir(__DIR__ . '/boards/'.$url.'/csrc');
     
-    symlink(__DIR__.'/templates/base.php', __DIR__ . '/boards/'.$url.'/index.php');
-    symlink(__DIR__.'/templates/images.php', __DIR__ . '/boards/'.$url.'/images.php');
-    symlink(__DIR__.'/templates/css.php', __DIR__ . '/boards/'.$url.'/css.php');
-    //symlink(__DIR__ . "/mod.php", __DIR__ . '/boards/'.$url.'/mod.php');
-    //copy(__DIR__ . "/debug.php", __DIR__ . '/boards/'.$url.'/debug.php');
+    file_put_contents(__DIR__ . '/boards/' . $url . '/index.php', '<?php require_once \'../../templates/base.php\'; ?>' . PHP_EOL);
+    file_put_contents(__DIR__ . '/boards/' . $url . '/images.php', '<?php require_once \'../../templates/images.php\'; ?>' . PHP_EOL);
+    file_put_contents(__DIR__ . '/boards/' . $url . '/css.php', '<?php require_once \'../../templates/css.php\'; ?>' . PHP_EOL);	
+    //symlink(__DIR__.'/templates/base.php', __DIR__ . '/boards/'.$url.'/index.php');
+    //symlink(__DIR__.'/templates/images.php', __DIR__ . '/boards/'.$url.'/images.php');
+    //symlink(__DIR__.'/templates/css.php', __DIR__ . '/boards/'.$url.'/css.php');
+      //symlink(__DIR__ . "/mod.php", __DIR__ . '/boards/'.$url.'/mod.php');
+      //copy(__DIR__ . "/debug.php", __DIR__ . '/boards/'.$url.'/debug.php');
 
     touch(__DIR__ . '/boards/'.$url.'/md5.block');
     touch(__DIR__ . '/boards/'.$url.'/userPosts.block');

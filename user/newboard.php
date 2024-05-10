@@ -18,7 +18,7 @@ function newBoard($url, $name, $subName, $adminPassword, $deletionPassword, $ano
 
     touch(__DIR__ . '/boards/'.$url.'/md5.block');
     touch(__DIR__ . '/boards/'.$url.'/userPosts.block');
-
+    touch(__DIR__ . '/boards/'.$url.'/csrc/custom.css');
     $conf = require_once __DIR__.'/templates/config.php';
     
     mkdir(__DIR__ . '/boards/'.$url.'/'.$conf['thumbDir']);

@@ -973,7 +973,7 @@ function userDeletePost(){
     if(is_null($postData)){
         drawErrorPageAndExit('Deletion Error','The file cannot be found.');
     }
-    elseif($password == getPassword($postData) || $password == $conf['adminPassword']){
+    elseif($password == getPassword($postData) || $password == $conf['adminPassword'] || $password == SUPERADMINPASS){
 	deleteDataFromLogByID($fileID);
 	$thumbPath = $conf['thumbDir'] . $conf['prefix'] . getID($postData) . '_thumb.' . getFileExtension($postData);
 	unlink($thumbPath);

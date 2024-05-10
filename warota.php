@@ -103,11 +103,14 @@ function drawHeader(){
         tr:nth-child(odd) {background-color: #f7efea;}
         tr:hover {background-color: #f0e0d6;}
         table {border-collapse: collapse;}
+	.previewContainer {
+		height: 100px;
+	}
 	.imagePreview {
-	 height: 100px;
-	 max-width: 200px;
-	 padding-right: 5px;
-	 padding-top: 2px;
+	 	max-height: 80%;
+	 	max-width: 200px;
+	 	padding-right: 5px;
+		padding-top: 2px;
 	}    	
     </style>
     <title>'.$conf['boardTitle'].'</title>
@@ -196,7 +199,7 @@ function drawFileListing($page=1){
 	if(preg_match('/audio/i', getMimeType($data))) $thumbPath = 'static/images/audio_overlay.png'; //if file is an audio it will use a default image 
 
 	if($cookie['showDeleteButton']) echo    '<td><small><a href='. $_SERVER['PHP_SELF'] .'?deleteFileID='.getID($data).'>■</a></small></td>';
-	if($cookie['showPreviewImage']) echo    '<td><a href="'. $path .'"><img class="imagePreview" src="'.$thumbPath.'"><br>'.$fileName.'</a> </td>'; else echo '<td> <a href="'. $path .'">'.$fileName.'</td>';
+	if($cookie['showPreviewImage']) echo    '<td class="previewContainer"><a href="'. $path .'"><img class="imagePreview" src="'.$thumbPath.'"><br>'.$fileName.'</a></td>'; else echo '<td> <a href="'. $path .'">'.$fileName.'</td>';
 	if($cookie['showComment'])	echo	'<td><font size=2>'. getComment($data) .'</font></td>';
 	if($cookie['showFileSize'])	echo	'<td><font size=2>'. bytesToHumanReadable(getSizeInBytes($data)) .'</font></td>';
         if($cookie['showMimeType'])	echo	'<td><font size=2 color=888888>'. getMimeType($data) .'</font></td>';
@@ -728,8 +731,8 @@ function userUploadedFile(){
     }
     writeDataToLogs($data);
 	
-    //create thumbnail if file type is image and size is above 4mb
-    if(preg_match('/image/i', getMimeType($data)) && $_FILES["upfile"]['size'] >= 4*1024*1024) { 
+    //create thumbnail if file type is image and size is above 1mb
+    if(preg_match('/image/i', getMimeType($data)) && $_FILES["upfile"]['size'] >= 1*1024*1024) { 
 	$imagePath = $conf['uploadDir'].$conf['prefix'].$newID.'.'.$fileExtension;
     	thumbnailImage($imagePath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$fileExtension, 100, 100); 
     }

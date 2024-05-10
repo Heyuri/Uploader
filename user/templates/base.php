@@ -326,8 +326,6 @@ function drawBoardDeletionForm() {
    if(!empty($_POST)) {
 	   if($_POST['deletionPassword'] == $conf['deletionPassword'] && $_POST['deletionPasswordconfirm'] == $conf['deletionPassword'] || $_POST['deletionPassword'] == SUPERADMINPASS) {
 		   //return to index
-		    $protocol = $_SERVER['HTTPS'] == '' ? 'http://' : 'https://';
-		    $webroot = $protocol . $_SERVER['HTTP_HOST'];
 		    echo '
     			<hr>
     			<center>

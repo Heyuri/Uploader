@@ -1,9 +1,5 @@
 <?php
-/* MAIN CONFIGURATION FILE FOR WAROTA.PHP*/
-
-//Paths
-define('ROOTPATH', './'); // main path for project
-
+/* MAIN CONFIGURATION FILE FOR USER BOARD*/
 
 /*
  *  the reason for configs like this is it makes it really easy to dump this table into a web veiw

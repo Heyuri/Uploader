@@ -39,7 +39,6 @@ function drawHeader(){
     <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT">
     <meta http-equiv="pragma" content="no-cache">
     <meta name="robots" content="follow,archive">
-    <link rel="stylesheet" type="text/css" href="styles.css" />
     <title>uploader</title>
     </head>
     <body bgcolor="#ffffee" text="#800000" link="#0000ee" alink="#5555ee" vlink="#0000ee">

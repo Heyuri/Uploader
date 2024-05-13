@@ -76,7 +76,7 @@ if (!file_exists($configFile)) {
     die("Error: Configuration file <i>$configFile</i> is missing.");
 }
 $conf = require_once $configFile;
-
+unset($configFile);
 date_default_timezone_set($conf['timeZone']);
 
 if(!file_exists($conf['logFile'])) die($conf['logFile']. " is missing. Please create it.");

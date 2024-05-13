@@ -2,7 +2,14 @@
 /* WIP, buggy. But it werks as a gallery. */
 
 
-$conf = require_once 'config.php';
+$configFile = 'config.php';
+
+if (!file_exists($configFile)) {
+    die("Error: Configuration file <i>$configFile</i> is missing.");
+}
+$conf = require_once $configFile;
+unset($configFile);
+if(!file_exists($conf['logFile'])) die($conf['logFile']. " is missing. Please create it.");
 
 require_once '../../globalconf.php';
 /* draw functions */

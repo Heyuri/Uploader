@@ -379,7 +379,7 @@ function drawOwnerForm(){
 	<table border="1"><tbody>
         <tr>
             <td><label for="name">Board name</label></td>
-            <td><input type="text" id="name" name="name" required maxlength="32"></td>
+            <td><input type="text" id="name" name="name" maxlength="32"></td>
         </tr>
         <tr>
             <td><label for="subName">Board descripton:</label></td>
@@ -387,28 +387,23 @@ function drawOwnerForm(){
         </tr>
         <tr>
             <td><label for="adminPassword">Board admin password:</label></td>
-            <td><input type="password" id="adminPassword" name="adminPassword" required maxlength="16"></td>
+            <td><input type="password" id="adminPassword" name="adminPassword" maxlength="16"></td>
         </tr>
         <tr>
             <td><label for="deletionPassword">Board deletion Password:</label></td>
-            <td><input type="password" id="deletionPassword" name="deletionPassword" required maxlength="16"></td>
+            <td><input type="password" id="deletionPassword" name="deletionPassword" maxlength="16"></td>
         </tr>
         <tr>
             <td><label for="defaultComment">Default Comment:</label></td>
             <td><input type="text" id="defaultComment" name="defaultComment" maxlength="128"></td>
         </tr>
 	<tr>
-            <td><label for="anonymize">Make board fully anonymous</label><br>
-                <label for="anonymize">This wont log IPs and original file names.</label></td>
-            <td><input type="checkbox" id="anonymize" name="anonymize"></td>
-        </tr>
-	<tr>
             <td><label for="passRequired">Password required for upload:</label></td>
             <td><input type="checkbox" id="passRequired" name="passRequired"></td>
 	</tr>
 	<tr>
-	     <td><label for="passCurrent">Current Password:</label></td>
-	     <td><input type=password id="passCurrent" name="passCurrent"></td>
+	     <td><label for="passCurrent">Current Password: *</label></td>
+	     <td><input type="password" id="passCurrent" name="passCurrent" required></td>
 	</tr>
        </tbody>
       </table>
@@ -519,15 +514,8 @@ function handleBoardEdit() {
     if(!(isset($_POST['passCurrent']) && $_POST['passCurrent'] == $oldConf['adminPassword']))
 	drawErrorPageAndExit("Validation Error", "Password incorrect!");
 
-    // Check all required fields are present
-    $requiredFields = ['name', 'subName', 'adminPassword', 'deletionPassword', 'passCurrent'];
-    foreach ($requiredFields as $field) {
-        if (empty($_POST[$field])) {
-            die("Error: All fields except Default Comment are required.");
-        }
-    }
     // Sanitize and check lengths of other fields
-    $name = isset($_POST['name']) ? strip_tags($_POST['name']) : $oldConf['boardTitle'];
+    $name = $_POST['name'] != '' ? strip_tags($_POST['name']) : $name = $oldConf['boardTitle'];
     if (strlen($name) > 32) {
         $errorMessage = "Name must be no longer than 32 characters.";
         drawErrorPageAndExit("$errorMessage");
@@ -535,28 +523,28 @@ function handleBoardEdit() {
     }
     
     // Sanitize and check lengths of other fields
-    $subName = isset($_POST['subName']) ? strip_tags($_POST['subName']) : $oldConf['boardSubTitle'];
+    $subName = $_POST['subName'] != '' ? strip_tags($_POST['subName']) : $subName = $oldConf['boardSubTitle'];
     if (strlen($subName) > 256) {
         $errorMessage = "Sub Name must be no longer than 50 characters.";
         drawErrorPageAndExit("$errorMessage");
         exit;
     }
 
-    $adminPassword = isset($_POST['adminPassword']) ? strip_tags($_POST['adminPassword']) : $oldConf['adminPassword'];
+    $adminPassword = $_POST['adminPassword'] != '' ? strip_tags($_POST['adminPassword']) : $adminPassword = $oldConf['adminPassword'];
     if (strlen($adminPassword) > 16) {
         $errorMessage = "mod Password must be no longer than 50 characters.";
         drawErrorPageAndExit("$errorMessage");
         exit;
     }
 
-    $deletionPassword = isset($_POST['deletionPassword']) ? strip_tags($_POST['deletionPassword']) : $oldConf['deletionPassword'];
+    $deletionPassword = $_POST['deletionPassword'] != '' ? strip_tags($_POST['deletionPassword']) : $deletionPassowrd = $oldConf['deletionPassword'];
     if (strlen($deletionPassword) > 16) {
         $errorMessage = "Deletion Password must be no longer than 50 characters.";
         drawErrorPageAndExit("$errorMessage");
         exit;
     }
 
-    $defaultComment = isset($_POST['defaultComment']) ? strip_tags($_POST['defaultComment']) : $oldConf['defaultComment'];
+    $defaultComment = $_POST['defaultComment'] != '' ? strip_tags($_POST['defaultComment']) : $defaultComment = $oldConf['defaultComment'];
     if (strlen($defaultComment) > 128) {
         $errorMessage = "Default Comment must be no longer than 128 characters.";
         drawErrorPageAndExit("$errorMessage");
@@ -565,7 +553,6 @@ function handleBoardEdit() {
 
     $commentRequired = isset($_POST['commentRequired']) ? filter_var($_POST['commentRequired'], FILTER_VALIDATE_BOOLEAN) : $commentRequired = $oldConf['commentRequired'];
     $passwordRequired = isset($_POST['passRequired']) ? filter_var($_POST['passRequired'], FILTER_VALIDATE_BOOLEAN) : $passwordRequired = $oldConf['passwordRequired'];
-    $anonymize = isset($_POST['anonymize']) ? filter_var($_POST['anonymize'], FILTER_VALIDATE_BOOLEAN) : $anonymize = $oldConf['logUserIP'];
 
 
     $newConf = $oldConf;
@@ -575,13 +562,7 @@ function handleBoardEdit() {
     $newConf['adminPassword'] = $adminPassword;
     $newConf['deletionPassword'] = $deletionPassword;
     $nweConf['passwordRequired'] = $passwordRequired;
-    if($anonymize){
-        // since we cant ban the user, we will make it's cool down longer
-        $newConf['coolDownTime'] = $newConf['coolDownTime'] + 5;
-        $newConf['logUserIP'] = false;
-        $newConf['allowDrawDateUploaded'] = false;
-        $newConf['allowDrawOriginalName'] = false;
-    }
+    
     if($commentRequired){
         $newConf['commentRequired'] = $commentRequired;
         $newConf['defaultComment'] = "";
@@ -601,7 +582,7 @@ function handleBoardEdit() {
     drawMessageAndRedirectHome('Board has been edited','If this page dose not change, click "Back".');
 }
 
-//generate thumbnail
+//generate thumbnail for image
 function thumbnailImage($imagePath, $thumbPath, $w, $h) {
 	global $conf;
     try {
@@ -614,7 +595,7 @@ function thumbnailImage($imagePath, $thumbPath, $w, $h) {
     	drawErrorPageAndExit("There was an error with thumbnailImage() in ".$conf['mainScript'].". Please contact the administrator.", $e->getMessage());
     }
 }
-    
+
 function writeDataToLogs($data){
     global $conf;
 

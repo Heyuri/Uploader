@@ -597,7 +597,7 @@ function thumbnailImage($imagePath, $thumbPath, $w, $h) {
 function thumbnailVideo($videoPath, $thumbPath, $w, $h) {
 	global $conf;
     try {
-	shell_exec("ffmpeg -i $videoPath -ss 00:00:01.000 -vframes 1 $thumbPath");
+	shell_exec("ffmpeg -i $videoPath -ss 00:00:01.000 -vframes 1 -s ".$w.'x'.$h." $thumbPath");
     } catch (Exception $e) {
     	drawErrorPageAndExit("There was an error with thumbnailVideo() in ".$conf['mainScript'].". Please contact the administrator.", $e->getMessage());
     }
@@ -951,13 +951,13 @@ function userUploadedFile(){
     //create thumbnail if file type is image and size is above 1mb
     if(preg_match('/image/i', getMimeType($data)) && $_FILES["upfile"]['size'] >= 1*1024*1024) { 
 	$imagePath = $conf['uploadDir'].$conf['prefix'].$newID.'.'.$fileExtension;
-    	thumbnailImage($imagePath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$fileExtension, 100, 100); 
+    	thumbnailImage($imagePath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$fileExtension, 200, 95); 
     }
     
     //create thumbnail if file type is image and size is above 1mb
     if(preg_match('/video/i', getMimeType($data))) { 
 	$videoPath = $conf['uploadDir'].$conf['prefix'].$newID.'.'.$fileExtension;
-    	thumbnailVideo($videoPath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.png', 95, 200); 
+    	thumbnailVideo($videoPath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.png', 200, 95); 
     }
     drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');
 }

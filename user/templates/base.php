@@ -109,7 +109,7 @@ function drawHeader(){
 		height: 100px;
 	}
 	.imagePreview {
-	 	height: 80%;
+	 	max-height: 90px;
 	 	max-width: 200px;
 	 	padding-right: 5px;
 	 	padding-top: 2px;
@@ -197,9 +197,8 @@ function drawFileListing($page=1){
 	$thumbPath = $conf['thumbDir'].$thumbName;
 	
 	if(!file_exists($thumbPath)) $thumbPath = $path;
-	if(preg_match('/video/i', getMimeType($data))) $thumbPath = STATICPATH.'images/video_overlay.png'; //if file is a video it will use a default image 
-	if(preg_match('/audio/i', getMimeType($data))) $thumbPath = STATICPATH.'images/audio_overlay.png'; //if file is an audio it will use a default image 
-	
+	if(preg_match('/audio/i', getMimeType($data))) $thumbPath = STATICPATH.'images/audio_overlay.png'; //if file is an audio it will use a default image 	
+	if(preg_match('/video/i', getMimeType($data))) $thumbPath = $conf['thumbDir'].$conf['prefix'].getID($data).'_thumb.png'; //if file is a video it will use a default image 
 	if($cookie['showDeleteButton']) echo    '<td><small><a href='. $_SERVER['PHP_SELF'] .'?deleteFileID='.getID($data).'>■</a></small></td>';
 	if($cookie['showPreviewImage']) echo    '<td class="previewContainer"><a href="'. $path .'"><img class="imagePreview" src="'.$thumbPath.'"><br>'.$fileName.'</a> </td>'; else echo '<td> <a href="'. $path .'">'.$fileName.'</td>';
 	if($cookie['showComment'])	echo	'<td><font size=2>'. getComment($data) .'</font></td>';
@@ -595,6 +594,15 @@ function thumbnailImage($imagePath, $thumbPath, $w, $h) {
     	drawErrorPageAndExit("There was an error with thumbnailImage() in ".$conf['mainScript'].". Please contact the administrator.", $e->getMessage());
     }
 }
+function thumbnailVideo($videoPath, $thumbPath, $w, $h) {
+	global $conf;
+    try {
+	shell_exec("ffmpeg -i $videoPath -ss 00:00:01.000 -vframes 1 $thumbPath");
+    } catch (Exception $e) {
+    	drawErrorPageAndExit("There was an error with thumbnailVideo() in ".$conf['mainScript'].". Please contact the administrator.", $e->getMessage());
+    }
+
+}
 
 function writeDataToLogs($data){
     global $conf;
@@ -946,6 +954,11 @@ function userUploadedFile(){
     	thumbnailImage($imagePath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$fileExtension, 100, 100); 
     }
     
+    //create thumbnail if file type is image and size is above 1mb
+    if(preg_match('/video/i', getMimeType($data))) { 
+	$videoPath = $conf['uploadDir'].$conf['prefix'].$newID.'.'.$fileExtension;
+    	thumbnailVideo($videoPath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.png', 95, 200); 
+    }
     drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');
 }
 function userDeletePost(){

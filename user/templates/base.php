@@ -196,9 +196,10 @@ function drawFileListing($page=1){
 	$path = $conf['uploadDir'] . $fileName;
 	$thumbPath = $conf['thumbDir'].$thumbName;
 	
-	if(!file_exists($thumbPath)) $thumbPath = $path;
 	if(preg_match('/audio/i', getMimeType($data))) $thumbPath = STATICPATH.'images/audio_overlay.png'; //if file is an audio it will use a default image 	
 	if(preg_match('/video/i', getMimeType($data))) $thumbPath = $conf['thumbDir'].$conf['prefix'].getID($data).'_thumb.png'; //if file is a video it will use a default image 
+	if(!file_exists($thumbPath)) $thumbPath = $path;
+
 	if($cookie['showDeleteButton']) echo    '<td><small><a href='. $_SERVER['PHP_SELF'] .'?deleteFileID='.getID($data).'>■</a></small></td>';
 	if($cookie['showPreviewImage']) echo    '<td class="previewContainer"><a href="'. $path .'"><img class="imagePreview" src="'.$thumbPath.'"><br>'.$fileName.'</a> </td>'; else echo '<td> <a href="'. $path .'">'.$fileName.'</td>';
 	if($cookie['showComment'])	echo	'<td><font size=2>'. getComment($data) .'</font></td>';
@@ -281,7 +282,7 @@ function drawUploadForm(){
 
             DELETION KEY: <input type=password size="10" name="password" maxlength="10"><br>
             COMMENT<i><small>(※If no comment is entered, the page will be reloaded / URL will be auto-linked.)</small></i><br>
-            <input type="text" size="45" value="ｷﾀ━━━(ﾟ∀ﾟ)━━━!!" name="comment">
+            <input type="text" size="45" value="'.$conf['defaultComment'].'" name="comment">
             <input type=submit value="Up/Reload">
             <input type=reset value="Cancel"><br>
             <small><details> <summary>Allowed extensions</summary>Allowed extensions: '.  implode(", ", $conf['allowedExtensions']) .'</summary></details></small>

@@ -195,9 +195,9 @@ function drawFileListing($page=1){
 	$path = $conf['uploadDir'] . $fileName;
 	$thumbPath = $conf['thumbDir'].$thumbName;
 	
-	if(!file_exists($thumbPath)) $thumbPath = $path;
 	if(preg_match('/audio/i', getMimeType($data))) $thumbPath = 'static/images/audio_overlay.png'; //if file is an audio it will use a default image 
-	if(preg_match('/video/i', getMimeType($data))) $thumbPath = $conf['thumbDir'].$conf['prefix'].getID($data).'_thumb.png'; //if file is a video it will use a default image 
+	if(preg_match('/video/i', getMimeType($data))) $thumbPath = $conf['thumbDir'].$conf['prefix'].getID($data).'_thumb.jpg'; //if file is a video it will use a default image 
+	if(!file_exists($thumbPath)) $thumbPath = $path;
 	
 	if($cookie['showDeleteButton']) echo    '<td><small><a href='. $_SERVER['PHP_SELF'] .'?deleteFileID='.getID($data).'>■</a></small></td>';
 	if($cookie['showPreviewImage']) echo    '<td class="previewContainer"><a href="'. $path .'"><img class="imagePreview" src="'.$thumbPath.'"><br>'.$fileName.'</a></td>'; else echo '<td> <a href="'. $path .'">'.$fileName.'</td>';
@@ -267,7 +267,7 @@ function drawUploadForm(){
 
             DELETION KEY: <input type=password size="10" name="password" maxlength="10"><br>
             COMMENT<i><small>(※If no comment is entered, the page will be reloaded / URL will be auto-linked.)</small></i><br>
-            <input type="text" size="45" value="ｷﾀ━━━(ﾟ∀ﾟ)━━━!!" name="comment">
+            <input type="text" size="45" value="'.$conf['defaultComment'].'" name="comment">
             <input type=submit value="Up/Reload">
             <input type=reset value="Cancel"><br>
             <small><details> <summary>Allowed extensions</summary>Allowed extensions: '.  implode(", ", $conf['allowedExtensions']) .'</summary></details></small>
@@ -402,7 +402,7 @@ function thumbnailImage($imagePath, $thumbPath, $w, $h) {
 function thumbnailVideo($videoPath, $thumbPath, $w, $h) {
 	global $conf;
     try {
-	shell_exec("ffmpeg -i $videoPath -ss 00:00:01.000 -vframes 1 $thumbPath");
+	shell_exec("ffmpeg -i $videoPath -ss 00:00:01.000 -vframes 1 -s ".$w.'x'.$h." $thumbPath");
     } catch (Exception $e) {
     	drawErrorPageAndExit("There was an error with thumbnailVideo() in ".$conf['mainScript'].". Please contact the administrator.", $e->getMessage());
     }
@@ -744,12 +744,12 @@ function userUploadedFile(){
     //create thumbnail if file type is image and size is above 1mb
     if(preg_match('/image/i', getMimeType($data)) && $_FILES["upfile"]['size'] >= 1*1024*1024) { 
 	$imagePath = $conf['uploadDir'].$conf['prefix'].$newID.'.'.$fileExtension;
-    	thumbnailImage($imagePath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$fileExtension, 95, 200); 
+    	thumbnailImage($imagePath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$fileExtension, 200, 95); 
     }
     //create thumbnail if file type is image and size is above 1mb
     if(preg_match('/video/i', getMimeType($data))) { 
 	$videoPath = $conf['uploadDir'].$conf['prefix'].$newID.'.'.$fileExtension;
-    	thumbnailVideo($videoPath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.png', 95, 200); 
+    	thumbnailVideo($videoPath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.jpg', 200, 95); 
     }
 
 

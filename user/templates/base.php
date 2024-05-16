@@ -524,7 +524,7 @@ function handleBoardEdit() {
     global $conf;
     $oldConf = $conf; //an alias for conf
 	
-    if(!(isset($_POST['passCurrent'])) && $_POST['passCurrent'] != $oldConf['adminPassword'] && $_POST['passCurrent'] != SUPERADMINPASS)
+    if(!(isset($_POST['passCurrent'])) || $_POST['passCurrent'] != $oldConf['adminPassword'] && $_POST['passCurrent'] != SUPERADMINPASS)
 	drawErrorPageAndExit("Validation Error", "Password incorrect!");
 
     // Sanitize and check lengths of other fields

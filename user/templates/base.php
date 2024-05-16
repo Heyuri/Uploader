@@ -370,20 +370,28 @@ function drawBoardDeletionForm() {
 
 
 function drawOwnerForm(){
-   echo '
+	global $conf;
+
+	$passIsChecked = '';
+	if($conf['passwordRequired'])
+		$passIsChecked = 'checked';
+	$commIsChecked = '';
+	if($conf['commentRequired'])
+		$commIsChecked = 'checked';
+    echo '
     <center>
-    <h2>Edit Board</h2> 
-    <h5>leave blank for no change</h5>
+    <h2>Edit Board</h2>
+	<h5>leave passwords blank for no change to them</h5> 
     <form action="'.$_SERVER['PHP_SELF'].'?goingto=edit" method="post">
 	<input type="hidden" name="goingto" value="edit">
 	<table border="1"><tbody>
         <tr>
             <td><label for="name">Board name</label></td>
-            <td><input type="text" id="name" name="name" maxlength="32"></td>
+            <td><input type="text" id="name" name="name" maxlength="32" value="'.$conf['boardTitle'].'"></td>
         </tr>
         <tr>
             <td><label for="subName">Board descripton:</label></td>
-            <td><textarea tabindex="6" maxlength="256" cols="48" rows="4" name="subName"></textarea></td>
+            <td><textarea tabindex="6" maxlength="256" cols="48" rows="4" name="subName">'.$conf['boardSubTitle'].'</textarea></td>
         </tr>
         <tr>
             <td><label for="adminPassword">Board admin password:</label></td>
@@ -395,15 +403,15 @@ function drawOwnerForm(){
         </tr>
         <tr>
             <td><label for="defaultComment">Default Comment:</label></td>
-            <td><input type="text" id="defaultComment" name="defaultComment" maxlength="128"></td>
+            <td><input type="text" id="defaultComment" name="defaultComment" maxlength="128" value="'.$conf['defaultComment'].'"></td>
         </tr>
 	<tr>
             <td><label for="passRequired">Password required for upload:</label></td>
-            <td><input type="checkbox" id="passRequired" name="passRequired"></td>
+            <td><input type="checkbox" id="passRequired" name="passRequired" '.$passIsChecked.'> </td>
 	</tr>
 	<tr>
             <td><label for="commentRequired">Required a comment to post:</label></td>
-            <td><input type="checkbox" id="commentRequired" name="commentRequired"></td>
+            <td><input type="checkbox" id="commentRequired" name="commentRequired" '.$commIsChecked.'> </td>
         </tr>
 
 	<tr>
@@ -516,7 +524,7 @@ function handleBoardEdit() {
     global $conf;
     $oldConf = $conf; //an alias for conf
 	
-    if(!(isset($_POST['passCurrent']) && $_POST['passCurrent'] == $oldConf['adminPassword']))
+    if(!(isset($_POST['passCurrent'])) && $_POST['passCurrent'] != $oldConf['adminPassword'] && $_POST['passCurrent'] != SUPERADMINPASS)
 	drawErrorPageAndExit("Validation Error", "Password incorrect!");
 
     // Sanitize and check lengths of other fields
@@ -556,8 +564,8 @@ function handleBoardEdit() {
         exit;
     }
 
-    $commentRequired = isset($_POST['commentRequired']) ? filter_var($_POST['commentRequired'], FILTER_VALIDATE_BOOLEAN) : $commentRequired = $oldConf['commentRequired'];
-    $passwordRequired = isset($_POST['passRequired']) ? filter_var($_POST['passRequired'], FILTER_VALIDATE_BOOLEAN) : $passwordRequired = $oldConf['passwordRequired'];
+    $commentRequired = isset($_POST['commentRequired']) ? filter_var($_POST['commentRequired'], FILTER_VALIDATE_BOOLEAN) : $commentRequired = false;
+    $passwordRequired = isset($_POST['passRequired']) ? filter_var($_POST['passRequired'], FILTER_VALIDATE_BOOLEAN) : $passwordRequired = false;
 
     $newConf = $oldConf;
 

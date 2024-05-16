@@ -402,6 +402,11 @@ function drawOwnerForm(){
             <td><input type="checkbox" id="passRequired" name="passRequired"></td>
 	</tr>
 	<tr>
+            <td><label for="commentRequired">Required a comment to post:</label></td>
+            <td><input type="checkbox" id="commentRequired" name="commentRequired"></td>
+        </tr>
+
+	<tr>
 	     <td><label for="passCurrent">Current Password: *</label></td>
 	     <td><input type="password" id="passCurrent" name="passCurrent" required></td>
 	</tr>
@@ -554,14 +559,13 @@ function handleBoardEdit() {
     $commentRequired = isset($_POST['commentRequired']) ? filter_var($_POST['commentRequired'], FILTER_VALIDATE_BOOLEAN) : $commentRequired = $oldConf['commentRequired'];
     $passwordRequired = isset($_POST['passRequired']) ? filter_var($_POST['passRequired'], FILTER_VALIDATE_BOOLEAN) : $passwordRequired = $oldConf['passwordRequired'];
 
-
     $newConf = $oldConf;
 
     $newConf['boardTitle'] = $name;
     $newConf['boardSubTitle'] = $subName;
     $newConf['adminPassword'] = $adminPassword;
     $newConf['deletionPassword'] = $deletionPassword;
-    $nweConf['passwordRequired'] = $passwordRequired;
+    $newConf['passwordRequired'] = $passwordRequired;
     
     if($commentRequired){
         $newConf['commentRequired'] = $commentRequired;

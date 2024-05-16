@@ -197,7 +197,10 @@ function drawFileListing($page=1){
 	$thumbPath = $conf['thumbDir'].$thumbName;
 	
 	if(preg_match('/audio/i', getMimeType($data))) $thumbPath = STATICPATH.'images/audio_overlay.png'; //if file is an audio it will use a default image 	
+	
 	if(preg_match('/video/i', getMimeType($data))) $thumbPath = $conf['thumbDir'].$conf['prefix'].getID($data).'_thumb.png'; //if file is a video it will use a default image 
+	if(preg_match('/video/i', getMimeType($data)) && !file_exists($thumbPath)) $thumbPath = 'static/images/video_overlay.png';
+	
 	if(!file_exists($thumbPath)) $thumbPath = $path;
 
 	if($cookie['showDeleteButton']) echo    '<td><small><a href='. $_SERVER['PHP_SELF'] .'?deleteFileID='.getID($data).'>■</a></small></td>';

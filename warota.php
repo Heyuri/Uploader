@@ -391,25 +391,52 @@ function isDataEmpty($data) {
 
 //generate thumbnail
 function thumbnailImage($imagePath, $thumbPath, $w, $h) {
-	global $conf;
-    try {
-    	$img = new Imagick(realpath($imagePath));
-    	$img->setbackgroundcolor('rgb(64, 64, 64)');
-    	$img->thumbnailImage($w, $h, true);
+  // Quality and dimensions settings
+        $maxWidth = 200;
+        $maxHeight = 95;
+       	
+        $image = imagecreatefromstring(file_get_contents($imagePath));
     
-	$img->writeImage($thumbPath);
-    } catch (Exception $e) {
-    	drawErrorPageAndExit("There was an error with thumbnailImage() in ".$conf['mainScript'].". Please contact the administrator.", $e->getMessage());
-    }
-}
-function thumbnailVideo($videoPath, $thumbPath, $w, $h) {
-	global $conf;
-    try {
-	shell_exec("ffmpeg -i $videoPath -ss 00:00:01.000 -vframes 1 -s ".$w.'x'.$h." $thumbPath");
-    } catch (Exception $e) {
-    	drawErrorPageAndExit("There was an error with thumbnailVideo() in ".$conf['mainScript'].". Please contact the administrator.", $e->getMessage());
-    }
+        $width = imagesx($image);
+        $height = imagesy($image);
+    
+        $newWidth = $w;
+        $newHeight = $h;
+    
 
+        if ($width > $maxWidth || $height > $maxHeight) {
+		$aspectRatio = $width / $height;
+    
+                if ($width > $height) {
+                    $newWidth = $maxWidth;
+                    $newHeight = $maxWidth / $aspectRatio;
+                } else {
+                    $newHeight = $maxHeight;
+                    $newWidth = $maxHeight * $aspectRatio;
+                }
+            }
+    
+         // Create a new image
+         $thumbnail = imagecreatetruecolor((int)$newWidth, (int)$newHeight);
+         // Resize the image to the new dimensions
+         imagecopyresampled($thumbnail, $image, 0, 0, 0, 0, (int)$newWidth, (int)$newHeight, $width, $height);
+    
+         // Save the thumbnail to a temporary file
+         $thumbnailPath = tempnam(sys_get_temp_dir(), 'thumbnail');
+         imagejpeg($thumbnail, $thumbPath, 80);
+    
+         // Free up memory
+         imagedestroy($image);
+         imagedestroy($thumbnail);
+    
+}
+function thumbnailVideo($videoPath, $thumbPath) {
+	$thumbnailPath = tempnam(sys_get_temp_dir(), 'thumbnail') . ".jpg";
+
+        // Ensure the environment variable is included in the command
+        $ffmpegCommand = "LD_LIBRARY_PATH=/usr/local/lib:/usr/X11R6/lib ffmpeg -i {$videoPath} -vframes 1  {$thumbPath} 2>&1";
+        exec($ffmpegCommand);
+        return $thumbnailPath;
 }
 
 function writeDataToLogs($data){
@@ -755,7 +782,7 @@ function userUploadedFile(){
     //create thumbnail if file type is image and size is above 1mb
     if(preg_match('/video/i', getMimeType($data))) { 
 	$videoPath = $conf['uploadDir'].$conf['prefix'].$newID.'.'.$fileExtension;
-    	thumbnailVideo($videoPath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.jpg', 200, 95); 
+    	thumbnailVideo($videoPath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.jpg'); 
     }
 
 

@@ -177,7 +177,9 @@ function drawCatalogListing($page=1){
 	if(preg_match('/video/i', getMimeType($data)) && !file_exists($thumbPath)) $thumbPath = 'static/images/video_overlay.png';
 	
 	if(preg_match('/audio/i', getMimeType($data))) $thumbPath = STATICPATH.'images/audio_overlay.png'; //if file is an audio it will use a default image 
-	
+
+	if(preg_match('/application/i', getMimeType($data))) $thumbPath = STATICPATH.'images/application_overlay.png'; //if file isn't media it will use a default image 
+
 	echo  '<div class="entry"><td style="display: inline-block; margin: 10px;"><a href="'.$conf['uploadDir'].$fileName.'"><center><img class="entryImage" src="'.$thumbPath.'"></center> </a><br><center>'.getComment($data).'</center></div></td>';
 	$currentLine = $currentLine + 1;
     }

@@ -22,11 +22,11 @@ return $conf = [
     'logFile' => "souko.log",   // name of flat file
     'uploadDir' => "src/",      // upload location (slash is required).
     'thumbDir' => "thmb/",	// thumbnail directory
-    'prefix' => "",             // prefix to add in front of your file name. Don't change after setting
+    'prefix' => "test",             // prefix to add in front of your file name. Don't change after setting
     'coolDownTime' => 5,        // time in seconds untill can be uploaded to again. (set to -1 for no cool down)
 
-
-    'maxAmountOfFiles' => 20,               // max files allowed on server
+    'defaultComment' => 'ｷﾀ━━━(ﾟ∀ﾟ)━━━!!',  //defulat comment for upload
+    'maxAmountOfFiles' => 200,              // max files allowed on server
     'maxTotalSize' => 200*1024*1024*1024,   // total sized allowed in bytes
     'filesPerListing' => 5,                 // how many files listed per page
     'maxUploadSize' => 20*1024*1024,        // max upload size in bytes

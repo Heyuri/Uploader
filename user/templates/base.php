@@ -195,13 +195,16 @@ function drawFileListing($page=1){
 	
 	$path = $conf['uploadDir'] . $fileName;
 	$thumbPath = $conf['thumbDir'].$thumbName;
-	
+
+	if(!file_exists($thumbPath)) $thumbPath = $path;
+
 	if(preg_match('/audio/i', getMimeType($data))) $thumbPath = STATICPATH.'images/audio_overlay.png'; //if file is an audio it will use a default image 	
 	
 	if(preg_match('/video/i', getMimeType($data))) $thumbPath = $conf['thumbDir'].$conf['prefix'].getID($data).'_thumb.png'; //if file is a video it will use a default image 
-	if(preg_match('/video/i', getMimeType($data)) && !file_exists($thumbPath)) $thumbPath = 'static/images/video_overlay.png';
-	
-	if(!file_exists($thumbPath)) $thumbPath = $path;
+	if(preg_match('/video/i', getMimeType($data)) && !file_exists($thumbPath)) $thumbPath = STATICPATH.'images/video_overlay.png';
+
+	if(preg_match('/application/i', getMimeType($data))) $thumbPath = STATICPATH.'images/application_overlay.png'; //if file isn't media it will use a default image 
+
 
 	if($cookie['showDeleteButton']) echo    '<td><small><a href='. $_SERVER['PHP_SELF'] .'?deleteFileID='.getID($data).'>■</a></small></td>';
 	if($cookie['showPreviewImage']) echo    '<td class="previewContainer"><a href="'. $path .'"><img class="imagePreview" src="'.$thumbPath.'"><br>'.$fileName.'</a> </td>'; else echo '<td> <a href="'. $path .'">'.$fileName.'</td>';

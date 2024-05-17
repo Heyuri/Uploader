@@ -645,9 +645,12 @@ function loadCookieSettings(){
     $_COOKIE['settings'] = $cookie;
 }
 function getSplitCookie(){
-    global $conf;
-    return array_combine(['showDeleteButton', 'showComment', 'showPreviewImage', 'showFileSize', 'showMimeType'], explode("<>",$_COOKIE['settings']));
+	if(sizeof(explode("<>", $_COOKIE['settings'])) != sizeof(array('showDeleteButton', 'showComment', 'showPreviewImage', 'showFileSize', 'showMimeType')))
+		drawErrorPageAndExit_headless("File listing could not be displayed", "Please refresh cookies. If problem persists, contact the administrator");
+	return array_combine(['showDeleteButton', 'showComment', 'showPreviewImage', 'showFileSize', 'showMimeType'], explode("<>",$_COOKIE['settings']));
 }
+
+
 function isBoardBeingFlooded() {
     global $conf;
     $lastPost = getDataByID(getLastID());

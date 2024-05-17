@@ -2,10 +2,10 @@ PHPぁぷろだ by ToR(http://php.s3.to)
 source by ずるぽん(http://zurubon.virtualave.net/)  
 English translation & various modifications by Heyuri (https://www.heyuri.net/)
 
-Heyuri's updates (edition 20240517)  
+Heyuri updates (edition 20240517)  
   This uploader is a custom version of PHPぁぷろだ.  
-  Many thanks to ずるぼん-sama for the original source and レッツPHP-sama for the PHP conversion.
-  The last update before Heyuri took over was Yakuba modification (edition 20090922)
+  Many thanks to ずるぼん-sama for the original source and レッツPHP-sama for the PHP conversion.  
+  The last update before Heyuri took over was Yakuba modifications (edition 20090922).
 
 ## Terms and Conditions
 - We give no guarantees on its operation. Don’t cry if anything bad happens!

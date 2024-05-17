@@ -12,9 +12,10 @@ $configFile = 'config.php';
   source by ずるぽん(http://zurubon.virtualave.net/)
   English translation & various modifications by Heyuri (https://www.heyuri.net/)
 
-  Yakuba modifications (edition 20090922)
+  Heyuri updates (edition 20240517)
     This uploader is a custom version of PHPぁぷろだ.
     Many thanks to ずるぼん-sama for the original source and レッツPHP-sama for the PHP conversion.
+    The last update before Heyuri took over was Yakuba modifications (edition 20090922)
 
 ■Terms and Conditions
   ・We give no guarantees on its operation. Don’t cry if anything bad happens!

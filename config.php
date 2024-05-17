@@ -21,11 +21,11 @@ return $conf = [
     'timeZone' => 'UTC',        // timezone
     'logFile' => "souko.log",   // name of flat file
     'uploadDir' => "src/",      // upload location (slash is required).
-    'thumbDir' => "thmb/",	// thumbnail directory
-    'prefix' => "test",             // prefix to add in front of your file name. Don't change after setting
+    'thumbDir' => "thmb/",	    // thumbnail directory
+    'prefix' => "up",           // prefix to add in front of your file name. Don't change after setting
     'coolDownTime' => 5,        // time in seconds untill can be uploaded to again. (set to -1 for no cool down)
 
-    'defaultComment' => 'ｷﾀ━━━(ﾟ∀ﾟ)━━━!!',  //defulat comment for upload
+    'defaultComment' => 'ｷﾀ━━━(ﾟ∀ﾟ)━━━!!',  // default comment for upload
     'maxAmountOfFiles' => 200,              // max files allowed on server
     'maxTotalSize' => 200*1024*1024*1024,   // total sized allowed in bytes
     'filesPerListing' => 5,                 // how many files listed per page
@@ -34,7 +34,7 @@ return $conf = [
     'maxCommentSize' => 128,                // max comment length
     'deleteOldestOnMaxFiles' => false,      // delete oldest file if user uploads when maxxed out.
 
-    'denylist' => ['0.0.0.0'], //IPs that are blocked from uploading but can still view the rest of the page | DON'T LEAVE BLANK
+    'denylist' => ['0.0.0.0'],    //IPs that are blocked from uploading but can still view the rest of the page | DON'T LEAVE BLANK
     'hardBanList' => ['0.0.0.0'], //IPs in here will recieve an error message when attempting to load the page => cannot interact at all | DON'T LEAVE BLANK
 
     'allowedExtensions' =>  [

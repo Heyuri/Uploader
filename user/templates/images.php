@@ -118,11 +118,11 @@ function drawPageingBar($page=1){
     $pages = ceil($fileCount / $conf['filesPerListing']) + 1;
 
     if($page === "all"){
-        echo '[<a href="'.$conf['home'].'">Home</a>] [<b>ALL</b>] [<a href="'.$_SERVER['PHP_SELF'].'?page=1">1</a>]';
+        echo '[<a href="'.$conf['home'].'">Home</a>]　[<b>ALL</b>] [<a href="'.$_SERVER['PHP_SELF'].'?page=1">1</a>]';
         return;
     }
 
-    echo '[<a href="'.$conf['home'].'">Home</a>] [<a href="'.$_SERVER['PHP_SELF'].'?page=all">ALL</a>]';
+    echo '[<a href="'.$conf['home'].'">Home</a>]　[<a href="'.$_SERVER['PHP_SELF'].'?page=all">ALL</a>]';
 
     for($i = 1; $i < $pages; $i++) {
         if($i == $page){

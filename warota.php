@@ -204,9 +204,11 @@ function drawFileListing($page=1){
 	$thumbPath = $conf['thumbDir'].$thumbName;
 	
 	if(preg_match('/audio/i', getMimeType($data))) $thumbPath = 'static/images/audio_overlay.png'; //if file is an audio it will use a default image 
-
+	
 	if(preg_match('/video/i', getMimeType($data))) $thumbPath = $conf['thumbDir'].$conf['prefix'].getID($data).'_thumb.jpg'; //if file is a video it will use a default imag 
 	if(preg_match('/video/i', getMimeType($data)) && !file_exists($thumbPath)) $thumbPath = 'static/images/video_overlay.png';
+
+	if(preg_match('/application/i', getMimeType($data))) $thumbPath = 'static/images/application_overlay.png'; //if file isn't media it will use a default image 
 
 	if(!file_exists($thumbPath)) $thumbPath = $path;
 	

@@ -237,6 +237,21 @@ function drawFooter(){
     </body>
     </html>';
 }
+
+function drawErrorPageAndExit_headless($mes1,$mes2=""){
+    global $conf;
+    echo '
+    <hr>
+    <center>
+        <strong>'.$mes1.'</strong><br>
+        <p>'.$mes2.'</p>
+    </center> 
+    [<a href="'.$conf['mainScript'].'">Back</a>]';
+    drawFooter();
+    exit;
+}
+
+
 function drawErrorPageAndExit($mes1,$mes2=""){
     global $base_php;
     drawHeader();

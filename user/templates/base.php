@@ -883,6 +883,7 @@ function loadCookieSettings(){
     $_COOKIE['settings'] = $cookie;
 }
 function getSplitCookie(){
+	global $conf;
 	if(sizeof(explode("<>", $_COOKIE['settings'])) != sizeof(array('showDeleteButton', 'showComment', 'showPreviewImage', 'showFileSize', 'showMimeType')))
 		$_COOKIE['settings'] = implode("<>", $conf['defaultCookieValues']); 
 	return array_combine(['showDeleteButton', 'showComment', 'showPreviewImage', 'showFileSize', 'showMimeType'], explode("<>",$_COOKIE['settings']));

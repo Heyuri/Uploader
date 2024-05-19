@@ -700,7 +700,7 @@ function loadCookieSettings(){
 }
 function getSplitCookie(){
 	if(sizeof(explode("<>", $_COOKIE['settings'])) != sizeof(array('showDeleteButton', 'showComment', 'showPreviewImage', 'showFileSize', 'showMimeType')))
-		drawErrorPageAndExit_headless("File listing could not be displayed", "Please refresh cookies. If problem persists, contact the administrator");
+		$_COOKIE['settings'] = implode("<>", $conf['defaultCookieValues']); 
 	return array_combine(['showDeleteButton', 'showComment', 'showPreviewImage', 'showFileSize', 'showMimeType'], explode("<>",$_COOKIE['settings']));
 }
 

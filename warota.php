@@ -61,6 +61,7 @@ $configFile = 'config.php';
     ・If logging IPs, there are other settings to block IPs from viewing the board & uploading files
     ・Some default CSS fixes
     ・If user didn't enter any password for a file, only the administrator can delete the file
+  2024/05/19 v3.1 Fixed a bug about not loading if the user had invalid cookies
 
 ■Installation
   ・Clone repo into web directory (or unzip it there)

@@ -32,8 +32,10 @@ function drawHeader(){
 	tr {min-width: 100%; background-color:#eeaa88;}
 	table {border-collapse: collapse; max-width: 100%; }
 	.entry {
-		position: absolute;
-		overflow-y: hidden;
+		word-wrap: break-word;
+		max-width:300px;
+		display: inline-block; 
+		margin: 10px;
 		vertical-align: top;
 		padding: 0.5em 0;
 	}
@@ -177,7 +179,7 @@ function drawCatalogListing($page=1){
 
 	if(preg_match('/application/i', getMimeType($data))) $thumbPath = 'static/images/application_overlay.png'; //if file isn't media it will use a default image 
 
-	echo  '<div class="entry"><td style="display: inline-block; margin: 10px;"><a href="'.$conf['uploadDir'].$fileName.'"><center><img class="entryImage" src="'.$thumbPath.'"></center> </a><br><center>'.getComment($data).'</center></div></td>';
+	echo  '<td style="display: inline-block; margin: 10px;"> <div class="entry"> <a href="'.$conf['uploadDir'].$fileName.'"><center><img class="entryImage" src="'.$thumbPath.'"></center> </a><br><center>'.getComment($data).'</center></div></td>';
 
 	$currentLine = $currentLine + 1;
     }

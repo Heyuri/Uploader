@@ -1,6 +1,5 @@
 <?php
 function drawBoardListing(){
-    // symlink black magic
     $boards = __DIR__ . "/boards";
     foreach (new DirectoryIterator($boards) as $fileInfo) {
         if ($fileInfo->isDir() && !$fileInfo->isDot()) {
@@ -9,7 +8,7 @@ function drawBoardListing(){
             if (file_exists($configFile)) {
                 $conf = require $configFile;
                 if($conf['boardListed']){
-                    echo '<center><h2>[<a href="boards/'.$conf['boardURL'] .'">'.$conf['boardURL'] .'</a>]</h2></center><br>';
+                    echo '<center><h2>[<a href="boards/'.$conf['boardURL'].'/">'.$conf['boardURL'].'</a>]</h2></center><br>';
                 }
             }
         }

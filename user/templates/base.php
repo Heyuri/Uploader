@@ -981,7 +981,11 @@ function userUploadedFile(){
     }else{
         $password = '';
     }
-
+	
+	if($conf['logUserIP'] == false){
+    	$_SERVER['REMOTE_ADDR'] = "1337";
+	}
+	
     $data = createData( $newID, $fileExtension, $comment, $_SERVER['REMOTE_ADDR'],
                         time(), $_FILES['upfile']['size'], $realMimeType, $password,
                         $fileName);
@@ -1035,15 +1039,10 @@ function userDeletePost(){
  *  Start of the main logic
  */
 
-if($conf['logUserIP'] == false){
-    $_SERVER['REMOTE_ADDR'] = "1337";
-}
-
 // check if user is hard banned (cannot lurk)
 if(isGlobalBanned($_SERVER['REMOTE_ADDR'])){
        	drawErrorPageAndExit("You have been banned by the administrator. ヽ(ー_ー )ノ");
 }
-
 
 loadCookieSettings();
 

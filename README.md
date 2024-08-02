@@ -2,7 +2,7 @@ PHPぁぷろだ by ToR(http://php.s3.to)
 source by ずるぽん(http://zurubon.virtualave.net/)  
 English translation & various modifications by Heyuri (https://www.heyuri.net/)
 
-Heyuri updates (edition 20240517)  
+Heyuri updates (edition 20240803)  
   This uploader is a custom version of PHPぁぷろだ.  
   Many thanks to ずるぼん-sama for the original source and レッツPHP-sama for the PHP conversion.  
   The last update before Heyuri took over was Yakuba modifications (edition 20090922).
@@ -51,7 +51,9 @@ Heyuri updates (edition 20240517)
 - If logging IPs, there are other settings to block IPs from viewing the board & uploading files
 - Some default CSS fixes
 - If user didn't enter any password for a file, only the administrator can delete the file
-
+2024/05/19 v3.1 Fixed a bug about not loading if the user had invalid cookies
+2024/08/03 v3.2 IP bans can now work without logging setting turned on as well
+  
 ## Installation
 - Clone repo into web directory (or unzip it there)
 - cd into the directory and do this: `chmod +x prepare.sh`, then run it with `./prepare.sh`

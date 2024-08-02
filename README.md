@@ -51,6 +51,7 @@ Heyuri updates (edition 20240803)
 - If logging IPs, there are other settings to block IPs from viewing the board & uploading files
 - Some default CSS fixes
 - If user didn't enter any password for a file, only the administrator can delete the file
+
 2024/05/19 v3.1 Fixed a bug about not loading if the user had invalid cookies
 2024/08/03 v3.2 IP bans can now work without logging setting turned on as well
   

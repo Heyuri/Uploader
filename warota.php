@@ -830,15 +830,16 @@ function userDeletePost(){
     if(empty($password)) drawErrorPageAndExit('Deletion Error', "The password you entered was blank.");
     
     if(is_null($postData)){
-        drawErrorPageAndExit('Deletion Error','The file cannot be found.');
-    } elseif(getPassword($postData) == ''){
-        drawErrorPageAndExit('Deletion Error','There was not a password when this post was created. Contact the administrator to request deletion');
+        drawErrorPageAndExit('Deletion Error','The file could not be found.');
     } elseif($password === getPassword($postData) || $password === $conf['adminPassword']){
 		deleteDataFromLogByID($fileID);
+		
 		$thumbPath = $conf['thumbDir'] . $conf['prefix'] . getID($postData) . '_thumb.' . getFileExtension($postData);
-		unlink($thumbPath);
+		if(file_exists($thumbPath)) unlink($thumbPath);
 
-        drawMessageAndRedirectHome('file has been deleted.','If this page does not change, click "Back".');
+        drawMessageAndRedirectHome('The file has been deleted.','If this page does not change, click "Back".');
+    } elseif(getPassword($postData) == '' && $password !== $conf['adminPassword']){
+        drawErrorPageAndExit('Deletion Error','There was not a password when this post was created. Contact the administrator to request deletion');
     } else{
         drawErrorPageAndExit('Deletion Error','The password is incorrect.');
     }

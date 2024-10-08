@@ -1,6 +1,9 @@
 <?php
 function drawBoardListing(){
     $boards = __DIR__ . "/boards";
+    
+    if(!is_dir($boards)) return;
+    
     foreach (new DirectoryIterator($boards) as $fileInfo) {
         if ($fileInfo->isDir() && !$fileInfo->isDot()) {
             $boardName = $fileInfo->getFilename();

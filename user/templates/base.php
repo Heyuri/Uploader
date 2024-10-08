@@ -137,11 +137,11 @@ function drawPageingBar($page=1){
     $pages = ceil($fileCount / $conf['filesPerListing']) + 1;
 
     if($page === "all"){
-        echo '[<a href="'.$conf['home'].'">Home</a>]　[<b>ALL</b>] [<a href="'.$_SERVER['PHP_SELF'].'?page=1">1</a>]';
+        echo '[<a href="'.$conf['home'].'">Home</a>] [<a href="../../index.php">Boards</a>] [<b>ALL</b>] [<a href="'.$_SERVER['PHP_SELF'].'?page=1">1</a>]';
         return;
     }
 
-    echo '[<a href="'.$conf['home'].'">Home</a>]　[<a href="'.$_SERVER['PHP_SELF'].'?page=all">ALL</a>]';
+    echo '[<a href="'.$conf['home'].'">Home</a>] [<a href="../../index.php">Boards</a>] [<a href="'.$_SERVER['PHP_SELF'].'?page=all">ALL</a>]';
 
     for($i = 1; $i < $pages; $i++) {
         if($i == $page){
@@ -269,6 +269,20 @@ function drawMessageAndRedirectHome($mes1,$mes2=""){
     exit;
 }
 
+function drawMessageAndRedirectToIndex($mes1,$mes2="") {
+	drawHeader();
+    echo '
+    <hr>
+    <center>
+        <strong>'.$mes1.'</strong><br>
+        <p>'.$mes2.'</p>
+    </center>
+    [<a href="'.$_SERVER['PHP_SELF'].'">Back</a>]
+    <script type="text/javascript">setTimeout(location.href="../../index.php",0)</script>';
+    drawFooter();
+    exit;
+}
+
 function drawUploadForm(){
     // Post form header (Yakuba modification)
     // Check if the overall filesize limit for the board has been exceeded
@@ -331,24 +345,6 @@ function drawSettingsForm(){
 }
 
 function drawBoardDeletionForm() {
-   global $conf;
-   if(!empty($_POST)) {
-	   if($_POST['deletionPassword'] == $conf['deletionPassword'] && $_POST['deletionPasswordconfirm'] == $conf['deletionPassword'] || $_POST['deletionPassword'] == SUPERADMINPASS) {
-		   //return to index
-		    echo '
-    			<hr>
-    			<center>
-        			<strong>BOARD DELETED</strong><br>
-    			</center> 
-    			[<a href="../../index.php">Return</a>]';
-		   deleteBoard();
-		   die;
-	   }
-   	   else {
-		drawErrorPageAndExit_headless('Password Incorrect');
-	   }
-   }
-   else {
    echo '
     	<center>
 	    <h2>Delete Board</h2> 
@@ -371,9 +367,20 @@ function drawBoardDeletionForm() {
     	</form>
 	    </center>
 	';
-   }
 }
 
+function handleBoardDeletion() {
+	global $conf;
+   if($_POST['deletionPassword'] === $conf['deletionPassword'] && $_POST['deletionPasswordconfirm'] === $conf['deletionPassword'] || $_POST['deletionPassword'] === SUPERADMINPASS) {
+	   //return to index
+	   deleteBoard();
+	   drawMessageAndRedirectToIndex('Board deleted.');
+	   die;
+   }
+   else {
+	drawErrorPageAndExit('Password Incorrect');
+   }
+}
 
 function drawOwnerForm(){
 	global $conf;
@@ -597,7 +604,7 @@ function handleBoardEdit() {
         drawErrorPageAndExit("Failed to write configuration. contact the admin");
     }
 
-    drawMessageAndRedirectHome('Board has been edited','If this page dose not change, click "Back".');
+    drawMessageAndRedirectHome('Board has been edited','If this page does not change, click "Back".');
 }
 
 //generate thumbnail
@@ -1012,6 +1019,7 @@ function userUploadedFile(){
     }
     drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');
 }
+
 function userDeletePost(){
     global $conf;
     $fileID = $_POST['deleteFileID'];
@@ -1022,15 +1030,16 @@ function userDeletePost(){
     if(empty($password)) drawErrorPageAndExit('Deletion Error', "The password you entered was blank.");
     
     if(is_null($postData)){
-        drawErrorPageAndExit('Deletion Error','The file cannot be found.');
-    } elseif(getPassword($postData) == ''){
-        drawErrorPageAndExit('Deletion Error','There was not a password when this post was created. Contact the administrator to request deletion');
-    } elseif($password === getPassword($postData) || $password === $conf['adminPassword']){
+        drawErrorPageAndExit('Deletion Error','The file could not be found.');
+    } elseif($password === getPassword($postData) || $password === $conf['adminPassword'] || $password === SUPERADMINPASS){
 		deleteDataFromLogByID($fileID);
+		
 		$thumbPath = $conf['thumbDir'] . $conf['prefix'] . getID($postData) . '_thumb.' . getFileExtension($postData);
-		unlink($thumbPath);
+		if(file_exists($thumbPath)) unlink($thumbPath);
 
-        drawMessageAndRedirectHome('file has been deleted.','If this page does not change, click "Back".');
+        drawMessageAndRedirectHome('The file has been deleted.','If this page does not change, click "Back".');
+    } elseif(getPassword($postData) == '' ){
+        drawErrorPageAndExit('Deletion Error', 'There was not a password when this post was created. Contact the administrator or board owner to request deletion');
     } else{
         drawErrorPageAndExit('Deletion Error','The password is incorrect.');
     }
@@ -1044,6 +1053,8 @@ function userDeletePost(){
 if(isGlobalBanned($_SERVER['REMOTE_ADDR'])){
        	drawErrorPageAndExit("You have been banned by the administrator. ヽ(ー_ー )ノ");
 }
+
+if(isset($_POST['deletionPassword'])) handleBoardDeletion();
 
 loadCookieSettings();
 

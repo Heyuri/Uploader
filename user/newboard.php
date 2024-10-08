@@ -4,7 +4,7 @@ function newBoard($url, $name, $subName, $adminPassword, $deletionPassword, $com
         mkdir(__DIR__ . '/boards/', 0755);
     }
     if (file_exists(__DIR__ . "/boards/".$url)){
-        drawErrorPageAndExit("this board already exist");
+        drawErrorPageAndExit("This board already exists.");
     }
     mkdir(__DIR__ . '/boards/'.$url);
     mkdir(__DIR__ . '/boards/'.$url.'/src');

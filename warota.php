@@ -63,6 +63,7 @@ $configFile = 'config.php';
     ・If user didn't enter any password for a file, only the administrator can delete the file
   2024/05/19 v3.1 Fixed a bug about not loading if the user had invalid cookies
   2024/08/03 v3.2 IP bans can now work without logging setting turned on as well
+  2024/10/08 v3.3 Fixed a bug where files could be deleted with empty password
 
 ■Installation
   ・Clone repo into web directory (or unzip it there)

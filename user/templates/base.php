@@ -1084,8 +1084,22 @@ if(isset($_GET['goingto'])){
             drawHeader();
             drawSettingsForm();
             drawFooter();
-            die();
+            die(); 
+	case "ownersettings":
+	    drawHeader();
+    	    drawOwnerForm(); 
+	    drawFooter();
+	    die();
+	case "edit":
+	    handleBoardEdit();
+	    die();
+	case "delete":
+	    drawHeader();
+	    drawBoardDeletionForm();
+	    drawFooter();
+	    die();
     }
+
 }
 if(isset($_GET['page'])){
     $page = $_GET['page'];

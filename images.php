@@ -166,7 +166,7 @@ function drawCatalogListing($page=1){
 	//display thumbnail
 	$data = createDataFromString($line);
 	$fileName = $conf['prefix'] . getID($data) .'.'. getFileExtension($data);
-        $thumbName = $conf['prefix'] . getID($data) .'_thumb.'. getFileExtension($data);
+    $thumbName = $conf['prefix'] . getID($data) .'_thumb.'. $conf['thumbnailExtention'];
 	
 	$path = $conf['uploadDir'] . $fileName;
 	$thumbPath = $conf['thumbDir'] . $thumbName;

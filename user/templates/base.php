@@ -1,9 +1,5 @@
 <?php
 
-if(file_exists("debug.php")){
-    require_once("debug.php");
-}
-
 
 // Define config file here. This all you need to do in this file.
 $configFile = 'config.php';
@@ -191,7 +187,7 @@ function drawFileListing($page=1){
         $data = createDataFromString($line);
 	
         $fileName = $conf['prefix'] . getID($data) .'.'. getFileExtension($data);
-	$thumbName = $conf['prefix'] . getID($data) .'_thumb.'. getFileExtension($data);
+	$thumbName = $conf['prefix'] . getID($data) .'_thumb.'. $conf['thumbnailExtention'];
 	
 	$path = $conf['uploadDir'] . $fileName;
 	$thumbPath = $conf['thumbDir'].$thumbName;
@@ -200,7 +196,7 @@ function drawFileListing($page=1){
 
 	if(preg_match('/audio/i', getMimeType($data))) $thumbPath = STATICPATH.'images/audio_overlay.png'; //if file is an audio it will use a default image 	
 	
-	if(preg_match('/video/i', getMimeType($data))) $thumbPath = $conf['thumbDir'].$conf['prefix'].getID($data).'_thumb.png'; //if file is a video it will use a default image 
+	if(preg_match('/video/i', getMimeType($data))) $thumbPath = $conf['thumbDir'].$conf['prefix'].getID($data).'_thumb.'.$conf['thumbnailExtention']; //if file is a video it will use a default image 
 	if(preg_match('/video/i', getMimeType($data)) && !file_exists($thumbPath)) $thumbPath = STATICPATH.'images/video_overlay.png';
 
 	if(preg_match('/application/i', getMimeType($data))) $thumbPath = STATICPATH.'images/application_overlay.png'; //if file isn't media it will use a default image 
@@ -1009,13 +1005,13 @@ function userUploadedFile(){
     //create thumbnail if file type is image and size is above 1mb
     if(preg_match('/image/i', getMimeType($data)) && $_FILES["upfile"]['size'] >= 1*1024*1024) { 
 	$imagePath = $conf['uploadDir'].$conf['prefix'].$newID.'.'.$fileExtension;
-    	thumbnailImage($imagePath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$fileExtension, 200, 95); 
+    	thumbnailImage($imagePath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$conf['thumbnailExtention'], 200, 95); 
     }
     
     //create thumbnail if file type is image and size is above 1mb
     if(preg_match('/video/i', getMimeType($data))) { 
 	$videoPath = $conf['uploadDir'].$conf['prefix'].$newID.'.'.$fileExtension;
-    	thumbnailVideo($videoPath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.png', 200, 95); 
+    	thumbnailVideo($videoPath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$conf['thumbnailExtention'], 200, 95); 
     }
     drawMessageAndRedirectHome('The process is over. The screen will change automatically.','If this does not change, click "Back".');
 }
@@ -1034,7 +1030,7 @@ function userDeletePost(){
     } elseif($password === getPassword($postData) || $password === $conf['adminPassword'] || $password === SUPERADMINPASS){
 		deleteDataFromLogByID($fileID);
 		
-		$thumbPath = $conf['thumbDir'] . $conf['prefix'] . getID($postData) . '_thumb.' . getFileExtension($postData);
+		$thumbPath = $conf['thumbDir'] . $conf['prefix'] . getID($postData) . '_thumb.'. $conf['thumbnailExtention'];
 		if(file_exists($thumbPath)) unlink($thumbPath);
 
         drawMessageAndRedirectHome('The file has been deleted.','If this page does not change, click "Back".');

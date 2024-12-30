@@ -1,9 +1,5 @@
 <?php
 
-if(file_exists("debug.php")){
-    require_once("debug.php");
-}
-
 // Define config file here. This all you need to do in this file.
 $configFile = 'config.php';
 
@@ -810,12 +806,12 @@ function userUploadedFile(){
     //create thumbnail if file type is image and size is above 1mb
     if(preg_match('/image/i', getMimeType($data)) && $_FILES["upfile"]['size'] >= 1*1024*1024) { 
 	$imagePath = $conf['uploadDir'].$conf['prefix'].$newID.'.'.$fileExtension;
-    	thumbnailImage($imagePath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$fileExtension, 200, 95); 
+    	thumbnailImage($imagePath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$conf['thumbnailExtention'], 200, 95); 
     }
     //create thumbnail if file type is image and size is above 1mb
     if(preg_match('/video/i', getMimeType($data))) { 
 	$videoPath = $conf['uploadDir'].$conf['prefix'].$newID.'.'.$fileExtension;
-    	thumbnailVideo($videoPath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.jpg'); 
+    	thumbnailVideo($videoPath, $conf['thumbDir'].$conf['prefix'].$newID.'_thumb.'.$conf['thumbnailExtention']); 
     }
 
 
@@ -835,7 +831,7 @@ function userDeletePost(){
     } elseif($password === getPassword($postData) || $password === $conf['adminPassword']){
 		deleteDataFromLogByID($fileID);
 		
-		$thumbPath = $conf['thumbDir'] . $conf['prefix'] . getID($postData) . '_thumb.' . getFileExtension($postData);
+		$thumbPath = $conf['thumbDir'] . $conf['prefix'] . getID($postData) . '_thumb.' . $conf['thumbnailExtention'];
 		if(file_exists($thumbPath)) unlink($thumbPath);
 
         drawMessageAndRedirectHome('The file has been deleted.','If this page does not change, click "Back".');

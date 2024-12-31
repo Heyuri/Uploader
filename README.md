@@ -54,7 +54,8 @@ Heyuri updates (edition 20240803)
 
 2024/05/19 v3.1 Fixed a bug about not loading if the user had invalid cookies<br>
 2024/08/03 v3.2 IP bans can now work without logging setting turned on as well<br>
-2024/10/08 v3.3 Fixed a bug where files could be deleted with empty password
+2024/10/08 v3.3 Fixed a bug where files could be deleted with empty password<br>
+2024/12/31 v3.4 Fixed the bug about video thumbnails not getting deleted with videos
 
 ## Installation
 - Clone repo into web directory (or unzip it there)

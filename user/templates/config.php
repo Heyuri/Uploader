@@ -31,7 +31,7 @@ return $conf = [
     'commentRequired' => true,              // comment is requires or not
     'maxCommentSize' => 128,                // max comment length
     'deleteOldestOnMaxFiles' => false,      // delete oldest file if user uploads when maxxed out.
-	 'thumbnailExtention' => 'jpg',
+	 'videoThumbnailExtention' => 'jpg',
 
     'denylist' => ['0.0.0.0'], //IPs that are blocked from uploading but can still view the rest of the page | DON'T LEAVE BLANK
     'hardBanList' => ['0.0.0.0'], //IPs in here will recieve an error message when attempting to load the page => cannot interact at all | DON'T LEAVE BLANK

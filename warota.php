@@ -586,7 +586,7 @@ function removeLastData(){
     fclose($fileHandle);
 
     $data = explode("<>", $lastLine);
-    delteFileByData($data);
+    deleteFileByData($data);
 
     return [true, $lastLine]; // Return true and the last line
 }

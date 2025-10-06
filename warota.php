@@ -799,9 +799,10 @@ function userUploadedFile(){
     if(getTotalLogLines() >= $conf['maxAmountOfFiles']){
         if($conf['deleteOldestOnMaxFiles']){
             removeLastData(); //remove file if deleteOldestOnMaxFiles is true
-        }
-	    drawErrorPageAndExit("File limit reached, contact administrator.");
-    }
+        } else {
+	    	drawErrorPageAndExit("File limit reached, contact administrator.");
+		}
+	}
     writeDataToLogs($data);
 	
     //create thumbnail if file type is image and size is above 1mb

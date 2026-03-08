@@ -96,7 +96,7 @@ try {
 	$conf = require $configFile;
 
 	if(!file_exists($configFile)) throw new \Exception("Configuration file <i>$configFile</i> is missing.");
-	if (!file_exists(DATA_DIR . $conf['logFile'])) throw new \Exception("Log file {$conf['logFile']} is missing. Please create it.");
+	if (!file_exists(DATA_DIR . $conf['logFile'])) throw new \Exception("Log file " . DATA_DIR . $conf['logFile'] . " is missing. Please create it.");
 
 	// Configuration check
 	if (!isset($conf['timeZone'])) {

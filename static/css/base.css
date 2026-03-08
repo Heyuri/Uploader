@@ -7,6 +7,12 @@ body {
 	color: var(--text-color);
 }
 
+.postblock {
+  background-color: var(--secondary-color);
+  font-weight: bold;
+  padding: 0px 5px;
+}
+
 a:link    {color: var(--link-color);}
 a:hover   {color: var(--alink-color);}
 a:visited {color: var(--vlink-color);}

@@ -112,6 +112,15 @@ class searchRepository {
 	}
 
 	private function entryMatches(array $e, array $p): bool {
+		// If all parameters are null, return false (no results)
+		if (
+			$p['fileExtension'] === null &&
+			$p['mimeType'] === null &&
+			$p['comment'] === null &&
+			$p['originalFileName'] === null
+		) {
+			return false;
+		}
 		// Exact matches (case-insensitive)
 		if ($p['fileExtension'] !== null && strcasecmp($e['fileExtension'], $p['fileExtension']) !== 0) {
 			return false;

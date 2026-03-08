@@ -696,7 +696,7 @@ class uploaderHTML {
 			$escapedValue = htmlspecialchars((string) $value);
 
 			$configRows .= '<tr>';
-			$configRows .= '<td><label for="conf_' . $escapedKey . '">' . $escapedKey . '</label></td>';
+			$configRows .= '<td class="postblock"><label for="conf_' . $escapedKey . '">' . $escapedKey . '</label></td>';
 
 			if (is_bool($value)) {
 				$checked = $value ? ' checked' : '';

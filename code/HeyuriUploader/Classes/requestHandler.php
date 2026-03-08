@@ -85,7 +85,7 @@ class requestHandler {
 					'comment' => $_GET['comment'] ?? null,
 					'fileExtension' => $_GET['fileExtension'] ?? null,
 					'mimeType' => $_GET['mimeType'] ?? null,
-					'sortDir' => $_GET['sortDir'] ?? 'desc'
+					'sortDir' => $_GET['sortDir'] ?? null,
 				];
 
 				// get the search results from the log file

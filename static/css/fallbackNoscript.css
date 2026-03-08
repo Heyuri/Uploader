@@ -1,0 +1,15 @@
+/* fallbackNoscript.css: Styles for users with JavaScript disabled */
+.chunk-only {
+	display: none !important;
+}
+
+body {
+	background: #fff;
+	color: #333;
+}
+
+#uploadProgress {
+	display: none !important;
+}
+
+/* Add any other fallback styles needed for noscript users */

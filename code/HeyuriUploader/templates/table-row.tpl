@@ -1,0 +1,10 @@
+<tr>
+{{deleteButton}}
+{{nameCell}}
+{{commentCell}}
+{{fileNameCell}}
+{{fileSizeCell}}
+{{mimeTypeCell}}
+{{dateCell}}
+{{adminCells}}
+</tr>

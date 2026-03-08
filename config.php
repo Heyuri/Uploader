@@ -1,10 +1,6 @@
 <?php
 /* MAIN CONFIGURATION FILE FOR WAROTA.PHP*/
 
-//Paths
-define('ROOTPATH', './'); // main path for project
-
-
 /*
  *  the reason for configs like this is it makes it really easy to dump this table into a web veiw
  *  or update them and save them with out having to ssh in and edit it manualy. there is no varable export for using defines.
@@ -13,9 +9,9 @@ define('ROOTPATH', './'); // main path for project
 return $conf = [
     'boardTitle' => 'Everything',
     'boardSubTitle' => 'Home for your files',
+    'staticUrl' => 'static/',
     'home' => "https://cgi.heyuri.net/goatse/",
     'adminPassword' => "lolpenis",
-    'logUserIP' => false,
     'mainScript' => 'warota.php',
 
     'timeZone' => 'UTC',        // timezone
@@ -25,18 +21,20 @@ return $conf = [
     'prefix' => "up",           // prefix to add in front of your file name. Don't change after setting
     'coolDownTime' => 5,        // time in seconds untill can be uploaded to again. (set to -1 for no cool down)
 
+    'defaultTheme' => 'Futaba', //default css theme
+    'language' => 'en', // language file to use (corresponds to lang/{language}.php)
+
     'defaultComment' => 'ｷﾀ━━━(ﾟ∀ﾟ)━━━!!',  // default comment for upload
     'maxAmountOfFiles' => 200,              // max files allowed on server
-    'maxTotalSize' => 200*1024*1024*1024,   // total sized allowed in bytes
-    'filesPerListing' => 5,                 // how many files listed per page
-    'maxUploadSize' => 20*1024*1024,        // max upload size in bytes
+    'maxTotalSize' => 204800,               // total size allowed in megabytes
+    'filesPerListing' => 30,                 // how many files listed per page
+    'maxUploadSize' => 20,                   // max upload size in megabytes
+    'chunkSize' => 200*1024*1024,                // chunk size in bytes for chunked uploads (must be under server's upload limit, e.g. nginx client_max_body_size)
+    'chunkDir' => 'chunks/',                // temp directory for upload chunks
     'commentRequired' => true,              // comment is requires or not
-    'maxCommentSize' => 128,                // max comment length
+    'maxCommentSize' => 400,                // max comment length
     'deleteOldestOnMaxFiles' => false,      // delete oldest file if user uploads when maxxed out.
-    'videoThumbnailExtention' => 'jpg',
-
-    'denylist' => ['0.0.0.0'],    //IPs that are blocked from uploading but can still view the rest of the page | DON'T LEAVE BLANK
-    'hardBanList' => ['0.0.0.0'], //IPs in here will recieve an error message when attempting to load the page => cannot interact at all | DON'T LEAVE BLANK
+    'thumbnailExtension' => 'jpg',
 
     'allowedExtensions' =>  [
         'dat','htm','torrent','deb','lzh','ogm','doc','class','js','swift','cc','tga','ape','woff2','cab','whl','mpe',
@@ -54,13 +52,16 @@ return $conf = [
         'mcr','mpk','eep','st0','dta','srm','afa','zpaq','arc','paq','lpaq','swf','pdn','lol','php','sh','img','ico','asc',
         'm2ts', 'nzb', 'appimage', 'json'
     ],
-    'extentionsToBeConvertedToText' => [
-        'htm','mht','cgi','php','html','sh','shtml','xml','svg'
+
+    'extensionsToBeConvertedToText' => [
+        'htm','mht','cgi','php','html','sh','shtml','xml','svg', 'py'
     ],
+    
     'defaultCookieValues' => [
         'showDeleteButton' => 'checked',
         'showComment' => 'checked',
         'showPreviewImage' => '',
+        'showFileName' => 'checked',
         'showFileSize' => 'checked',
         'showMimeType' => ''
     ],

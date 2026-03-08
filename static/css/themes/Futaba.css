@@ -1,0 +1,14 @@
+:root {
+	--bg-color: #ffffee;
+	--text-color: #800000;
+	--link-color: #0000ee;
+	--alink-color: #5555ee;
+	--vlink-color: #0000ee;
+	--accent-color: #007bff;
+	--secondary-color: #eeaa88;
+	--tablelisting-odd-row: #f7efea;
+	--tablelisting-hover-row: #f0e0d6;
+	--tablelisting-font-size: 12px;
+	--red-text: #ef0a0a;
+	--gray-text: #888888;
+}

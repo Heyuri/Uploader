@@ -1,0 +1,226 @@
+
+/* Css variables - default is the futaba style*/
+
+
+body {
+	background-color: var(--bg-color);
+	color: var(--text-color);
+}
+
+a:link    {color: var(--link-color);}
+a:hover   {color: var(--alink-color);}
+a:visited {color: var(--vlink-color);}
+
+.boldText {
+	font-weight: bold;
+}
+
+.fileListingTable {
+	min-width: 100%;
+	text-align: center;
+	border-collapse: collapse;
+	font-size: var(--tablelisting-font-size);
+}
+
+/* Ensure the header has a distinct background */
+.fileListingTable thead {
+	background-color: var(--secondary-color);
+}
+
+/* Style only odd-numbered rows inside tbody */
+.fileListingTable tbody tr:nth-child(odd) {
+	background-color: var(--tablelisting-odd-row);
+}
+
+/* Ensure row hover effect works */
+.fileListingTable tbody tr:hover {
+	background-color: var(--tablelisting-hover-row);
+}
+
+.titleHeader {
+	background-color: var(--secondary-color);
+	max-width: 100%;
+	font-size: 22px;
+}
+
+.subtitleHeader {
+	font-size: 15px;
+}
+
+.previewContainer {
+	height: 100px;
+}
+
+.imagePreview {
+	padding-right: 5px;
+	padding-top: 2px;
+}    	
+
+.redText {
+	color: var(--red-text);
+}
+
+.grayText {
+	color: var(--gray-text);
+}
+
+.fileNameColumn {
+	width: 10%;
+}
+
+.fileSize {
+	font-size: 13px;
+}
+
+.actionLinks {
+	font-size: 12px;
+}
+
+.alignRight {
+	text-align: right;
+}
+
+.centerItem {
+	text-align: center;
+}
+
+.centerItem table {
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+
+.subtleList {
+	list-style: none; /* Removes bullet points */
+	padding-left: 0; /* Removes default padding on the left */
+	margin-left: 0; /* Removes default margin on the left */
+	
+}
+
+.subtleList li label {
+	cursor: pointer; /* Makes the label clickable */
+	user-select: none; /* Prevents text selection */
+}
+
+
+
+.commentInput {
+	min-width: 200px; /* Minimum size before it wraps */
+	width: 100%; /* Takes full available space */
+	max-width: 400px; /* Prevents it from growing too large */
+}
+
+.deleteColumn {
+	width: 2%;
+}
+
+.nameColumn {
+	width: 15%;
+}
+
+.commentColumn {
+	width: 40%;
+}
+
+.fileSizeColumn {
+	width: 5%;
+}
+
+.mimeTypeColumn {
+	width: 10%;
+}
+
+.catalogTable {
+	width: 100%;
+	table-layout: fixed;       /* Enforce fixed column widths */
+	border-collapse: collapse; /* Remove default gaps */
+	text-align: center;
+}
+
+.catalogTable td {
+	width: 120px;   /* Fixed width */
+	height: 120px;  /* Fixed height */
+	padding: 4px;
+	vertical-align: top;
+	overflow: hidden; /* Hide overflowing content */
+}
+
+.catalogTable img {
+	object-fit: cover; /* Crop to fit the cell */
+	display: block;
+	margin: 0 auto;
+}
+
+.catalogTable .catalogComment {
+	display: block;
+	margin-top: 4px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 0.9em;
+}
+
+.mascot {
+	position: fixed;
+	right: 0px;
+	bottom: -5px;
+	z-index: -1;
+	opacity: 80%;
+}
+
+/* Admin manage files page */
+.selectColumn {
+	width: 3%;
+}
+
+.ipColumn {
+	width: 10%;
+}
+
+.adminActionsColumn {
+	width: 15%;
+}
+
+.adminActionsCell {
+	white-space: nowrap;
+	font-size: 12px;
+}
+
+.adminActionsCell a {
+	text-decoration: none;
+}
+
+.ipCell {
+	font-family: monospace;
+	font-size: 12px;
+}
+
+.manageFilesPage .utilityOptions {
+	margin-bottom: 8px;
+	font-size: 13px;
+}
+
+.utilityLink a {
+	cursor: pointer;
+}
+
+/* Upload progress bar */
+#progressBar {
+	appearance: none;
+	-webkit-appearance: none;
+	height: 16px;
+	border: 1px solid var(--text-color);
+	background-color: var(--bg-color);
+}
+
+#progressBar::-webkit-progress-bar {
+	background-color: var(--bg-color);
+}
+
+#progressBar::-webkit-progress-value {
+	background-color: var(--secondary-color);
+}
+
+#progressBar::-moz-progress-bar {
+	background-color: var(--secondary-color);
+}

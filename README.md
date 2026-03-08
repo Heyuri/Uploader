@@ -84,11 +84,11 @@ Run chmod on the following files. E.g (`chmod 755 warota.php` and so on)
 #### httpd (openBSD)
 Open /etc/httpd.conf In the server block for the site your uploader instance is on and paste the following location block into it:
 ```conf
-location 'Uploader/data/*' {
+location "/Uploader/data/*" {
   block
 }
 
-location 'Uploader/data/' {
+location "/Uploader/data/" {
   block
 }
 ```

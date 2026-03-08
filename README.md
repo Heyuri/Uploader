@@ -56,7 +56,7 @@ Heyuri updates (edition 20240803)
 2024/08/03 v3.2 IP bans can now work without logging setting turned on as well<br>
 2024/10/08 v3.3 Fixed a bug where files could be deleted with empty password<br>
 2024/12/31 v3.4 Fixed the bug about video thumbnails not getting deleted with videos<br>
-2026/03/08 v4 Major code rework and mod tool implementations.
+2026/03/08 v4.0 Major code rework and mod tool implementations.
 
 ## Installation
 ```bash

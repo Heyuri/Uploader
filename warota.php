@@ -57,7 +57,7 @@
 	2024/08/03 v3.2 IP bans can now work without logging setting turned on as well
 	2024/10/08 v3.3 Fixed a bug where files could be deleted with empty password
 	2024/12/31 v3.4 Fixed the bug about video thumbnails not getting deleted with videos
-
+	2026/03/08 v4.0 Major code refactor, added chunked uploads, and various other features and fixes.
 ■Installation
 	・Clone repo into web directory (or unzip it there)
 	・cd into the directory and do this: "chmod +x prepare.sh", then run it with "./prepare.sh"

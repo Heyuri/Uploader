@@ -55,14 +55,53 @@ Heyuri updates (edition 20240803)
 2024/05/19 v3.1 Fixed a bug about not loading if the user had invalid cookies<br>
 2024/08/03 v3.2 IP bans can now work without logging setting turned on as well<br>
 2024/10/08 v3.3 Fixed a bug where files could be deleted with empty password<br>
-2024/12/31 v3.4 Fixed the bug about video thumbnails not getting deleted with videos
+2024/12/31 v3.4 Fixed the bug about video thumbnails not getting deleted with videos<br>
+2026/03/08 v4 Major code rework and mod tool implementations.
 
 ## Installation
-- Clone repo into web directory (or unzip it there)
-- cd into the directory and do this: `chmod +x prepare.sh`, then run it with `./prepare.sh`
-- Alternatively create the log file (default: souko.log), the count file (default: count.log), source dir. (src/) and thumb dir (thmb/) yourself
-- If you change their names, you need to change them from configuration file too
-- Set owner of all files in the directory to web user by "sudo chown -R webuser:webuser /path/to/Uploader"
+```bash
+git clone <repo-url> /var/www/sites/uploader.test/Uploader
+```
+### Permissions
+Make sure all files in the owned by the web group (which is typically www-data or www). Which you can do by running `chown -R user:www /var/www/sites/uploader.test/Uploader`. You may want to make the owned user your personal user so uploading and editing files is easier.   
+
+Run chmod on the following files. E.g (`chmod 755 warota.php` and so on)
+
+- 755 warota.php 
+- 775 config.php  - note: it uses 775 so its modifiable so the config editing mod tool can work
+- 755 autoloader.php
+- 755 code/
+- run: `chmod -R 775 code`
+- 775 data/
+- 775 data/count.log
+- 775 data/souko.log
+- 775 data/banned_hashes.dat
+- 775 data/banlist.log
+
+### Restricting access
+`data/` contains sensitive information and shouldn't be visible to users.
+
+#### httpd (openBSD)
+Open /etc/httpd.conf In the server block for the site your uploader instance is on and paste the following location block into it:
+```conf
+location 'Uploader/data/*' {
+  block
+}
+
+location 'Uploader/data/' {
+  block
+}
+```
+#### nginx
+Open your site conf file in `/etc/nginx/sites-available/` and add this to the server block:
+```
+location ~ ^/Uploader/data/ {
+    deny all;
+    return 403;
+}
+```
+#### Apache
+There is already a .htaccess file in data that will prevent accesses to data 
 
 ## Cautions (it is recommended to check these)
 - These variables in php.ini may need to be changed if you want to allow files larger than 2MBs to get uploaded:

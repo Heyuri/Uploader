@@ -76,7 +76,7 @@ Run chmod on the following files. E.g (`chmod 755 warota.php` and so on)
 - 775 data/count.log
 - 775 data/souko.log
 - 775 data/banned_hashes.dat
-- 775 data/banlist.log
+- 775 data/banlist.dat
 
 ### Restricting access
 `data/` contains sensitive information and shouldn't be visible to users.

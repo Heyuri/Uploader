@@ -116,7 +116,7 @@ return [
         'config' => 'Config',
         'other' => 'Other',
         'logOut' => 'Log out',
-        'login' => 'Admin Login',
+        'login' => 'Admin login',
         'passwordLabel' => 'Password:',
         'enter' => 'Enter',
         'manageFiles' => 'Manage files on instance.',

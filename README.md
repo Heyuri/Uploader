@@ -60,7 +60,7 @@ Heyuri updates (edition 20240803)
 
 ## Installation
 ```bash
-git clone <repo-url> /var/www/sites/uploader.test/Uploader
+git clone https://github.com/Heyuri/Uploader.git /var/www/sites/uploader.test/Uploader
 ```
 ### Permissions
 Make sure all files in the owned by the web group (which is typically www-data or www). Which you can do by running `chown -R user:www /var/www/sites/uploader.test/Uploader`. You may want to make the owned user your personal user so uploading and editing files is easier.   

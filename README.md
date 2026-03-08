@@ -94,7 +94,7 @@ location 'Uploader/data/' {
 ```
 #### nginx
 Open your site conf file in `/etc/nginx/sites-available/` and add this to the server block:
-```
+```conf
 location ~ ^/Uploader/data/ {
     deny all;
     return 403;
@@ -102,6 +102,7 @@ location ~ ^/Uploader/data/ {
 ```
 #### Apache
 There is already a .htaccess file in data that will prevent accesses to data 
+
 
 ## Cautions (it is recommended to check these)
 - These variables in php.ini may need to be changed if you want to allow files larger than 2MBs to get uploaded:

@@ -103,6 +103,14 @@ location ~ ^/Uploader/data/ {
 #### Apache
 There is already a .htaccess file in data that will prevent accesses to data 
 
+### Configuration
+After setting permissions, you shouldn't need to do much else however you should change the admin password. 
+
+You can find the admin password in `config.php` under 'adminPassword'. 
+
+You can configure the instance through a web UI by going to 'Admin room' on `warota.php`, entering the password, then going to 'Config' in the vertical list of admin pages.
+
+Be aware that only simple integer values will appear, and that `config.php` may change after submitting an edit.
 
 ## Cautions (it is recommended to check these)
 - These variables in php.ini may need to be changed if you want to allow files larger than 2MBs to get uploaded:

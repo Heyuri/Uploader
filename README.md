@@ -71,7 +71,7 @@ Run chmod on the following files. E.g (`chmod 755 warota.php` and so on)
 - 775 config.php  - note: it uses 775 so its modifiable so the config editing mod tool can work
 - 755 autoloader.php
 - 755 code/
-- run: `chmod -R 775 code`
+- run: `chmod -R 755 code`
 - 775 data/
 - 775 data/count.log
 - 775 data/souko.log

@@ -16,6 +16,7 @@ return $conf = [
 
     'timeZone' => 'UTC',        // timezone
     'logFile' => "souko.log",   // name of flat file
+    'counterFile' => "count.log", // name of counter file
     'uploadDir' => "src/",      // upload location (slash is required).
     'thumbDir' => "thmb/",	    // thumbnail directory
     'prefix' => "up",           // prefix to add in front of your file name. Don't change after setting

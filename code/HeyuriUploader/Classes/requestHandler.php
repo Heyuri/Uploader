@@ -29,7 +29,9 @@ class requestHandler {
 
 	public function __construct(array $config) {
 		$this->conf = $config;
-		$this->uploadEntryRepository = new uploadEntryRepository(\DATA_DIR . $this->conf['logFile']);
+		$this->uploadEntryRepository = new uploadEntryRepository(
+			\DATA_DIR . $this->conf['logFile'],
+			\DATA_DIR . $this->conf['counterFile']);
 		$this->uploaderHTML = new uploaderHTML($config);
 		$this->lang = $this->uploaderHTML->getLang();
 		$this->banChecker = new banChecker();

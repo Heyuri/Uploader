@@ -2,10 +2,9 @@
 namespace HeyuriUploader\Classes;
 
 class uploadEntryRepository {
-	private string $counterFile = \DATA_DIR . 'count.log';
-
 	public function __construct(
-		private string $logFile
+		private string $logFile,
+		private string $counterFile
 	) {}
 
 	/* Data Getters */

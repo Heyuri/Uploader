@@ -31,7 +31,7 @@ class chunkUploadService {
 		$this->banChecker = $banChecker;
 
 		// Ensure chunk directory exists, default to data/chunks/ if not configured
-		$this->chunkDir = !empty($this->conf['chunkDir']) ? $this->conf['chunkDir'] : 'chunks/';
+		$this->chunkDir = !empty($this->conf['chunkDir']) ? \DATA_DIR . $this->conf['chunkDir'] : \DATA_DIR . 'chunks/';
 		// Normalize trailing slash
 		if (substr($this->chunkDir, -1) !== '/') {
 			$this->chunkDir .= '/';

@@ -20,6 +20,7 @@ return [
         'showFileName' => 'Show file name',
         'showFileSize' => 'Show file size',
         'showMimeTypes' => 'Show MIME types',
+        'showDate' => 'Show date',
         'save' => 'Save',
         'clear' => 'Clear',
         'styleSelector' => 'Style selector:',

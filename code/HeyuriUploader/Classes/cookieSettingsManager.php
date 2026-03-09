@@ -23,7 +23,8 @@ class cookieSettingsManager {
 				$_POST['showPreviewImage'] ?? "",
 				$_POST['showFileName'] ?? "",
 				$_POST['showFileSize'] ?? "",
-				$_POST['showMimeType'] ?? ""
+				$_POST['showMimeType'] ?? "",
+				$_POST['showDate'] ?? ""
 			));
 		}
 
@@ -32,7 +33,7 @@ class cookieSettingsManager {
 	}
 
 	public function getSplitCookie(): array {
-		$cookieKeys = ['showDeleteButton', 'showComment', 'showPreviewImage', 'showFileName', 'showFileSize', 'showMimeType'];
+		$cookieKeys = ['showDeleteButton', 'showComment', 'showPreviewImage', 'showFileName', 'showFileSize', 'showMimeType', 'showDate'];
 		$cookieData = explode("<>", $_COOKIE['settings'] ?? []);
 
 		if (sizeof($cookieData) !== sizeof($cookieKeys)) {

@@ -27,6 +27,10 @@
 				<input type="checkbox" id="showMimeType" name="showMimeType" value="checked" {{showMimeType}}>
 				<label for="showMimeType">{{lang.settings.showMimeTypes}}</label>
 			</li>
+			<li>
+				<input type="checkbox" id="showDate" name="showDate" value="checked" {{showDate}}>
+				<label for="showDate">{{lang.settings.showDate}}</label>
+			</li>
 		</ul>
 
 		<input type="hidden" name="action" value="setUserSettings">

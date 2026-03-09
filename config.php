@@ -65,6 +65,7 @@ return $conf = [
         'showPreviewImage' => '',
         'showFileName' => 'checked',
         'showFileSize' => 'checked',
-        'showMimeType' => ''
+        'showMimeType' => '',
+        'showDate' => 'checked'
     ],
 ];

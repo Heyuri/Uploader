@@ -173,7 +173,7 @@ class uploaderHTML {
 		$fileNameHeader = $cookie['showFileName'] ? '<th class="fileNameColumn">' . $this->lang->get('table.fileName') . '</th>' : '';
 		$fileSizeHeader = $cookie['showFileSize'] ? '<th class="fileSizeColumn">' . $this->lang->get('table.size') . '</th>' : '';
 		$mimeTypeHeader = $cookie['showMimeType'] ? '<th class="mimeTypeColumn">' . $this->lang->get('table.mime') . '</th>' : '';
-		$dateHeader = '<th class="dateColumn">' . $this->lang->get('table.date') . '</th>';
+		$dateHeader = $cookie['showDate'] ? '<th class="dateColumn">' . $this->lang->get('table.date') . '</th>' : '';
 
 		$adminHeaders = '';
 		if ($isAdmin) {
@@ -242,8 +242,11 @@ class uploaderHTML {
 		$fileSizeCell = $cookie['showFileSize'] ? '<td><span class="fileSize">' . bytesToHumanReadable($data->getSize()) . '</span></td>' : '';
 		$mimeTypeCell = $cookie['showMimeType'] ? '<td><span class="grayText">' . htmlspecialchars($data->getMimeType()) . '</span></td>' : '';
 
+		// Timestamp for date cell
 		$timestamp = $data->getTime();
-		$dateCell = '<td><span class="grayText">' . ($timestamp ? htmlspecialchars(date('Y-m-d H:i:s', (int)$timestamp)) : '') . '</span></td>';
+
+		// Date cell with formatted timestamp, also toggled by cookie settings
+		$dateCell = $cookie['showDate'] ? '<td><span class="grayText">' . ($timestamp ? htmlspecialchars(date('Y-m-d H:i:s', (int)$timestamp)) : '') . '</span></td>' : '';
 
 		// Admin-only cells: IP address and action links
 		$adminCells = '';
@@ -530,6 +533,7 @@ class uploaderHTML {
 			'showComment' => $cookie['showComment'],
 			'showPreviewImage' => $cookie['showPreviewImage'],
 			'showFileName' => $cookie['showFileName'],
+			'showDate' => $cookie['showDate'],
 			'showFileSize' => $cookie['showFileSize'],
 			'showMimeType' => $cookie['showMimeType'],
 		]);
@@ -576,6 +580,7 @@ class uploaderHTML {
 			'showFileName' => 'checked',
 			'showFileSize' => 'checked',
 			'showMimeType' => 'checked',
+			'showDate' => 'checked',
 		];
 
 		$tableHeader = $this->buildTableHeader($cookie, true);

@@ -55,14 +55,12 @@ class themeManager {
 	}
 
 	/**
-	 * Generate <link rel="preload"> and <link rel="preload"> tags for all themes except the default
+	 * Generate <link rel="preload"> tags for all themes except the default
 	 */
-	public function generatepreloadLinks(string $defaultTheme): string {
+	public function generatePreloadLinks(): string {
 		$links = [];
 		foreach ($this->themes as $theme) {
-			if ($theme === $defaultTheme) continue;
 			$url = htmlspecialchars($this->getThemeUrl($theme), ENT_QUOTES, 'UTF-8');
-			$links[] = '<link rel="preload" href="' . $url . '" as="style">';
 			$links[] = '<link rel="preload" href="' . $url . '" as="style">';
 		}
 		return implode("\n", $links);

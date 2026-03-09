@@ -30,7 +30,7 @@ class uploaderHTML {
 		$themeLink = $themeManager->generateThemeLink($this->conf['defaultTheme']);
 		$availableThemes = implode(',', $themeManager->getThemeNames());
 
-		$preloadLinks = $themeManager->generatepreloadLinks($this->conf['defaultTheme']);
+		$preloadLinks = $themeManager->generatePreloadLinks();
 
 		$html = $this->renderer->render('header', [
 			'defaultTheme' => $this->conf['defaultTheme'],

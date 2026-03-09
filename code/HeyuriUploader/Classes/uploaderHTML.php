@@ -298,6 +298,10 @@ class uploaderHTML {
 		if (preg_match('/audio/i', $mimeType)) {
 			return $this->conf['staticUrl'] . 'images/audio.png';
 		}
+		// Flash file (SWF)
+		if (preg_match('/x-shockwave-flash|flash|swf/i', $mimeType) || preg_match('/\.swf$/i', $data->getOriginalFileName())) {
+			return $this->conf['staticUrl'] . 'images/swf_thumb.png';
+		}
 		if (preg_match('/video/i', $mimeType)) {
 			$videoThumbPath = $data->getVideoThumbPath($this->conf);
 			return file_exists($videoThumbPath) ? $videoThumbPath : $this->conf['staticUrl'] . 'images/video_overlay.png';

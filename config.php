@@ -1,42 +1,39 @@
 <?php
-/* MAIN CONFIGURATION FILE FOR WAROTA.PHP*/
+/* MAIN CONFIGURATION FILE FOR WAROTA.PHP / WAROTA.PHP のメイン設定ファイル */
 
-/*
- *  the reason for configs like this is it makes it really easy to dump this table into a web veiw
- *  or update them and save them with out having to ssh in and edit it manualy. there is no varable export for using defines.
- */
+# English explanation / 日本語説明
 
 return $conf = [
-    'boardTitle' => 'Everything',
-    'boardSubTitle' => 'Home for your files',
-    'staticUrl' => 'static/',
-    'home' => "https://cgi.heyuri.net/goatse/",
-    'adminPassword' => "lolpenis",
-    'mainScript' => 'warota.php',
+    'boardTitle' => 'Everything',        // main title displayed on the page / ページ上部に表示されるタイトル
+    'boardSubTitle' => 'Home for your files',    // subtitle shown below the title / タイトル下に表示されるサブタイトル
+    'staticUrl' => 'static/',            // static files path / 静的ファイルのパス
+    'home' => "https://cgi.heyuri.net/goatse/",  // URL used for the [Home] link / [Home]リンクのリンク先URL
+    'adminPassword' => "lolpenis",       // admin password (change in production) / 管理者パスワード（本番環境では必ず変更すること）
+    'mainScript' => 'warota.php',        // main application script filename (can be renamed if desired) / メインスクリプトのファイル名（必要に応じて変更可能）
 
-    'timeZone' => 'UTC',        // timezone
-    'logFile' => "souko.log",   // name of flat file
-    'counterFile' => "count.log", // name of counter file
-    'uploadDir' => "src/",      // upload location (slash is required).
-    'thumbDir' => "thmb/",	    // thumbnail directory
-    'prefix' => "up",           // prefix to add in front of your file name. Don't change after setting
-    'thumb_suffix' => "_thumb", // suffix to add to thumbnail file names
-    'coolDownTime' => 5,        // time in seconds untill can be uploaded to again. (set to -1 for no cool down)
+    'timeZone' => 'UTC',          // timezone / タイムゾーン
+    'logFile' => "souko.log",     // name of flat file (found in data/) / ログファイル名（data/ 内）
+    'counterFile' => "count.log", // name of counter file / アップロードカウンターファイル
+    'uploadDir' => "src/",        // upload directory (trailing slash required) / アップロード・ディレクトリ（末尾スラッシュ必須）
+    'thumbDir' => "thmb/",	      // thumbnail directory / サムネイル・ディレクトリ
+    'prefix' => "up",             // prefix added to uploaded filenames (do not change after deployment) / アップロードファイル名の接頭辞（設定後は変更しないこと）
+    'thumb_suffix' => "_thumb",   // suffix appended to thumbnail filenames / サムネイルファイル名の接尾辞
+    'coolDownTime' => 5,          // seconds before another upload is allowed (-1 disables cooldown) / 次のアップロードまでの待機秒数（-1で制限なし）
 
-    'defaultTheme' => 'Futaba', //default css theme
-    'language' => 'en', // language file to use (corresponds to lang/{language}.php)
+    'defaultTheme' => 'Futaba', // default CSS theme / デフォルトのCSSテーマ
+    'language' => 'en',         // language file to load (lang/{language}.php) / 使用する言語ファイル（日本語の場合は ja）
 
-    'defaultComment' => 'ｷﾀ━━━(ﾟ∀ﾟ)━━━!!',  // default comment for upload
-    'maxAmountOfFiles' => 200,              // max files allowed on server
-    'maxTotalSize' => 204800,               // total size allowed in megabytes
-    'filesPerListing' => 30,                 // how many files listed per page
-    'maxUploadSize' => 20,                   // max upload size in megabytes
-    'chunkSize' => 200*1024*1024,                // chunk size in bytes for chunked uploads (must be under server's upload limit, e.g. nginx client_max_body_size)
-    'chunkDir' => 'chunks/',                // temp directory for upload chunks
-    'commentRequired' => true,              // comment is requires or not
-    'maxCommentSize' => 400,                // max comment length
-    'deleteOldestOnMaxFiles' => false,      // delete oldest file if user uploads when maxxed out.
-    'thumbnailExtension' => 'jpg',
+    'defaultComment' => 'ｷﾀ━━━(ﾟ∀ﾟ)━━━!!',  // default comment for uploads / アップロード時に自動入力されるデフォルトコメント
+    'maxAmountOfFiles' => 200,              // maximum number of uploaded files stored at once / 同時に保存できるアップロードファイルの最大数
+    'maxUploadSize' => 20,                  // maximum upload size per file (MB) / 1ファイルあたりの最大アップロードサイズ（MB）
+    'maxTotalSize' => 204800,               // total size limit of all stored files in megabytes / 保存されている全ファイルの合計サイズ上限（MB）
+    'filesPerListing' => 30,                // number of files displayed per page / 1ページに表示するファイル数
+    'chunkSize' => 200*1024*1024,           // chunk size in bytes for chunked uploads (must be under server upload limit, e.g. nginx client_max_body_size) / 分割アップロードのチャンクサイズ（バイト）。サーバーのアップロード制限（例: nginx client_max_body_size）以下にすること
+    'chunkDir' => 'chunks/',                // temporary directory used for upload chunks / 分割アップロード用の一時ディレクトリ
+    'commentRequired' => true,              // whether a comment is required when uploading / アップロード時にコメントを必須にするか
+    'maxCommentSize' => 400,                // maximum comment length / コメントの最大文字数
+    'deleteOldestOnMaxFiles' => false,      // delete the oldest file if the maximum number of files is reached / 最大ファイル数に達した場合、最も古いファイルを削除する
+    'thumbnailExtension' => 'jpg',          // file extension used for generated thumbnails / 生成されるサムネイルの拡張子
 
     'allowedExtensions' =>  [
         'dat','htm','torrent','deb','lzh','ogm','doc','class','js','swift','cc','tga','ape','woff2','cab','whl','mpe',
@@ -53,19 +50,19 @@ return $conf = [
         'gba','srl','gcm','gcz','nds','dsi','wbfs','wad','cia','3ds','ngp','ngc','pce','vb','ws','wsc','dsv','sav','ps2',
         'mcr','mpk','eep','st0','dta','srm','afa','zpaq','arc','paq','lpaq','swf','pdn','lol','php','sh','img','ico','asc',
         'm2ts', 'nzb', 'appimage', 'json'
-    ],
+    ], // allowed file extensions for uploads / アップロードを許可するファイル拡張子一覧
 
     'extensionsToBeConvertedToText' => [
         'htm','mht','cgi','php','html','sh','shtml','xml','svg', 'py'
-    ],
+    ], // extensions that should be rendered as text / テキストとして表示する拡張子
     
     'defaultCookieValues' => [
-        'showDeleteButton' => 'checked',
-        'showComment' => 'checked',
-        'showPreviewImage' => '',
-        'showFileName' => 'checked',
-        'showFileSize' => 'checked',
-        'showMimeType' => '',
-        'showDate' => 'checked'
-    ],
+        'showDeleteButton' => 'checked',  // show delete button / 削除ボタンを表示
+        'showComment' => 'checked',       // show comment text / コメントを表示
+        'showPreviewImage' => '',         // show preview thumbnail / プレビュー画像（サムネイル）を表示
+        'showFileName' => 'checked',      // show original file name / 元ファイル名を表示
+        'showFileSize' => 'checked',      // show file size / ファイルサイズを表示
+        'showMimeType' => '',             // show MIME type / MIMEタイプを表示
+        'showDate' => 'checked'           // show upload date / 投稿日時を表示
+    ], // default UI display options stored in cookies / クッキーに保存される表示設定の初期値
 ];

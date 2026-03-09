@@ -40,7 +40,6 @@ class chunkUploadService {
 		if (!is_dir($this->chunkDir)) {
 			mkdir($this->chunkDir, 0755, true);
 		}
-		error_log($this->chunkDir);
 	}
 
 	/**

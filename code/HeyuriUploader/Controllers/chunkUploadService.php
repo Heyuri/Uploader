@@ -15,33 +15,31 @@ class chunkUploadService {
 	private $uploadedFileRepository;
 	private $uploadEntryRepository;
 	private $logFile;
-	private $uploaderHTML;
 	private $banChecker;
+	private string $chunkDir;
 
 	public function __construct(
 		array $conf,
 		uploadedFileRepository $uploadedFileRepository,
 		uploadEntryRepository $uploadEntryRepository,
 		logFile $logFile,
-		uploaderHTML $uploaderHTML,
 		banChecker $banChecker
 	) {
 		$this->conf = $conf;
 		$this->uploadedFileRepository = $uploadedFileRepository;
 		$this->uploadEntryRepository = $uploadEntryRepository;
 		$this->logFile = $logFile;
-		$this->uploaderHTML = $uploaderHTML;
 		$this->banChecker = $banChecker;
 
 		// Ensure chunk directory exists, default to data/chunks/ if not configured
-		$chunkDir = !empty($this->conf['chunkDir']) ? $this->conf['chunkDir'] : 'data/chunks/';
+		$this->chunkDir = !empty($this->conf['chunkDir']) ? DATA_DIR . $this->conf['chunkDir'] : DATA_DIR . 'chunks/';
 		// Normalize trailing slash
-		if (substr($chunkDir, -1) !== '/') {
-			$chunkDir .= '/';
+		if (substr($this->chunkDir, -1) !== '/') {
+			$this->chunkDir .= '/';
 		}
-		$this->conf['chunkDir'] = $chunkDir;
-		if (!is_dir($chunkDir)) {
-			mkdir($chunkDir, 0755, true);
+
+		if (!is_dir($this->chunkDir)) {
+			mkdir($this->chunkDir, 0755, true);
 		}
 	}
 
@@ -86,7 +84,7 @@ class chunkUploadService {
 		// First chunk: generate upload ID and create session directory
 		if ($chunkIndex === 0) {
 			$uploadId = bin2hex(random_bytes(16));
-			$uploadDir = $this->conf['chunkDir'] . $uploadId . '/';
+			$uploadDir = $this->chunkDir . $uploadId . '/';
 			mkdir($uploadDir, 0755, true);
 
 			// Store metadata
@@ -107,7 +105,7 @@ class chunkUploadService {
 				return;
 			}
 
-			$uploadDir = $this->conf['chunkDir'] . $uploadId . '/';
+			$uploadDir = $this->chunkDir . $uploadId . '/';
 			if (!is_dir($uploadDir) || !file_exists($uploadDir . 'meta.json')) {
 				http_response_code(404);
 				echo json_encode(['error' => 'Upload session not found.']);
@@ -148,7 +146,7 @@ class chunkUploadService {
 			return;
 		}
 
-		$uploadDir = $this->conf['chunkDir'] . $uploadId . '/';
+		$uploadDir = $this->chunkDir . $uploadId . '/';
 		if (!is_dir($uploadDir) || !file_exists($uploadDir . 'meta.json')) {
 			http_response_code(404);
 			echo json_encode(['error' => 'Upload session not found.']);
@@ -330,13 +328,13 @@ class chunkUploadService {
 			return;
 		}
 
-		$uploadDir = $this->conf['chunkDir'] . $uploadId . '/';
+		$uploadDir = $this->chunkDir . $uploadId . '/';
 		if (!is_dir($uploadDir)) {
 			return;
 		}
 
 		// Resolve real path and verify it's within the chunk directory
-		$realChunkDir = realpath($this->conf['chunkDir']);
+		$realChunkDir = realpath($this->chunkDir);
 		$realUploadDir = realpath($uploadDir);
 		if ($realUploadDir === false || strpos($realUploadDir, $realChunkDir) !== 0) {
 			return;

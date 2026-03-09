@@ -33,9 +33,4 @@
 		<input type="submit" value="{{lang.settings.save}}">
 		<input type="reset" value="{{lang.settings.clear}}">
 	</form>
-	<h4>{{lang.settings.styleHeading}}</h4>
-	<form id="style-form">
-		<label for="style-selector">{{lang.settings.styleSelector}}</label>
-		<select id="style-selector"></select>
-	</form>
 </div>

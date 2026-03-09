@@ -24,6 +24,13 @@ a:visited {color: var(--vlink-color);}
 /* make summaries clickable */
 summary {
 	cursor: pointer;
+	background-color: var(--secondary-color);
+	padding: 0.25em;
+}
+
+.styleSelectorContainer {
+	text-align: right;
+	padding-right: 0.25em;
 }
 
 .fileListingTable {

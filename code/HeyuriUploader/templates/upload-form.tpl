@@ -25,7 +25,7 @@
 		<span id="progressText" style="font-size:12px;"></span>
 	</div>
 
-	<details open="">
+	<details>
 		<summary>{{lang.upload.allowedExtensions}}</summary>
 		<p>{{allowedExtensions}}</p>
 	</details>

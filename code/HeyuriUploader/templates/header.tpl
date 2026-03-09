@@ -13,5 +13,11 @@
 	</head>
 	
 	<body>
+		<div class="styleSelectorContainer">
+			<form id="style-form">
+				<label for="style-selector">{{lang.settings.styleSelector}}</label>
+				<select id="style-selector"></select>
+			</form>
+		</div>
 		<h1 class="titleHeader">{{boardTitle}}</h1>
 		<h2 class="subtitleHeader">{{boardSubTitle}}</h2>

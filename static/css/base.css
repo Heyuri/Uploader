@@ -21,6 +21,11 @@ a:visited {color: var(--vlink-color);}
 	font-weight: bold;
 }
 
+/* make summaries clickable */
+summary {
+	cursor: pointer;
+}
+
 .fileListingTable {
 	min-width: 100%;
 	text-align: center;

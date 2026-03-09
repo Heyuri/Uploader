@@ -5,7 +5,6 @@ use HeyuriUploader\Classes\uploadedFileRepository;
 use HeyuriUploader\Classes\uploadEntryRepository;
 use HeyuriUploader\Classes\logFile;
 use HeyuriUploader\Classes\uploadEntry;
-use HeyuriUploader\Classes\uploaderHTML;
 use HeyuriUploader\Classes\banChecker;
 
 use function HeyuriUploader\Functions\getUserIP;
@@ -32,7 +31,7 @@ class chunkUploadService {
 		$this->banChecker = $banChecker;
 
 		// Ensure chunk directory exists, default to data/chunks/ if not configured
-		$this->chunkDir = !empty($this->conf['chunkDir']) ? DATA_DIR . $this->conf['chunkDir'] : DATA_DIR . 'chunks/';
+		$this->chunkDir = !empty($this->conf['chunkDir']) ? $this->conf['chunkDir'] : 'chunks/';
 		// Normalize trailing slash
 		if (substr($this->chunkDir, -1) !== '/') {
 			$this->chunkDir .= '/';
@@ -41,6 +40,7 @@ class chunkUploadService {
 		if (!is_dir($this->chunkDir)) {
 			mkdir($this->chunkDir, 0755, true);
 		}
+		error_log($this->chunkDir);
 	}
 
 	/**

@@ -378,7 +378,7 @@ class requestHandler {
 		}
 
 		try {
-			$chunkService = new chunkUploadService($this->conf, $this->uploadedFileRepository, $this->uploadEntryRepository, $this->logFile, $this->uploaderHTML, $this->banChecker);
+			$chunkService = new chunkUploadService($this->conf, $this->uploadedFileRepository, $this->uploadEntryRepository, $this->logFile, $this->banChecker);
 
 			if ($pageRequest === self::REQUEST_UPLOAD_CHUNK) {
 				$chunkService->handleChunk();

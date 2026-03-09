@@ -20,6 +20,7 @@ return $conf = [
     'uploadDir' => "src/",      // upload location (slash is required).
     'thumbDir' => "thmb/",	    // thumbnail directory
     'prefix' => "up",           // prefix to add in front of your file name. Don't change after setting
+    'thumb_suffix' => "_thumb", // suffix to add to thumbnail file names
     'coolDownTime' => 5,        // time in seconds untill can be uploaded to again. (set to -1 for no cool down)
 
     'defaultTheme' => 'Futaba', //default css theme

@@ -76,13 +76,13 @@ class uploadEntry {
 	}
 
 	/**
-	 * Constructs the thumbnail file name with prefix, ID, _thumb suffix and extension.
+	 * Constructs the thumbnail file name with prefix, ID, thumb suffix and extension.
 	 * 
 	 * @param array $conf Configuration array containing 'prefix'
 	 * @return string The constructed thumbnail name (e.g., "up001_thumb.jpg")
 	 */
 	public function getThumbName(array $conf): string {
-		return $conf['prefix'] . sprintf("%03d", $this->id) . '_thumb.' . $conf['thumbnailExtension'];
+		return $conf['prefix'] . sprintf("%03d", $this->id) . $conf['thumb_suffix'] . '.' . $conf['thumbnailExtension'];
 	}
 
 	/**
@@ -112,6 +112,6 @@ class uploadEntry {
 	 * @return string The full video thumbnail path (e.g., "thmb/up001_thumb.jpg")
 	 */
 	public function getVideoThumbPath(array $conf): string {
-		return $conf['thumbDir'] . $conf['prefix'] . sprintf("%03d", $this->id) . '_thumb.' . $conf['thumbnailExtension'];
+		return $conf['thumbDir'] . $conf['prefix'] . sprintf("%03d", $this->id) . $conf['thumb_suffix'] . '.' . $conf['thumbnailExtension'];
 	}
 }

@@ -25,13 +25,13 @@ function redirect(string $url): void {
 }
 
 function forceJapaneseForJpUsers(languageManager $languageManager, bool $forceJapanese): void {
-	if ($forceJapanese) {
-		if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-			 // Detect "ja" in the browser's language header
-			 if (preg_match('/\bja\b/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '')) {
-				// Override the configured display language
-				$languageManager->setLanguage('ja');
-			}
-		}
+	// If the option is enabled and the user has Japanese browser settings, force the language to Japanese
+	if (
+		$forceJapanese 
+		&& file_exists(__DIR__ . '/../lang/ja.php')
+		&& isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])
+		&& preg_match('/\bja\b/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+			// Override the configured display language
+			$languageManager->setLanguage('ja');
 	}
 }

@@ -29,11 +29,11 @@ return $conf = [
     'maxTotalSize' => 204800,               // total size limit of all stored files in megabytes / 保存されている全ファイルの合計サイズ上限（MB）
     'filesPerListing' => 30,                // number of files displayed per page / 1ページに表示するファイル数
     'chunkSize' => 200*1024*1024,           // chunk size in bytes for chunked uploads (must be under server upload limit, e.g. nginx client_max_body_size) / 分割アップロードのチャンクサイズ（バイト）。サーバーのアップロード制限（例: nginx client_max_body_size）以下にすること
-    'chunkDir' => 'chunks/',                // temporary directory used for upload chunks / 分割アップロード用の一時ディレクトリ
     'commentRequired' => true,              // whether a comment is required when uploading / アップロード時にコメントを必須にするか
     'maxCommentSize' => 400,                // maximum comment length / コメントの最大文字数
     'deleteOldestOnMaxFiles' => false,      // delete the oldest file if the maximum number of files is reached / 最大ファイル数に達した場合、最も古いファイルを削除する
     'thumbnailExtension' => 'jpg',          // file extension used for generated thumbnails / 生成されるサムネイルの拡張子
+    'forceJapaneseForJpUsers' => true,    // force Japanese language for users with Japanese browser settings / 日本語のブラウザ設定を持つユーザーに日本語を強制する
 
     'allowedExtensions' =>  [
         'dat','htm','torrent','deb','lzh','ogm','doc','class','js','swift','cc','tga','ape','woff2','cab','whl','mpe',

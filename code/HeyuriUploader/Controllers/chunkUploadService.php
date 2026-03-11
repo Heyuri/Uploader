@@ -6,32 +6,24 @@ use HeyuriUploader\Classes\uploadEntryRepository;
 use HeyuriUploader\Classes\logFile;
 use HeyuriUploader\Classes\uploadEntry;
 use HeyuriUploader\Classes\banChecker;
+use HeyuriUploader\Classes\languageManager;
 
 use function HeyuriUploader\Functions\getUserIP;
 
 class chunkUploadService {
-	private $conf;
-	private $uploadedFileRepository;
-	private $uploadEntryRepository;
-	private $logFile;
-	private $banChecker;
 	private string $chunkDir;
 
 	public function __construct(
-		array $conf,
-		uploadedFileRepository $uploadedFileRepository,
-		uploadEntryRepository $uploadEntryRepository,
-		logFile $logFile,
-		banChecker $banChecker
+		private array $conf,
+		private uploadedFileRepository $uploadedFileRepository,
+		private uploadEntryRepository $uploadEntryRepository,
+		private logFile $logFile,
+		private banChecker $banChecker,
+		private languageManager $languageManager,
 	) {
-		$this->conf = $conf;
-		$this->uploadedFileRepository = $uploadedFileRepository;
-		$this->uploadEntryRepository = $uploadEntryRepository;
-		$this->logFile = $logFile;
-		$this->banChecker = $banChecker;
-
-		// Ensure chunk directory exists, default to data/chunks/ if not configured
-		$this->chunkDir = !empty($this->conf['chunkDir']) ? \DATA_DIR . $this->conf['chunkDir'] : \DATA_DIR . 'chunks/';
+		// Ensure chunk directory exists, default to system temp directory if not configured
+		$this->chunkDir = sys_get_temp_dir() . '/';
+		
 		// Normalize trailing slash
 		if (substr($this->chunkDir, -1) !== '/') {
 			$this->chunkDir .= '/';
@@ -51,7 +43,7 @@ class chunkUploadService {
 
 		if (!isset($_FILES['chunkData']) || $_FILES['chunkData']['error'] !== UPLOAD_ERR_OK) {
 			http_response_code(400);
-			echo json_encode(['error' => 'No chunk data received.']);
+			echo json_encode(['error' => $this->languageManager->get('upload.chunkUploadFailed')]);
 			return;
 		}
 
@@ -63,20 +55,20 @@ class chunkUploadService {
 		if ($chunkIndex === false || $totalChunks === false || $fileSize === false
 			|| $chunkIndex < 0 || $totalChunks <= 0 || empty($fileName) || $fileSize <= 0) {
 			http_response_code(400);
-			echo json_encode(['error' => 'Invalid chunk parameters.']);
+			echo json_encode(['error' => $this->languageManager->get('upload.invalidChunkParameters')]);
 			return;
 		}
 
 		if ($chunkIndex >= $totalChunks) {
 			http_response_code(400);
-			echo json_encode(['error' => 'Chunk index out of range.']);
+			echo json_encode(['error' => $this->languageManager->get('upload.chunkIndexOutOfRange')]);
 			return;
 		}
 
 		// Enforce max file size
 		if ($fileSize > $this->conf['maxUploadSize'] * 1024 * 1024) {
 			http_response_code(413);
-			echo json_encode(['error' => 'File exceeds maximum upload size.']);
+			echo json_encode(['error' => $this->languageManager->get('upload.fileExceedsMaxSize')]);
 			return;
 		}
 
@@ -100,14 +92,14 @@ class chunkUploadService {
 			$uploadId = $_POST['uploadId'] ?? '';
 			if (!$this->isValidUploadId($uploadId)) {
 				http_response_code(400);
-				echo json_encode(['error' => 'Invalid upload ID.']);
+				echo json_encode(['error' => $this->languageManager->get('upload.invalidUploadId')]);
 				return;
 			}
 
 			$uploadDir = $this->chunkDir . $uploadId . '/';
 			if (!is_dir($uploadDir) || !file_exists($uploadDir . 'meta.json')) {
 				http_response_code(404);
-				echo json_encode(['error' => 'Upload session not found.']);
+				echo json_encode(['error' => $this->languageManager->get('upload.uploadSessionNotFound')]);
 				return;
 			}
 
@@ -115,7 +107,7 @@ class chunkUploadService {
 			$meta = json_decode(file_get_contents($uploadDir . 'meta.json'), true);
 			if ($meta['ip'] !== getUserIP()) {
 				http_response_code(403);
-				echo json_encode(['error' => 'IP mismatch.']);
+				echo json_encode(['error' => $this->languageManager->get('upload.ipMismatch')]);
 				return;
 			}
 		}
@@ -141,14 +133,14 @@ class chunkUploadService {
 		$uploadId = $_POST['uploadId'] ?? '';
 		if (!$this->isValidUploadId($uploadId)) {
 			http_response_code(400);
-			echo json_encode(['error' => 'Invalid upload ID.']);
+			echo json_encode(['error' => $this->languageManager->get('upload.invalidUploadId')]);
 			return;
 		}
 
 		$uploadDir = $this->chunkDir . $uploadId . '/';
 		if (!is_dir($uploadDir) || !file_exists($uploadDir . 'meta.json')) {
 			http_response_code(404);
-			echo json_encode(['error' => 'Upload session not found.']);
+			echo json_encode(['error' => $this->languageManager->get('upload.uploadSessionNotFound')]);
 			return;
 		}
 
@@ -157,7 +149,7 @@ class chunkUploadService {
 		// Verify IP
 		if ($meta['ip'] !== getUserIP()) {
 			http_response_code(403);
-			echo json_encode(['error' => 'IP mismatch.']);
+			echo json_encode(['error' => $this->languageManager->get('upload.ipMismatch')]);
 			return;
 		}
 
@@ -165,7 +157,7 @@ class chunkUploadService {
 		for ($i = 0; $i < $meta['totalChunks']; $i++) {
 			if (!file_exists($uploadDir . $i)) {
 				http_response_code(400);
-				echo json_encode(['error' => 'Missing chunk ' . $i . '.']);
+				echo json_encode(['error' => $this->languageManager->get('upload.missingChunk', ['chunk' => $i])]);
 				return;
 			}
 		}
@@ -175,7 +167,7 @@ class chunkUploadService {
 		$assembledHandle = fopen($assembledPath, 'wb');
 		if (!$assembledHandle) {
 			http_response_code(500);
-			echo json_encode(['error' => 'Failed to assemble file.']);
+			echo json_encode(['error' => $this->languageManager->get('upload.failedToAssembleFile')]);
 			return;
 		}
 
@@ -194,7 +186,7 @@ class chunkUploadService {
 		if ($actualSize !== $meta['fileSize']) {
 			$this->cleanupChunks($uploadId);
 			http_response_code(400);
-			echo json_encode(['error' => 'Assembled file size mismatch.']);
+			echo json_encode(['error' => $this->languageManager->get('upload.fileSizeMismatch')]);
 			return;
 		}
 
@@ -228,7 +220,7 @@ class chunkUploadService {
 		// Parse file info
 		$fileInfo = pathinfo($originalFileName);
 		if (!isset($fileInfo['extension'])) {
-			throw new \Exception("Invalid file format.");
+			throw new \Exception($this->languageManager->get('upload.invalidFileFormat'));
 		}
 
 		$fileName = $fileInfo['filename'];
@@ -335,7 +327,7 @@ class chunkUploadService {
 		// Resolve real path and verify it's within the chunk directory
 		$realChunkDir = realpath($this->chunkDir);
 		$realUploadDir = realpath($uploadDir);
-		if ($realUploadDir === false || strpos($realUploadDir, $realChunkDir) !== 0) {
+		if ($realUploadDir === false || str_contains($realUploadDir, $realChunkDir) === false) {
 			return;
 		}
 

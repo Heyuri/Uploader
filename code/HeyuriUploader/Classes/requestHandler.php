@@ -11,7 +11,15 @@ use function HeyuriUploader\Functions\getUserIP;
 use function HeyuriUploader\Functions\redirect;
 
 class requestHandler {
-	private $conf, $uploadEntryRepository, $uploaderHTML, $banChecker, $floodControls, $logFile, $cookieSettingsManager, $uploadedFileRepository, $searchRepository, $lang;
+	private array $conf;
+	private uploadEntryRepository $uploadEntryRepository;
+	private uploaderHTML $uploaderHTML;
+	private banChecker $banChecker;
+	private logFile $logFile;
+	private cookieSettingsManager $cookieSettingsManager;
+	private uploadedFileRepository $uploadedFileRepository;
+	private searchRepository $searchRepository;
+	private languageManager $languageManager;
 
 	// Define request constants
 	private const REQUEST_DELETE_FILE = 'deleteFile';
@@ -29,6 +37,7 @@ class requestHandler {
 
 	public function __construct(array $config, languageManager $languageManager) {
 		$this->conf = $config;
+		$this->languageManager = $languageManager;
 		$this->uploadEntryRepository = new uploadEntryRepository(
 			\DATA_DIR . $this->conf['logFile'],
 			\DATA_DIR . $this->conf['counterFile']);
@@ -38,7 +47,7 @@ class requestHandler {
 		$this->floodControls = new floodControls($config['coolDownTime'], $this->uploadEntryRepository);
 		$this->logFile = new logFile($config);
 		$this->cookieSettingsManager = new cookieSettingsManager($config['defaultCookieValues']);
-		$this->uploadedFileRepository = new uploadedFileRepository($config, $this->uploaderHTML, $this->banChecker, $this->floodControls, $this->logFile, $this->uploadEntryRepository);
+		$this->uploadedFileRepository = new uploadedFileRepository($config);
 		$this->searchRepository = new searchRepository($this->logFile);
 	}
 
@@ -141,6 +150,10 @@ class requestHandler {
 			case self::REQUEST_UPLOAD:
 				if ($this->banChecker->isBanned(getUserIP())) {
 					$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.bannedFromUploading'));
+				}
+
+				if ($this->floodControls->isFlooding(getUserIP())) {
+					$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.uploadRejected'), $this->lang->get('errors.mustWaitBeforePosting'));
 				}
 
 				$uploadedFileService = new uploadedFileService($this->uploadedFileRepository, $this->uploadEntryRepository, $this->logFile, $this->uploaderHTML, $this->conf['allowedExtensions'], $this->conf['extensionsToBeConvertedToText'], $this->conf['prefix'], $this->conf['maxAmountOfFiles'], $this->conf['deleteOldestOnMaxFiles'], $this->banChecker);
@@ -375,7 +388,15 @@ class requestHandler {
 		if ($this->banChecker->isBanned(getUserIP())) {
 			header('Content-Type: application/json');
 			http_response_code(403);
-			echo json_encode(['error' => 'You have been banned.']);
+			echo json_encode(['error' => $this->languageManager->get('errors.bannedFromUploading')]);
+			return;
+		}
+
+		// Check flood control before allowing chunk uploads
+		if ($this->floodControls->isFlooding(getUserIP())) {
+			header('Content-Type: application/json');
+			http_response_code(429);
+			echo json_encode(['error' => $this->languageManager->get('errors.mustWaitBeforePosting')]);
 			return;
 		}
 

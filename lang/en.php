@@ -111,6 +111,7 @@ return [
 		'invalidPassword' => 'Invalid password',
 		'passwordEnteredIncorrect' => 'The password you entered was incorrect.',
 		'unableOpenLog' => 'Error: Unable to open log file.',
+        'mustWaitBeforePosting' => 'You must wait before posting again due to flood control.',
 	],
 	'messages' => [
 		'fileDeleted' => 'The file has been deleted.',

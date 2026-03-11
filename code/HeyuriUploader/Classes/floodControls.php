@@ -8,7 +8,7 @@ class floodControls {
 		private uploadEntryRepository $uploadEntryRepository
 	) {}
 
-	public function isBoardBeingFlooded(): bool {
+	public function isFlooding(): bool {
 		$lastPostID = $this->uploadEntryRepository->getLastID();
 		$lastPost = $this->uploadEntryRepository->getDataByID($lastPostID);
 		if (!$lastPost) {

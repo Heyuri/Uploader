@@ -85,10 +85,10 @@ return [
 		'deleteButton' => 'Delete',
 	],
 	'errors' => [
-		'failedToDelete' => 'Failed to delete',
+		'failedToDelete' => 'Failed to delete file.',
 		'invalidFileID' => 'Invalid file ID.',
 		'noFileIDSelected' => 'No file ID selected.',
-		'bannedFromUploading' => 'You have been banned from uploading. ヽ(ー_ー )ノ',
+		'bannedFromUploading' => 'You have been banned. ヽ(ー_ー )ノ',
 		'notAuthorized' => 'You are not authorized to access this page.',
 		'mustBeLoggedIn' => 'You must be logged in to view this page.',
 		'banError' => 'Ban Error',

@@ -86,17 +86,30 @@ ini_set('error_log', DATA_DIR . 'error.log');
 require __DIR__.'/code/HeyuriUploader/include.php';
 require __DIR__.'/autoloader.php';
 
+use HeyuriUploader\Classes\languageManager;
 use HeyuriUploader\Classes\requestHandler;
 use HeyuriUploader\Classes\uploaderHTML;
 
-try {
+use function HeyuriUploader\Functions\forceJapaneseForJpUsers;
 
+// load language manager
+$languageManager = new languageManager(__DIR__ . '/lang', 'en');
+
+try {
+	// Load configuration
 	$configFile = "config.php";
 
+	// Check if config file exists
+	if(!file_exists($configFile)) throw new \Exception("Configuration file <i>$configFile</i> is missing.");
+
+	// Load config
 	$conf = require $configFile;
 
-	if(!file_exists($configFile)) throw new \Exception("Configuration file <i>$configFile</i> is missing.");
+	// Check if log file exists
 	if (!file_exists(DATA_DIR . $conf['logFile'])) throw new \Exception("Log file " . DATA_DIR . $conf['logFile'] . " is missing. Please create it.");
+
+	// handle force japanese option if the user has japanese browser settings, even if the default language is not japanese
+	forceJapaneseForJpUsers($languageManager, $conf['forceJapaneseForJpUsers'] ?? false);
 
 	// Configuration check
 	if (!isset($conf['timeZone'])) {
@@ -106,11 +119,11 @@ try {
 	date_default_timezone_set($conf['timeZone']);
 
 	// Main logic
-	$requestHandler = new requestHandler($conf);
+	$requestHandler = new requestHandler($conf, $languageManager);
 	$requestHandler->handleRequest();
 	
 } catch (\Exception $e) {
 	// Handle exceptions, logging, and displaying user-friendly error messages
-	$uploaderHTML = new uploaderHTML($conf);
+	$uploaderHTML = new uploaderHTML($conf, $languageManager);
 	$uploaderHTML->drawErrorPageAndExit($uploaderHTML->getLang()->get('errors.generalError') . $e->getMessage());
 }

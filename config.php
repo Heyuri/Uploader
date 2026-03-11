@@ -32,11 +32,11 @@ return $conf = [
     'filesPerListing' => 30,                 // how many files listed per page
     'maxUploadSize' => 20,                   // max upload size in megabytes
     'chunkSize' => 200*1024*1024,                // chunk size in bytes for chunked uploads (must be under server's upload limit, e.g. nginx client_max_body_size)
-    'chunkDir' => 'chunks/',                // temp directory for upload chunks
     'commentRequired' => true,              // comment is requires or not
     'maxCommentSize' => 400,                // max comment length
     'deleteOldestOnMaxFiles' => false,      // delete oldest file if user uploads when maxxed out.
     'thumbnailExtension' => 'jpg',
+    'forceJapaneseForJpUsers' => true, // force japanese language for users with japanese browser settings
 
     'allowedExtensions' =>  [
         'dat','htm','torrent','deb','lzh','ogm','doc','class','js','swift','cc','tga','ape','woff2','cab','whl','mpe',

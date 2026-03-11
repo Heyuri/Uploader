@@ -40,7 +40,7 @@ class uploadEntryController {
 		}
 
 		// Secure file deletion to prevent unauthorized access
-		if (file_exists($thumbPath) && strpos(realpath($thumbPath), realpath($this->thumbDir)) === 0) {
+		if (file_exists($thumbPath) && str_contains(realpath($thumbPath), realpath($this->thumbDir)) === false) {
 			unlink($thumbPath);
 		}
 
@@ -84,7 +84,7 @@ class uploadEntryController {
 			}
 
 			// Secure file deletion to prevent unauthorized access
-			if (file_exists($thumbPath) && strpos(realpath($thumbPath), realpath($this->thumbDir)) === 0) {
+			if (file_exists($thumbPath) && str_contains(realpath($thumbPath), realpath($this->thumbDir)) === false) {
 				unlink($thumbPath);
 			}
 

@@ -27,12 +27,12 @@ class requestHandler {
 	private const REQUEST_FINALIZE_CHUNK = 'finalizeChunkUpload';
 	private const REQUEST_LOGOUT = 'logout';
 
-	public function __construct(array $config) {
+	public function __construct(array $config, languageManager $languageManager) {
 		$this->conf = $config;
 		$this->uploadEntryRepository = new uploadEntryRepository(
 			\DATA_DIR . $this->conf['logFile'],
 			\DATA_DIR . $this->conf['counterFile']);
-		$this->uploaderHTML = new uploaderHTML($config);
+		$this->uploaderHTML = new uploaderHTML($config, $languageManager);
 		$this->lang = $this->uploaderHTML->getLang();
 		$this->banChecker = new banChecker();
 		$this->floodControls = new floodControls($config['coolDownTime'], $this->uploadEntryRepository);
@@ -380,7 +380,7 @@ class requestHandler {
 		}
 
 		try {
-			$chunkService = new chunkUploadService($this->conf, $this->uploadedFileRepository, $this->uploadEntryRepository, $this->logFile, $this->banChecker);
+			$chunkService = new chunkUploadService($this->conf, $this->uploadedFileRepository, $this->uploadEntryRepository, $this->logFile, $this->banChecker, $this->languageManager);
 
 			if ($pageRequest === self::REQUEST_UPLOAD_CHUNK) {
 				$chunkService->handleChunk();

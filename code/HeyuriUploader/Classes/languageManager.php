@@ -28,6 +28,11 @@ class languageManager {
 		$this->strings = $this->flatten($decoded);
 	}
 
+	public function setLanguage(string $language): void {
+		$this->language = $language;
+		$this->loadLanguage();
+	}
+
 	/**
 	 * Flatten a nested array into dot-notation keys.
 	 * e.g. ['nav' => ['back' => 'Back']] becomes ['nav.back' => 'Back']

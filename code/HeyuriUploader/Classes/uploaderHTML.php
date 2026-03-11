@@ -12,9 +12,9 @@ class uploaderHTML {
 	private $cookieSettingsManager;
 	private languageManager $lang;
 
-	public function __construct(array $conf) {
+	public function __construct(array $conf, languageManager $languageManager) {
 		$this->conf = $conf;
-		$this->lang = new languageManager(__DIR__ . '/../../../lang', $conf['language'] ?? 'en');
+		$this->lang = $languageManager;
 		$this->renderer = new HTMLRenderer(__DIR__ . '/../templates', $this->lang);
 		$this->cookieSettingsManager = new cookieSettingsManager($conf['defaultCookieValues']);
 	}

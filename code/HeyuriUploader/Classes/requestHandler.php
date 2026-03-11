@@ -14,6 +14,7 @@ class requestHandler {
 	private array $conf;
 	private uploadEntryRepository $uploadEntryRepository;
 	private uploaderHTML $uploaderHTML;
+	private floodControls $floodControls;
 	private banChecker $banChecker;
 	private logFile $logFile;
 	private cookieSettingsManager $cookieSettingsManager;
@@ -42,7 +43,6 @@ class requestHandler {
 			\DATA_DIR . $this->conf['logFile'],
 			\DATA_DIR . $this->conf['counterFile']);
 		$this->uploaderHTML = new uploaderHTML($config, $languageManager);
-		$this->lang = $this->uploaderHTML->getLang();
 		$this->banChecker = new banChecker();
 		$this->floodControls = new floodControls($config['coolDownTime'], $this->uploadEntryRepository);
 		$this->logFile = new logFile($config);
@@ -69,7 +69,7 @@ class requestHandler {
 
 				// Validate file ID as a proper integer
 				if (!filter_var($fileID, FILTER_VALIDATE_INT)) {
-					$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.failedToDelete'), $this->lang->get('errors.invalidFileID'));
+					$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.failedToDelete'), $this->languageManager->get('errors.invalidFileID'));
 				}
 				
 				// Retrieve post data
@@ -111,7 +111,7 @@ class requestHandler {
 
 			case self::REQUEST_DELETE_FORM:
 				$fileID = $_GET['deleteFileID'] ?? '';
-				if (!$fileID) $this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.noFileIDSelected'));
+				if (!$fileID) $this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.noFileIDSelected'));
 
 				$this->uploaderHTML->drawHeader();
 				$this->uploaderHTML->drawActionLinks();
@@ -149,11 +149,11 @@ class requestHandler {
 
 			case self::REQUEST_UPLOAD:
 				if ($this->banChecker->isBanned(getUserIP())) {
-					$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.bannedFromUploading'));
+					$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.bannedFromUploading'));
 				}
 
 				if ($this->floodControls->isFlooding(getUserIP())) {
-					$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.uploadRejected'), $this->lang->get('errors.mustWaitBeforePosting'));
+					$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.uploadRejected'), $this->languageManager->get('errors.mustWaitBeforePosting'));
 				}
 
 				$uploadedFileService = new uploadedFileService($this->uploadedFileRepository, $this->uploadEntryRepository, $this->logFile, $this->uploaderHTML, $this->conf['allowedExtensions'], $this->conf['extensionsToBeConvertedToText'], $this->conf['prefix'], $this->conf['maxAmountOfFiles'], $this->conf['deleteOldestOnMaxFiles'], $this->banChecker);
@@ -188,7 +188,7 @@ class requestHandler {
 				$isLoggedIn = $sessionController->isLoggedIn();
 
 				if(!$isLoggedIn) {
-					$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.notAuthorized'), $this->lang->get('errors.mustBeLoggedIn'));
+					$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.notAuthorized'), $this->languageManager->get('errors.mustBeLoggedIn'));
 				}
 
 				// get mod page paramter
@@ -221,7 +221,7 @@ class requestHandler {
 					if ($modAction === 'deleteFile') {
 						$fileID = $_REQUEST['fileID'] ?? '';
 						if (!filter_var($fileID, FILTER_VALIDATE_INT)) {
-							$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.failedToDelete'), $this->lang->get('errors.invalidFileID'));
+							$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.failedToDelete'), $this->languageManager->get('errors.invalidFileID'));
 						}
 
 						$uploadEntry = $this->uploadEntryRepository->getDataByID((int) $fileID);
@@ -234,17 +234,17 @@ class requestHandler {
 					if ($modAction === 'banIP') {
 						$targetIP = $_REQUEST['targetIP'] ?? '';
 						if (empty($targetIP) || !filter_var($targetIP, FILTER_VALIDATE_IP)) {
-							$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.banError'), $this->lang->get('errors.invalidIPAddress'));
+							$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.banError'), $this->languageManager->get('errors.invalidIPAddress'));
 						}
 						$this->banChecker->addBan($targetIP);
-						$this->uploaderHTML->drawMessageAndRedirectHome($this->lang->get('messages.ipBanned', htmlspecialchars($targetIP)));
+						$this->uploaderHTML->drawMessageAndRedirectHome($this->languageManager->get('messages.ipBanned', htmlspecialchars($targetIP)));
 						return;
 					}
 
 					if ($modAction === 'banFile') {
 						$fileID = $_REQUEST['fileID'] ?? '';
 						if (!filter_var($fileID, FILTER_VALIDATE_INT)) {
-							$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.banError'), $this->lang->get('errors.invalidFileID'));
+							$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.banError'), $this->languageManager->get('errors.invalidFileID'));
 						}
 
 						$uploadEntry = $this->uploadEntryRepository->getDataByID((int) $fileID);
@@ -268,7 +268,7 @@ class requestHandler {
 							$this->banChecker->addBan($ip);
 						}
 
-						$this->uploaderHTML->drawMessageAndRedirectHome($this->lang->get('messages.fileDeletedAndBanned', htmlspecialchars($ip)));
+						$this->uploaderHTML->drawMessageAndRedirectHome($this->languageManager->get('messages.fileDeletedAndBanned', htmlspecialchars($ip)));
 						return;
 					}
 
@@ -287,16 +287,16 @@ class requestHandler {
 
 						if ($banType === 'ip') {
 							if (empty($banValue) || !filter_var($banValue, FILTER_VALIDATE_IP)) {
-								$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.banError'), $this->lang->get('errors.invalidIPAddress'));
+								$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.banError'), $this->languageManager->get('errors.invalidIPAddress'));
 							}
 							$this->banChecker->addBan($banValue);
 						} elseif ($banType === 'hash') {
 							if (empty($banValue) || !preg_match('/^[a-f0-9]{64}$/i', $banValue)) {
-								$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.banError'), $this->lang->get('errors.invalidSHA256'));
+								$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.banError'), $this->languageManager->get('errors.invalidSHA256'));
 							}
 							$this->banChecker->addBannedFileHash($banValue);
 						} else {
-							$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.banError'), $this->lang->get('errors.invalidBanType'));
+							$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.banError'), $this->languageManager->get('errors.invalidBanType'));
 						}
 
 						redirect($this->conf['mainScript'] . '?request=admin&modPage=manageBans');
@@ -332,7 +332,7 @@ class requestHandler {
 					if ($modAction === 'saveConfig') {
 						$newValues = $_POST['conf'] ?? [];
 						if (!is_array($newValues)) {
-							$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.configError'), $this->lang->get('errors.invalidFormData'));
+							$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.configError'), $this->languageManager->get('errors.invalidFormData'));
 						}
 
 						$configFile = 'config.php';
@@ -371,7 +371,7 @@ class requestHandler {
 			break;
 
 			default:
-				$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.pageNotFound'), $this->lang->get('errors.contactAdmin'));
+				$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.pageNotFound'), $this->languageManager->get('errors.contactAdmin'));
 			break;
 		}
 	}

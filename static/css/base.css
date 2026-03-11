@@ -242,3 +242,15 @@ summary {
 #progressBar::-moz-progress-bar {
 	background-color: var(--secondary-color);
 }
+
+/* Top right style selector to push titleHeader less vertically (temp, PC-only) */
+@media screen and (min-width: 1020px) {
+	.styleSelectorContainer {
+		float: right;
+		margin: -13px 0 0 0;
+	}
+
+	.titleHeader {
+		border-top: 13px solid var(--bg-color);
+	}
+}

@@ -124,6 +124,14 @@ try {
 	
 } catch (\Exception $e) {
 	// Handle exceptions, logging, and displaying user-friendly error messages
+	if (!isset($conf) || !is_array($conf)) {
+		$conf = [];
+	}
+	if (!isset($languageManager) || !$languageManager instanceof languageManager) {
+		$languageManager = new languageManager(__DIR__ . '/lang', 'en');
+	}
+
+	// display a user-friendly error page with the error message
 	$uploaderHTML = new uploaderHTML($conf, $languageManager);
-	$uploaderHTML->drawErrorPageAndExit($uploaderHTML->getLang()->get('errors.generalError') . $e->getMessage());
+	$uploaderHTML->drawErrorPageAndExit($languageManager->get('errors.generalError'), $e->getMessage());
 }

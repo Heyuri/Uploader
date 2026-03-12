@@ -1,7 +1,7 @@
 {{capacityWarning}}
 <noscript>
 	<link rel="stylesheet" href="static/css/fallback-noscript.css">
-	<div style="color:red;">lang.upload.javascriptQoL</div>
+	<div class="redText">{{lang.upload.javascriptQoL}}</div>
 </noscript>
 <form id="uploadForm" method="post" enctype="multipart/form-data" action="{{action}}" data-chunk-size="{{chunkSize}}" data-main-script="{{mainScript}}">
 	<input type="hidden" name="request" value="uploadFile">

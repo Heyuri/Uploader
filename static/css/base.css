@@ -98,10 +98,6 @@ summary {
 	text-align: right;
 }
 
-.alignLeft {
-	text-align: left;
-}
-
 .centerItem {
 	text-align: center;
 }
@@ -109,7 +105,6 @@ summary {
 .centerItem table {
 	margin-left: auto;
 	margin-right: auto;
-	text-align: center;
 }
 
 .subtleList {

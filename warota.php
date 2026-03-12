@@ -92,9 +92,6 @@ use HeyuriUploader\Classes\uploaderHTML;
 
 use function HeyuriUploader\Functions\forceJapaneseForJpUsers;
 
-// load language manager
-$languageManager = new languageManager(__DIR__ . '/lang', 'en');
-
 try {
 	// Load configuration
 	$configFile = "config.php";
@@ -107,6 +104,9 @@ try {
 
 	// Check if log file exists
 	if (!file_exists(DATA_DIR . $conf['logFile'])) throw new \Exception("Log file " . DATA_DIR . $conf['logFile'] . " is missing. Please create it.");
+
+	// load language manager
+	$languageManager = new languageManager(__DIR__ . '/lang', $conf['language'] ?? 'en');
 
 	// handle force japanese option if the user has japanese browser settings, even if the default language is not japanese
 	forceJapaneseForJpUsers($languageManager, $conf['forceJapaneseForJpUsers'] ?? false);

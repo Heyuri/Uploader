@@ -107,6 +107,10 @@ summary {
 	margin-right: auto;
 }
 
+.configEditorTable {
+	text-align: left;
+}
+
 .subtleList {
 	list-style: none; /* Removes bullet points */
 	padding-left: 0; /* Removes default padding on the left */

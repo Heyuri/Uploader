@@ -98,6 +98,10 @@ summary {
 	text-align: right;
 }
 
+.alignLeft {
+	text-align: left;
+}
+
 .centerItem {
 	text-align: center;
 }

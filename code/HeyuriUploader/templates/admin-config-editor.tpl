@@ -7,7 +7,7 @@
 	{{statusMessage}}
 
 	<form method="post" action="{{saveUrl}}">
-		<table>
+		<table class="alignLeft">
 			<tbody>
 				{{configRows}}
 			</tbody>

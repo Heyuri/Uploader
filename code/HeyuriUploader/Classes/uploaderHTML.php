@@ -502,14 +502,14 @@ class uploaderHTML {
 		}
 
 		$html = $this->renderer->render('upload-form', [
-			'action' => $url,
-			'maxFileSize' => htmlspecialchars(bytesToHumanReadable($this->conf['maxUploadSize'] * 1024 * 1024)),
-			'defaultComment' => htmlspecialchars($this->conf['defaultComment']),
-			'allowedExtensions' => htmlspecialchars(implode(", ", $this->conf['allowedExtensions'])),
-			'capacityWarning' => $capacityWarning,
-			'requestFrom' => isset($_GET['request']) && $_GET['request'] === 'catalog' ? 'catalog' : 'index',
-			'chunkSize' => $this->conf['chunkSize'] ?? 2 * 1024 * 1024,
-			'mainScript' => htmlspecialchars($this->conf['mainScript']),
+		'action' => $url,
+		'maxFileSize' => ($this->lang->get('upload.maxFileSize', htmlspecialchars(bytesToHumanReadable($this->conf['maxUploadSize'] * 1024 * 1024)))),
+		'defaultComment' => htmlspecialchars($this->conf['defaultComment']),
+		'allowedExtensions' => htmlspecialchars(implode(", ", $this->conf['allowedExtensions'])),
+		'capacityWarning' => $capacityWarning,
+		'requestFrom' => isset($_GET['request']) && $_GET['request'] === 'catalog' ? 'catalog' : 'index',
+		'chunkSize' => $this->conf['chunkSize'] ?? 2 * 1024 * 1024,
+		'mainScript' => htmlspecialchars($this->conf['mainScript']),
 		]);
 
 		echo $html;

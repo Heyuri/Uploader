@@ -1,13 +1,13 @@
 {{capacityWarning}}
 <noscript>
 	<link rel="stylesheet" href="static/css/fallback-noscript.css">
-	<div style="color:red;">JavaScript is required for chunk uploads. Some features may be unavailable.</div>
+	<div style="color:red;">lang.upload.javascriptQoL</div>
 </noscript>
 <form id="uploadForm" method="post" enctype="multipart/form-data" action="{{action}}" data-chunk-size="{{chunkSize}}" data-main-script="{{mainScript}}">
 	<input type="hidden" name="request" value="uploadFile">
 	<input type="hidden" name="requestFrom" value="{{requestFrom}}">
 
-	<p>{{lang.upload.maxFileSize}} {{maxFileSize}}</p>
+	<p class="maxFileSize">{{maxFileSize}}</p>
 
 	<label for="upfile"><span title="{{lang.upload.chooseFileTooltip}}">{{lang.upload.chooseFile}}</span></label>
 	<input type="file" id="upfile" name="upfile" required> <br>

@@ -27,7 +27,7 @@ return [
 		'languageHeading' => 'Language',
 	],
 	'upload' => [
-		'maxFileSize' => 'Max file size:',
+		'maxFileSize' => 'Max file size: %s',
 		'chooseFile' => 'Choose file:',
 		'chooseFileTooltip' => 'File to be uploaded',
 		'comment' => 'Comment:',
@@ -50,6 +50,7 @@ return [
         'fileExceedsMaxSize' => 'File exceeds maximum allowed size.',
         'invalidUploadId' => 'Invalid upload ID.',
         'failedToAssembleFile' => 'Failed to assemble file.',
+		'javascriptQoL' => 'For a better experience, please enable JavaScript.',
 	],
 	'table' => [
 		'delete' => 'Delete',

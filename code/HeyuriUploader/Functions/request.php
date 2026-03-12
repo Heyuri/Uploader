@@ -28,10 +28,11 @@ function forceJapaneseForJpUsers(languageManager $languageManager, bool $forceJa
 	// If the option is enabled and the user has Japanese browser settings, force the language to Japanese
 	if (
 		$forceJapanese 
-		&& file_exists(__DIR__ . '/../lang/ja.php')
+		&& file_exists(__DIR__ . '/../../../lang/ja.php')
 		&& isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])
-		&& preg_match('/\bja\b/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-			// Override the configured display language
-			$languageManager->setLanguage('ja');
+		&& preg_match('/\bja\b/i', $_SERVER['HTTP_ACCEPT_LANGUAGE'])
+	) {
+		// Override the configured display language
+		$languageManager->setLanguage('ja');
 	}
 }

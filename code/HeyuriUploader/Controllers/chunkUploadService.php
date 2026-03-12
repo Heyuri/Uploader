@@ -8,6 +8,7 @@ use HeyuriUploader\Classes\uploadEntry;
 use HeyuriUploader\Classes\banChecker;
 use HeyuriUploader\Classes\languageManager;
 
+use function HeyuriUploader\Functions\generatePasswordHash;
 use function HeyuriUploader\Functions\getUserIP;
 
 class chunkUploadService {
@@ -228,7 +229,7 @@ class chunkUploadService {
 
 		// Check extension whitelist
 		if (!in_array($fileExtension, $this->conf['allowedExtensions'])) {
-			throw new \Exception("Invalid file extension: $fileExtension.");
+			throw new \Exception($this->languageManager->get('errors.invalidExtension', htmlspecialchars($fileExtension)));
 		}
 
 		// Handle dangerous extensions
@@ -243,7 +244,7 @@ class chunkUploadService {
 
 		// Check if the file is banned by hash
 		if ($this->banChecker->isFileBanned($filePath)) {
-			throw new \Exception("This file has been banned.");
+			throw new \Exception($this->languageManager->get('errors.fileBanned'));
 		}
 
 		// Generate new ID and file name
@@ -253,7 +254,7 @@ class chunkUploadService {
 		// Move assembled file to upload directory
 		$destPath = $this->conf['uploadDir'] . $newFileName;
 		if (!rename($filePath, $destPath)) {
-			throw new \Exception("Failed to move assembled file.");
+			throw new \Exception($this->languageManager->get('upload.failedToSaveFile'));
 		}
 		chmod($destPath, 0644);
 
@@ -265,7 +266,7 @@ class chunkUploadService {
 
 		// Process password
 		$password = $_POST['password'] ?? '';
-		$hashedPassword = !empty($password) ? password_hash($password, PASSWORD_DEFAULT) : '';
+		$hashedPassword = !empty($password) ? generatePasswordHash($password) : '';
 
 		// Build the log entry
 		$data = new uploadEntry([
@@ -293,7 +294,7 @@ class chunkUploadService {
 				if (file_exists($destPath)) {
 					unlink($destPath);
 				}
-				throw new \Exception("File limit reached, contact administrator.");
+				throw new \Exception($this->languageManager->get('errors.fileLimitReached'));
 			}
 		}
 

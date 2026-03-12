@@ -7,6 +7,8 @@ use HeyuriUploader\Classes\logFile; // Assuming this is the correct class
 use HeyuriUploader\Classes\uploadEntry;
 use HeyuriUploader\Classes\uploaderHTML; // Assuming this class handles UI output
 use HeyuriUploader\Classes\banChecker;
+
+use function HeyuriUploader\Functions\generatePasswordHash;
 use function HeyuriUploader\Functions\logFileData;
 
 class uploadedFileService {
@@ -87,11 +89,11 @@ class uploadedFileService {
 		// If the extension was converted, append a notice
 		$comment = $this->appendConversionNoticeIfNeeded($comment, $originalExtension, $fileExtension);
 
-		// Process password (optional)
-		$password = $this->processPassword();
+		// Process password
+		$passwordHash = generatePasswordHash($_POST['password'] ?? '');
 
 		// Log data
-		$data = logFileData($newID, $fileExtension, $comment, $realMimeType, $password, $fileName);
+		$data = logFileData($newID, $fileExtension, $comment, $realMimeType, $passwordHash, $fileName);
 
 		// Check file limit
 		if (!$this->enforceFileLimit()) {
@@ -107,7 +109,7 @@ class uploadedFileService {
 
 	private function validateUpload(): array {
 		if (!isset($_FILES['upfile']) || $_FILES['upfile']['error'] !== UPLOAD_ERR_OK) {
-			throw new \Exception("No file uploaded or an error occurred during upload.");
+			throw new \Exception($this->lang->get('errors.noFileUploaded'));
 		}
 		return $_FILES['upfile'];
 	}
@@ -115,7 +117,7 @@ class uploadedFileService {
 	private function getFileInfo(string $fullFileName): array {
 		$fileInfo = pathinfo($fullFileName);
 		if (!isset($fileInfo['extension'])) {
-			throw new \Exception("Invalid file format.");
+			throw new \Exception($this->lang->get('errors.invalidFileFormat'));
 		}
 		$fileName = $fileInfo['filename'];
 		$fileExtension = strtolower($fileInfo['extension']);
@@ -124,7 +126,7 @@ class uploadedFileService {
 
 	private function ensureAllowedExtension(string $fileExtension): void {
 		if (!in_array($fileExtension, $this->allowedExtensions)) {
-			throw new \Exception("Invalid file extension: $fileExtension.");
+			throw new \Exception($this->lang->get('errors.invalidExtension', htmlspecialchars($fileExtension)));
 		}
 	}
 
@@ -151,16 +153,6 @@ class uploadedFileService {
 			$comment .= '[ext]' . $fileExtension . '←' . $originalExtension . '[/ext]';
 		}
 		return $comment;
-	}
-
-	private function processPassword(): string {
-		$password = $_POST['password'];
-
-		if(empty($password)) {
-			return '';
-		}
-
-		return password_hash($password, PASSWORD_DEFAULT) ?? '';
 	}
 
 	private function enforceFileLimit(): bool {

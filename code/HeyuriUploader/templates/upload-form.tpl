@@ -26,7 +26,7 @@
 	</div>
 
 	<details>
-		<summary>{{lang.upload.allowedExtensions}}</summary>
+		<summary><span class="summaryLabel">{{lang.upload.allowedExtensions}}</span></summary>
 		<p>{{allowedExtensions}}</p>
 	</details>
 </form>

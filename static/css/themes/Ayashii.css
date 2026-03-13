@@ -12,3 +12,14 @@
 	--red-text: #ff4444;
 	--gray-text: #bbbbbb;
 }
+
+select {
+  background-color: #007F7F;
+  color: #FFFFFF;
+}
+
+button {
+	background-color: #007F7F;
+	color: #FFFFFF;
+	border-color: #FFFFFF;
+}

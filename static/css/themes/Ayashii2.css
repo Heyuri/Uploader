@@ -1,0 +1,37 @@
+:root {
+	--bg-color: #CCFFCC;
+	--text-color: #002200;
+	--link-color: #002200;
+	--alink-color: #FF0000;
+	--vlink-color: #002200;
+	--accent-color: #004040;
+	--secondary-color: #006060;
+	--tablelisting-odd-row: #CCFFCC;
+	--tablelisting-hover-row: #20A0A0;
+	--tablelisting-font-size: 12px;
+	--red-text: #FF0000;
+	--gray-text: #002200;
+}
+
+select {
+	background-color: #006060;
+	color: #FFFFFF;
+}
+
+button {
+	background-color: #006060;
+	color: #FFFFFF;
+	border-color: #FFFFFF;
+}
+
+.summaryLabel, .titleHeader, summary::marker, summary::-webkit-details-marker  {
+	color: #FFFFFF;
+}
+
+.titleHeader {
+	background-color: var(--accent-color) !important;
+}
+
+.fileListingTable thead tr th:nth-child(odd) {
+	color: #FFFFFF;
+}

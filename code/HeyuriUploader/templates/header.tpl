@@ -6,7 +6,7 @@
 		<meta name="static-url" content="{{staticUrl}}">
 		{{themeLink}}
 		{{preloadLinks}}
-		<script src="{{staticUrl}}javascript/styleSelector.js" defer></script>
+		<script src="{{staticUrl}}javascript/styleSelector.js"></script>
 		<script src="{{staticUrl}}javascript/chunkUploader.js" defer></script>
 		<script src="{{staticUrl}}javascript/clipboard.js" defer></script>
 		<link rel="stylesheet" href="{{staticUrl}}css/base.css">

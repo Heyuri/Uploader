@@ -172,6 +172,15 @@
 		b.style.display='inline-block';
 		b.style.maxWidth='220px';
 
+		// Fetch localized labels from meta#languageMeta
+		var languageMeta = document.getElementById('languageMeta');
+		var fileNameLabel = 'Filename';
+		var fileSizeLabel = 'File size';
+		if (languageMeta) {
+			if (languageMeta.dataset.fileName) fileNameLabel = languageMeta.dataset.fileName;
+			if (languageMeta.dataset.fileSize) fileSizeLabel = languageMeta.dataset.fileSize;
+		}
+
 		// Removes this file from the selection
 		var x=document.createElement('span');
 		x.innerHTML='[<a href="javascript:void(0);">X</a>]';
@@ -185,7 +194,7 @@
 		// Allows the user to rename the file before submission
 		var fn=document.createElement('div');
 		var l=document.createElement('label');
-		l.textContent='Filename';
+		l.textContent=fileNameLabel;
 		var inp=document.createElement('input');
 		inp.type='text'; inp.classList.add('inputtext'); inp.style.width='100%';
 		inp.value=st.nameBase;
@@ -199,7 +208,7 @@
 		// Displays the file's size in kilobytes
 		var sc=document.createElement('div');
 		var sl=document.createElement('label');
-		sl.textContent='File size';
+		sl.textContent=fileSizeLabel;
 		var sv=document.createElement('div');
 		sv.textContent=(st.blob.size/1024).toFixed(2)+' KB';
 		sc.appendChild(sl); sc.appendChild(sv);

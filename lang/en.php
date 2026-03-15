@@ -51,6 +51,8 @@ return [
         'invalidUploadId' => 'Invalid upload ID.',
         'failedToAssembleFile' => 'Failed to assemble file.',
 		'javascriptQoL' => 'For a better experience, please enable JavaScript.',
+		'fileSizeLabel' => 'File size',
+		'fileNameLabel' => 'File name',
 	],
 	'table' => [
 		'delete' => 'Delete',

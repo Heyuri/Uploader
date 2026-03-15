@@ -10,6 +10,7 @@
 		<script src="{{staticUrl}}javascript/chunkUploader.js" defer></script>
 		<script src="{{staticUrl}}javascript/clipboard.js" defer></script>
 		<link rel="stylesheet" href="{{staticUrl}}css/base.css">
+		<meta id="languageMeta" data-file-size="{{lang.upload.fileSizeLabel}}" data-file-name="{{lang.upload.fileNameLabel}}">
 		<title>{{boardTitle}}</title>
 	</head>
 	

@@ -58,6 +58,7 @@
 	2024/10/08 v3.3 Fixed a bug where files could be deleted with empty password
 	2024/12/31 v3.4 Fixed the bug about video thumbnails not getting deleted with videos
 	2026/03/08 v4.0 Major code refactor, added chunked uploads, and various other features and fixes.
+	2026/03/16 v4.1 Misc improvements including some front-end updates, Japanese language option added. A homepage for the software is created.
 ■Installation
 	・Clone repo into web directory (or unzip it there)
 	・cd into the directory and do this: "chmod +x prepare.sh", then run it with "./prepare.sh"

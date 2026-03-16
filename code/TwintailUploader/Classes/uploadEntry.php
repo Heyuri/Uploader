@@ -45,7 +45,7 @@ class uploadEntry {
 		return $this->ip ?? '';
 	}
 
-	public function getTime(): string {
+	public function getTime(): int {
 		return $this->time ?? '';
 	}
 

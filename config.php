@@ -29,7 +29,7 @@ return $conf = [
     'uploadDir' => "src/",        // upload directory (trailing slash required) / アップロード・ディレクトリ（末尾スラッシュ必須）
     'thumbDir' => "thmb/",	      // thumbnail directory / サムネイル・ディレクトリ
     'prefix' => "up",             // prefix added to uploaded filenames (do not change after deployment) / アップロードファイル名の接頭辞（設定後は変更しないこと）
-    'thumb_suffix' => "_thumb",   // suffix appended to thumbnail filenames / サムネイルファイル名の接尾辞
+    'thumb_suffix' => "s",   // suffix appended to thumbnail filenames / サムネイルファイル名の接尾辞
     'coolDownTime' => 5,          // seconds before another upload is allowed (-1 disables cooldown) / 次のアップロードまでの待機秒数（-1で制限なし）
 
     'defaultTheme' => 'Futaba', // default CSS theme / デフォルトのCSSテーマ

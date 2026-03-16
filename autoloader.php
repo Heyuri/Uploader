@@ -2,8 +2,8 @@
 
 // Autoloader function
 function up_autoloader($class) {
-    $prefix = 'HeyuriUploader\\'; 
-    $base_dir = __DIR__ . '/code/HeyuriUploader/';
+    $prefix = 'TwintailUploader\\'; 
+    $base_dir = __DIR__ . '/code/TwintailUploader/';
     // Check if the class uses the namespace prefix
     $len = strlen($prefix);
     if (strncmp($prefix, $class, $len) !== 0) {

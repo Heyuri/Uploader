@@ -1,8 +1,8 @@
 <?php
 
-namespace HeyuriUploader\Functions;
+namespace TwintailUploader\Functions;
 
-use HeyuriUploader\Classes\languageManager;
+use TwintailUploader\Classes\languageManager;
 use InvalidArgumentException;
 
 function redirect(string $url): void {

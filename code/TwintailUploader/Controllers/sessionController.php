@@ -1,7 +1,7 @@
 <?php
-namespace HeyuriUploader\Controllers;
+namespace TwintailUploader\Controllers;
 
-use HeyuriUploader\Classes\session;
+use TwintailUploader\Classes\session;
 
 class sessionController {
     private $session;

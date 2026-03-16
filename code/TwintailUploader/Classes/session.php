@@ -1,5 +1,5 @@
 <?php
-namespace HeyuriUploader\Classes;
+namespace TwintailUploader\Classes;
 
 class session {
 	public function __construct() {

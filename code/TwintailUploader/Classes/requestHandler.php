@@ -1,14 +1,14 @@
 <?php
-namespace HeyuriUploader\Classes;
+namespace TwintailUploader\Classes;
 
-use HeyuriUploader\Controllers\sessionController;
-use HeyuriUploader\Controllers\uploadEntryController;
-use HeyuriUploader\Classes\uploadEntryRepository;
-use HeyuriUploader\Controllers\uploadedFileService;
-use HeyuriUploader\Controllers\chunkUploadService;
+use TwintailUploader\Controllers\sessionController;
+use TwintailUploader\Controllers\uploadEntryController;
+use TwintailUploader\Classes\uploadEntryRepository;
+use TwintailUploader\Controllers\uploadedFileService;
+use TwintailUploader\Controllers\chunkUploadService;
 
-use function HeyuriUploader\Functions\getUserIP;
-use function HeyuriUploader\Functions\redirect;
+use function TwintailUploader\Functions\getUserIP;
+use function TwintailUploader\Functions\redirect;
 
 class requestHandler {
 	private array $conf;

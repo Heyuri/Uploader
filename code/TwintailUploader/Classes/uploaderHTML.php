@@ -1,9 +1,9 @@
 <?php
-namespace HeyuriUploader\Classes;
+namespace TwintailUploader\Classes;
 
 use DateTime;
 
-use function HeyuriUploader\Functions\bytesToHumanReadable;
+use function TwintailUploader\Functions\bytesToHumanReadable;
 
 
 class uploaderHTML {

@@ -1,5 +1,5 @@
 <?php
-namespace HeyuriUploader\Functions;
+namespace TwintailUploader\Functions;
 
 function bytesToHumanReadable($size){
     if($size == 0){

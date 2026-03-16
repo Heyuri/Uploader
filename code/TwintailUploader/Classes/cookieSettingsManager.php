@@ -1,5 +1,5 @@
 <?php
-namespace HeyuriUploader\Classes;
+namespace TwintailUploader\Classes;
 
 class cookieSettingsManager {
 	private $defaultCookieValues;

@@ -83,14 +83,14 @@ ini_set('display_errors', 'Off');
 ini_set('log_errors', 'On');
 ini_set('error_log', DATA_DIR . 'error.log');
 
-require __DIR__.'/code/HeyuriUploader/include.php';
+require __DIR__.'/code/TwintailUploader/include.php';
 require __DIR__.'/autoloader.php';
 
-use HeyuriUploader\Classes\languageManager;
-use HeyuriUploader\Classes\requestHandler;
-use HeyuriUploader\Classes\uploaderHTML;
+use TwintailUploader\Classes\languageManager;
+use TwintailUploader\Classes\requestHandler;
+use TwintailUploader\Classes\uploaderHTML;
 
-use function HeyuriUploader\Functions\forceJapaneseForJpUsers;
+use function TwintailUploader\Functions\forceJapaneseForJpUsers;
 
 try {
 	// Load configuration

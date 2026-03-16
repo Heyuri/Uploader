@@ -1,13 +1,13 @@
 <?php
 
-namespace HeyuriUploader\Classes;
+namespace TwintailUploader\Classes;
 
-use HeyuriUploader\Classes\logFile;
+use TwintailUploader\Classes\logFile;
 
 /**
  * Flat-file search repository
  *
- * Reads the same "<>"-delimited log used by HeyuriUploader\Classes\logFile
+ * Reads the same "<>"-delimited log used by TwintailUploader\Classes\logFile
  * and applies filters against its fields.
  *
  * Supported $searchParameters (all optional):

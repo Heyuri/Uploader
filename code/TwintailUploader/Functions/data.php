@@ -1,6 +1,6 @@
 <?php
-namespace HeyuriUploader\Functions;
-use HeyuriUploader\Classes\uploadEntry;
+namespace TwintailUploader\Functions;
+use TwintailUploader\Classes\uploadEntry;
 
 function isDataEmpty($data) {
 	if(count($data) < 8){

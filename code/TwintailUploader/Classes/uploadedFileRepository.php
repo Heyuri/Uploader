@@ -1,10 +1,10 @@
 <?php
-namespace HeyuriUploader\Classes;
+namespace TwintailUploader\Classes;
 
 use RuntimeException;
 
-use function HeyuriUploader\Functions\thumbnailVideo;
-use function HeyuriUploader\Functions\thumbnailImage;
+use function TwintailUploader\Functions\thumbnailVideo;
+use function TwintailUploader\Functions\thumbnailImage;
 
 
 class uploadedFileRepository {

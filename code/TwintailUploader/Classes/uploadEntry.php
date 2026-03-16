@@ -1,5 +1,5 @@
 <?php
-namespace HeyuriUploader\Classes;
+namespace TwintailUploader\Classes;
 
 class uploadEntry {
 	private $id, $fileExtension, $comment, $ip, $time, $size, $mimeType, $password, $originalFileName;

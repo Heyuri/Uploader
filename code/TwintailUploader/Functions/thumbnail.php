@@ -1,5 +1,5 @@
 <?php
-namespace HeyuriUploader\Functions;
+namespace TwintailUploader\Functions;
 
 //generate thumbnail
 function thumbnailImage(string $imagePath, string $thumbPath, int $w, int $h): void {

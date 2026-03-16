@@ -1,10 +1,10 @@
 <?php
-namespace HeyuriUploader\Controllers;
+namespace TwintailUploader\Controllers;
 
-use HeyuriUploader\Classes\uploadEntry;
-use HeyuriUploader\Classes\uploadEntryRepository;
-use HeyuriUploader\Classes\uploadedFileRepository;
-use HeyuriUploader\Classes\uploaderHTML;
+use TwintailUploader\Classes\uploadEntry;
+use TwintailUploader\Classes\uploadEntryRepository;
+use TwintailUploader\Classes\uploadedFileRepository;
+use TwintailUploader\Classes\uploaderHTML;
 
 class uploadEntryController {
 	private $lang;

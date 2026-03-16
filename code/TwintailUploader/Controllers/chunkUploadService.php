@@ -1,15 +1,15 @@
 <?php
-namespace HeyuriUploader\Controllers;
+namespace TwintailUploader\Controllers;
 
-use HeyuriUploader\Classes\uploadedFileRepository;
-use HeyuriUploader\Classes\uploadEntryRepository;
-use HeyuriUploader\Classes\logFile;
-use HeyuriUploader\Classes\uploadEntry;
-use HeyuriUploader\Classes\banChecker;
-use HeyuriUploader\Classes\languageManager;
+use TwintailUploader\Classes\uploadedFileRepository;
+use TwintailUploader\Classes\uploadEntryRepository;
+use TwintailUploader\Classes\logFile;
+use TwintailUploader\Classes\uploadEntry;
+use TwintailUploader\Classes\banChecker;
+use TwintailUploader\Classes\languageManager;
 
-use function HeyuriUploader\Functions\generatePasswordHash;
-use function HeyuriUploader\Functions\getUserIP;
+use function TwintailUploader\Functions\generatePasswordHash;
+use function TwintailUploader\Functions\getUserIP;
 
 class chunkUploadService {
 	private string $chunkDir;

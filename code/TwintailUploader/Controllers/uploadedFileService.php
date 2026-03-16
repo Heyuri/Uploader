@@ -1,15 +1,15 @@
 <?php
-namespace HeyuriUploader\Controllers;
+namespace TwintailUploader\Controllers;
 
-use HeyuriUploader\Classes\uploadedFileRepository;
-use HeyuriUploader\Classes\uploadEntryRepository;
-use HeyuriUploader\Classes\logFile; // Assuming this is the correct class
-use HeyuriUploader\Classes\uploadEntry;
-use HeyuriUploader\Classes\uploaderHTML; // Assuming this class handles UI output
-use HeyuriUploader\Classes\banChecker;
+use TwintailUploader\Classes\uploadedFileRepository;
+use TwintailUploader\Classes\uploadEntryRepository;
+use TwintailUploader\Classes\logFile; // Assuming this is the correct class
+use TwintailUploader\Classes\uploadEntry;
+use TwintailUploader\Classes\uploaderHTML; // Assuming this class handles UI output
+use TwintailUploader\Classes\banChecker;
 
-use function HeyuriUploader\Functions\generatePasswordHash;
-use function HeyuriUploader\Functions\logFileData;
+use function TwintailUploader\Functions\generatePasswordHash;
+use function TwintailUploader\Functions\logFileData;
 
 class uploadedFileService {
 	private $uploadedFileRepository;

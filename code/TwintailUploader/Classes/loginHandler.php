@@ -1,10 +1,10 @@
 <?php
 
-namespace HeyuriUploader\Classes;
+namespace TwintailUploader\Classes;
 
-use HeyuriUploader\Controllers\sessionController;
+use TwintailUploader\Controllers\sessionController;
 
-use function HeyuriUploader\Functions\redirect;
+use function TwintailUploader\Functions\redirect;
 
 class loginHandler {
 	public function __construct(

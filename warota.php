@@ -4,7 +4,7 @@
 	source by ずるぽん(http://zurubon.virtualave.net/)
 	English translation & various modifications by Heyuri (https://www.heyuri.net/)
 
-	Heyuri updates (edition 20240803)
+	Heyuri updates (edition 20260316)
 		This uploader is a custom version of PHPぁぷろだ.
 		Many thanks to ずるぼん-sama for the original source and レッツPHP-sama for the PHP conversion.
 		The last update before Heyuri took over was Yakuba modifications (edition 20090922)

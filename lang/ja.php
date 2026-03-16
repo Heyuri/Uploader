@@ -147,7 +147,7 @@ return [
         'fileHashLabel' => 'ファイルハッシュ (SHA-256):',
         'removeSelected' => '選択したものを削除',
         'none' => 'なし',
-        'configTitle' => '設定編集',
+        'configTitle' => '設定',
         'configDescription' => '設定値を編集する',
         'saveButton' => '保存',
         'deleteAction' => '削除',

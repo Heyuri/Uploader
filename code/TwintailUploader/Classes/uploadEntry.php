@@ -46,7 +46,7 @@ class uploadEntry {
 	}
 
 	public function getTime(): int {
-		return $this->time ?? '';
+		return $this->time ?? 0;
 	}
 
 	public function getSize(): int {

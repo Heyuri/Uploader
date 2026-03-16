@@ -17,7 +17,7 @@ class floodControls {
 		}
 
 		$lastTime = $lastPost->getTime();
-		if ($lastTime + $this->coolDownTime > time()) {
+		if ((int)$lastTime + $this->coolDownTime > time()) {
 			return true;
 		} else {
 			return false;

@@ -1,5 +1,17 @@
 <?php
-/* MAIN CONFIGURATION FILE FOR WAROTA.PHP / WAROTA.PHP のメイン設定ファイル */
+/* MAIN CONFIGURATION FILE FOR TWINTAIL UPLOADER / TWINTAIL UPLOADERのメイン設定ファイル */
+
+/*
+NOTE:
+If you edit this file using "Edit Configuration" in the admin panel, comments may be removed.
+If that happens, please check the original file here:
+https://github.com/Heyuri/Uploader/blob/main/config.php
+
+注意:
+管理パネルの「設定編集」を使用してこのファイルを編集すると、コメントが削除されることがあります。
+その場合は以下の元ファイルを確認してください:
+https://github.com/Heyuri/Uploader/blob/main/config.php
+*/
 
 # English explanation / 日本語説明
 

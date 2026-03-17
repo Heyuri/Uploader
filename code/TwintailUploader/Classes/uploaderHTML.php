@@ -321,35 +321,38 @@ class uploaderHTML {
 	private function getThumbnailPath(uploadEntry $data, string $defaultPath): string {
 		$mimeType = $data->getMimeType();
 
-		if (preg_match('/audio/i', $mimeType)) {
-			return $this->conf['staticUrl'] . 'images/audio.png';
-		}
-		// Flash file (SWF)
-		if (preg_match('/x-shockwave-flash|flash|swf/i', $mimeType) || preg_match('/\.swf$/i', $data->getOriginalFileName())) {
-			return $this->conf['staticUrl'] . 'images/swf_thumb.png';
-		}
-		if (preg_match('/video/i', $mimeType)) {
-			$videoThumbPath = $data->getVideoThumbPath($this->conf);
-			return file_exists($videoThumbPath) ? $videoThumbPath : $this->conf['staticUrl'] . 'images/video_overlay.png';
-		}
-		if (preg_match('/application/i', $mimeType)) {
-			return $this->conf['staticUrl'] . 'images/archive.png';
-		}
-
-		// Non-image types that weren't caught above: use archive icon as fallback
-		if (!preg_match('/image/i', $mimeType)) {
-			return $this->conf['staticUrl'] . 'images/archive.png';
-		}
-
-		// For image types: check if file exists at all
-		if (!file_exists($defaultPath)) {
-			return $this->conf['staticUrl'] . 'images/nofile.gif';
-		}
-
 		// File exists but thumbnail wasn't generated
 		$thumbPath = $data->getThumbPath($this->conf);
 		if (!file_exists($thumbPath)) {
 			return $this->conf['staticUrl'] . 'images/nothumb.gif';
+		}
+
+		else if (preg_match('/audio/i', $mimeType)) {
+			return $this->conf['staticUrl'] . 'images/audio.png';
+		}
+
+		// Flash file (SWF)
+		else if (preg_match('/x-shockwave-flash|flash|swf/i', $mimeType) || preg_match('/\.swf$/i', $data->getOriginalFileName())) {
+			return $this->conf['staticUrl'] . 'images/swf_thumb.png';
+		}
+
+		else if (preg_match('/video/i', $mimeType)) {
+			$videoThumbPath = $data->getVideoThumbPath($this->conf);
+			return file_exists($videoThumbPath) ? $videoThumbPath : $this->conf['staticUrl'] . 'images/video_overlay.png';
+		}
+
+		else if (preg_match('/application/i', $mimeType)) {
+			return $this->conf['staticUrl'] . 'images/archive.png';
+		}
+		
+		// Non-image types that weren't caught above: use archive icon as fallback
+		else if (!preg_match('/image/i', $mimeType)) {
+			return $this->conf['staticUrl'] . 'images/archive.png';
+		}
+
+		// For image types: check if file exists at all
+		else if (!file_exists($defaultPath)) {
+			return $this->conf['staticUrl'] . 'images/nofile.gif';
 		}
 
 		return $thumbPath;

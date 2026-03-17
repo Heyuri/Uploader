@@ -336,11 +336,13 @@ class uploaderHTML {
 			return $this->conf['staticUrl'] . 'images/swf_thumb.png';
 		}
 
+		// Video file types
 		else if (preg_match('/video/i', $mimeType)) {
 			$videoThumbPath = $data->getVideoThumbPath($this->conf);
 			return file_exists($videoThumbPath) ? $videoThumbPath : $this->conf['staticUrl'] . 'images/video_overlay.png';
 		}
 
+		// Application types
 		else if (preg_match('/application/i', $mimeType)) {
 			return $this->conf['staticUrl'] . 'images/archive.png';
 		}

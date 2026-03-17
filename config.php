@@ -47,7 +47,7 @@ return $conf = [
     'deleteOldestOnMaxFiles' => false,      // delete the oldest file if the maximum number of files is reached / 最大ファイル数に達した場合、最も古いファイルを削除する
     'thumbnailExtension' => 'jpg',          // file extension used for generated thumbnails / 生成されるサムネイルの拡張子
     'forceJapaneseForJpUsers' => true,    // force Japanese language for users with Japanese browser settings / 日本語のブラウザ設定を持つユーザーに日本語を強制する
-    'allowDisplayingAllEntries' => false,    // allow users to view all entries on one page (can be performance heavy with many files) / すべてのエントリーを1ページで表示することを許可する（ファイル数が多いとパフォーマンスに影響する可能性あり）
+    'allowDisplayingAllEntries' => true,    // allow users to view all entries on one page (can be performance heavy with many files) / すべてのエントリーを1ページで表示することを許可する（ファイル数が多いとパフォーマンスに影響する可能性あり）
 
     'allowedExtensions' =>  [
         'dat','htm','torrent','deb','lzh','ogm','doc','class','js','swift','cc','tga','ape','woff2','cab','whl','mpe',

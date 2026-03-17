@@ -50,17 +50,7 @@ class uploaderHTML {
 	public function drawPageingBar(string $url, int $page = 1): void {
 		$logFile = new logFile($this->conf);
 		$fileCount = $logFile->getTotalLogLines();
-		$pages = ceil($fileCount / $this->conf['filesPerListing']) + 1;
-
-		// Build page links
-		$pageLinks = '';
-		for ($i = 1; $i < $pages; $i++) {
-			if ($i == $page) {
-				$pageLinks .= '[<b>' . $i . '</b>]';
-			} else {
-				$pageLinks .= '[<a href="' . $url . '&pageNumber=' . htmlspecialchars($i) . '">' . htmlspecialchars($i) . '</a>]';
-			}
-		}
+		$pageLinks = $this->buildPagingLinks($url, $page, $fileCount, $this->conf['filesPerListing']);
 
 		$html = $this->renderer->render('paging-bar', [
 			'homeUrl' => $this->conf['home'],
@@ -70,12 +60,41 @@ class uploaderHTML {
 		echo $html;
 	}
 
+	/**
+	 * Builds HTML for paging links.
+	 */
+	private function buildPagingLinks(string $url, int $currentPage, int $fileCount, int $filesPerListing): string {
+		$pages = (int)ceil($fileCount / $filesPerListing);
+		$pageLinks = '';
+		for ($i = 1; $i <= $pages; $i++) {
+			if ($i == $currentPage) {
+				$pageLinks .= '[<b>' . $i . '</b>]';
+			} else {
+				$pageLinks .= '[<a href="' . $url . '&pageNumber=' . htmlspecialchars($i) . '">' . htmlspecialchars($i) . '</a>]';
+			}
+		}
+		// Add [ALL] link if allowed
+		if (!empty($this->conf['allowDisplayingAllEntries']) && $this->conf['allowDisplayingAllEntries']) {
+			if ($currentPage === -1) {
+				$pageLinks .= ' [<b>ALL</b>]';
+			} else {
+				$pageLinks .= ' [<a href="' . $url . '&pageNumber=-1">ALL</a>]';
+			}
+		}
+		return $pageLinks;
+	}
+
 	public function drawFileListing(int $page = 1): void {
 		$logFile = new LogFile($this->conf);
 		$count = $this->conf['filesPerListing'];
 
-		$page--;
-		$lineOffset = $count * $page;
+		if ($page === -1 && $this->conf['allowDisplayingAllEntries']) {
+			$count = $logFile->getTotalLogLines();
+			$lineOffset = 0;
+		} else {
+			$page--;
+			$lineOffset = $count * $page;
+		}
 
 		$fileHandle = fopen(\DATA_DIR . $this->conf['logFile'], 'r');
 		if (!$fileHandle) {
@@ -86,10 +105,10 @@ class uploaderHTML {
 		$this->skipLines($fileHandle, $lineOffset);
 
 		$cookie = $this->cookieSettingsManager->getSplitCookie();
-		
+        
 		// Build table header
 		$tableHeader = $this->buildTableHeader($cookie);
-		
+        
 		// Build table rows
 		$entries = $this->processFileLines($fileHandle, $count, false);
 		$tableRows = $this->buildTableRows($entries, $cookie);
@@ -348,14 +367,17 @@ class uploaderHTML {
 		$logFile = new LogFile($this->conf);
 		$count = $this->conf['filesPerListing'];
 
-		if ($page === 0) {
+		if ($page === -1 && $this->conf['allowDisplayingAllEntries']) {
+			$count = $logFile->getTotalLogLines();
+			$lineOffset = 0;
+		} else if ($page === 0) {
 			$count = $logFile->getTotalLogLines();
 			$page = 0;
+			$lineOffset = 0;
 		} else {
 			$page--;
+			$lineOffset = $count * $page;
 		}
-
-		$lineOffset = $count * $page;
 
 		$fileHandle = fopen(\DATA_DIR . $this->conf['logFile'], 'r');
 		if (!$fileHandle) {

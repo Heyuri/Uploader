@@ -46,11 +46,11 @@ class uploadEntry {
 	}
 
 	public function getTime(): int {
-		return $this->time ?? 0;
+		return intval($this->time) ?? 0;
 	}
 
 	public function getSize(): int {
-		return $this->size ?? 0;
+		return intval($this->size) ?? 0;
 	}
 
 	public function getMimeType(): string {

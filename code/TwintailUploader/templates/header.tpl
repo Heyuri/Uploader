@@ -10,7 +10,19 @@
 		<script src="{{staticUrl}}javascript/chunkUploader.js" defer></script>
 		<script src="{{staticUrl}}javascript/clipboard.js" defer></script>
 		<link rel="stylesheet" href="{{staticUrl}}css/base.css">
-		<meta id="languageMeta" data-file-size="{{lang.upload.fileSizeLabel}}" data-file-name="{{lang.upload.fileNameLabel}}">
+		<meta
+			id="languageMeta"
+			data-file-size="{{lang.upload.fileSizeLabel}}"
+			data-file-name="{{lang.upload.fileNameLabel}}"
+			data-uploading="{{lang.upload.uploading}}"
+			data-finalizing="{{lang.upload.finalizing}}"
+			data-complete="{{lang.upload.complete}}"
+			data-upload-error-prefix="{{lang.upload.uploadErrorPrefix}}"
+			data-server-error-finalize="{{lang.upload.serverErrorDuringFinalize}}"
+			data-server-error="{{lang.upload.serverError}}"
+			data-network-error="{{lang.upload.networkError}}"
+			data-upload-aborted="{{lang.upload.uploadAborted}}"
+		>
 		<title>{{boardTitle}}</title>
 	</head>
 	

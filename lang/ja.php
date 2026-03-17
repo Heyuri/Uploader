@@ -88,6 +88,7 @@ return [
 		'deleteButton' => '削除',
 	],
     'errors' => [
+        'failedToSaveFile' => 'ファイルの保存に失敗しました。',
         'failedToDelete' => 'ファイルの削除に失敗しました。',
         'invalidFileID' => '無効なファイルIDです。',
         'noFileIDSelected' => 'ファイルIDが選択されていません。',

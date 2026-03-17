@@ -254,7 +254,7 @@ class chunkUploadService {
 		// Move assembled file to upload directory
 		$destPath = $this->conf['uploadDir'] . $newFileName;
 		if (!rename($filePath, $destPath)) {
-			throw new \Exception($this->languageManager->get('upload.failedToSaveFile'));
+			throw new \Exception($this->languageManager->get('errors.failedToSaveFile'));
 		}
 		chmod($destPath, 0644);
 

@@ -88,6 +88,7 @@ return [
 		'deleteButton' => 'Delete',
 	],
 	'errors' => [
+		'failedToSaveFile' => 'Failed to save file.',
 		'failedToDelete' => 'Failed to delete file.',
 		'invalidFileID' => 'Invalid file ID.',
 		'noFileIDSelected' => 'No file ID selected.',

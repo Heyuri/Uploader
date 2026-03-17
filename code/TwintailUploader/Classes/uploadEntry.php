@@ -26,11 +26,11 @@ class uploadEntry {
 
 	// Getters
 	public function getId(): int {
-		return $this->id ?? '';
+		return intval($this->id ?? 0);
 	}
 
 	public function getIdAsString(): string {
-		return $this->id ?? '';
+		return strval($this->id ?? 0);
 	}
 
 	public function getFileExtension(): string {

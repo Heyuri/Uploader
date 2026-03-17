@@ -19,6 +19,7 @@ return $conf = [
     'boardTitle' => 'Everything',        // main title displayed on the page / ページ上部に表示されるタイトル
     'boardSubTitle' => 'Home for your files',    // subtitle shown below the title / タイトル下に表示されるサブタイトル
     'staticUrl' => 'static/',            // static files path / 静的ファイルのパス
+    'staticPath' => './static/',   // absolute path to static files / 静的ファイルの絶対パス
     'home' => "https://cgi.heyuri.net/goatse/",  // URL used for the [Home] link / [Home]リンクのリンク先URL
     'adminPassword' => "lolpenis",       // admin password (change in production) / 管理者パスワード（本番環境では必ず変更すること）
     'mainScript' => 'warota.php',        // main application script filename (can be renamed if desired) / メインスクリプトのファイル名（必要に応じて変更可能）

@@ -323,12 +323,10 @@ class uploaderHTML {
 
 		// File exists but thumbnail wasn't generated
 		$thumbPath = $data->getThumbPath($this->conf);
-		if (!file_exists($thumbPath)) {
-			return $this->conf['staticUrl'] . 'images/nothumb.gif';
-		}
 
-		else if (preg_match('/audio/i', $mimeType)) {
-			return $this->conf['staticUrl'] . 'images/audio.png';
+		// For image types: check if file exists at all
+		if (!file_exists($defaultPath)) {
+			return $this->conf['staticUrl'] . 'images/nofile.gif';
 		}
 
 		// Flash file (SWF)
@@ -336,25 +334,30 @@ class uploaderHTML {
 			return $this->conf['staticUrl'] . 'images/swf_thumb.png';
 		}
 
-		// Video file types
-		else if (preg_match('/video/i', $mimeType)) {
-			$videoThumbPath = $data->getVideoThumbPath($this->conf);
-			return file_exists($videoThumbPath) ? $videoThumbPath : $this->conf['staticUrl'] . 'images/video_overlay.png';
-		}
-
 		// Application types
 		else if (preg_match('/application/i', $mimeType)) {
 			return $this->conf['staticUrl'] . 'images/archive.png';
+		}
+
+		// Audio file types
+		else if (preg_match('/audio/i', $mimeType)) {
+			return $this->conf['staticUrl'] . 'images/audio.png';
+		}
+
+		// If it's an image type but the thumbnail doesn't exist, show a "no thumbnail" image instead of a broken image link/preview
+		else if (!file_exists($thumbPath)) {
+			return $this->conf['staticUrl'] . 'images/nothumb.gif';
+		}
+
+		// Video file types
+		else if (preg_match('/video/i', $mimeType)) {
+			$videoThumbPath = $data->getVideoThumbPath($this->conf);
+			return file_exists($videoThumbPath) ? $videoThumbPath : $this->conf['staticUrl'] . 'images/nothumb.gif';
 		}
 		
 		// Non-image types that weren't caught above: use archive icon as fallback
 		else if (!preg_match('/image/i', $mimeType)) {
 			return $this->conf['staticUrl'] . 'images/archive.png';
-		}
-
-		// For image types: check if file exists at all
-		else if (!file_exists($defaultPath)) {
-			return $this->conf['staticUrl'] . 'images/nofile.gif';
 		}
 
 		return $thumbPath;

@@ -370,8 +370,11 @@ class uploaderHTML {
 
 		fclose($fileHandle);
 
+		// get cookie settings for which columns to show
+		$cookie = $this->cookieSettingsManager->getSplitCookie();
+
 		// Build catalog rows
-		$catalogRows = $this->buildCatalogRows($batchedData);
+		$catalogRows = $this->buildCatalogRows($batchedData, $cookie);
 
 		// Render template
 		$html = $this->renderer->render('catalog', [
@@ -384,10 +387,10 @@ class uploaderHTML {
 	/**
 	 * Builds all catalog rows from batched data
 	 */
-	private function buildCatalogRows(array $batchedData): string {
+	private function buildCatalogRows(array $batchedData, array $cookie): string {
 		$result = '';
 		foreach ($batchedData as $dataArray) {
-			$result .= $this->buildCatalogRow($dataArray);
+			$result .= $this->buildCatalogRow($dataArray, $cookie);
 		}
 		return $result;
 	}
@@ -395,11 +398,11 @@ class uploaderHTML {
 	/**
 	 * Builds a catalog row with multiple columns
 	 */
-	private function buildCatalogRow(array $dataArray): string {
+	private function buildCatalogRow(array $dataArray, array $cookie): string {
 		$columns = '';
 		foreach ($dataArray as $data) {
 			// File meta data
-			$fileSize = $data->getSize();
+			$fileSize = $cookie['showFileSize'] ? bytesToHumanReadable($data->getSize()) : '';
 
 			// File paths
 			$path = $data->getFilePath($this->conf);
@@ -413,10 +416,10 @@ class uploaderHTML {
 			$date->setTimestamp($timestamp);
 
 			// formatted time
-			$formattedDate = $date->format('Y-m-d H:i:s');
+			$formattedDate = $cookie['showDate'] ? $date->format('Y-m-d H:i:s') : '';
 
 			// comment
-			$comment = $data->getComment();
+			$comment = $cookie['showComment'] ? $data->getComment() : '';
 
 			// url to use for src
 			$thumbUrl = $thumbPath ?: $path;
@@ -443,7 +446,7 @@ class uploaderHTML {
 				'height' => $height,
 				'fileName' => $fileName,
 				'formattedDate' => htmlspecialchars($formattedDate),
-				'fileSize' => htmlspecialchars(bytesToHumanReadable($fileSize)),
+				'fileSize' => htmlspecialchars($fileSize),
 				'comment' => $this->renderComment($comment),
 			]);
 		}

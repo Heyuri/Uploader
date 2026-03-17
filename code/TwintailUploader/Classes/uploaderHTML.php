@@ -66,13 +66,7 @@ class uploaderHTML {
 	private function buildPagingLinks(string $url, int $currentPage, int $fileCount, int $filesPerListing): string {
 		$pages = (int)ceil($fileCount / $filesPerListing);
 		$pageLinks = '';
-		for ($i = 1; $i <= $pages; $i++) {
-			if ($i == $currentPage) {
-				$pageLinks .= '[<b>' . $i . '</b>]';
-			} else {
-				$pageLinks .= '[<a href="' . $url . '&pageNumber=' . htmlspecialchars($i) . '">' . htmlspecialchars($i) . '</a>]';
-			}
-		}
+
 		// Add [ALL] link if allowed
 		if (!empty($this->conf['allowDisplayingAllEntries']) && $this->conf['allowDisplayingAllEntries']) {
 			if ($currentPage === -1) {
@@ -81,6 +75,15 @@ class uploaderHTML {
 				$pageLinks .= ' [<a href="' . $url . '&pageNumber=-1">ALL</a>]';
 			}
 		}
+
+		for ($i = 1; $i <= $pages; $i++) {
+			if ($i == $currentPage) {
+				$pageLinks .= '[<b>' . $i . '</b>]';
+			} else {
+				$pageLinks .= '[<a href="' . $url . '&pageNumber=' . htmlspecialchars($i) . '">' . htmlspecialchars($i) . '</a>]';
+			}
+		}
+
 		return $pageLinks;
 	}
 

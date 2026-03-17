@@ -24,8 +24,9 @@ class uploaderHTML {
 	}
 
 	public function drawHeader(): void {
-		$themesDir = $this->conf['staticUrl'] . 'css/themes';
-		$themeManager = new themeManager($themesDir, $themesDir);
+		$themesDir = $this->conf['staticPath'] . 'css/themes';
+		$themesUrl = $this->conf['staticUrl'] . 'css/themes';
+		$themeManager = new themeManager($themesDir, $themesUrl);
 
 		$themeLink = $themeManager->generateThemeLink($this->conf['defaultTheme']);
 		$availableThemes = implode(',', $themeManager->getThemeNames());

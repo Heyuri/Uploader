@@ -167,12 +167,6 @@ summary {
 	overflow: hidden; /* Hide overflowing content */
 }
 
-.catalogTable img {
-	object-fit: cover; /* Crop to fit the cell */
-	display: block;
-	margin: 0 auto;
-}
-
 .catalogTable .catalogComment {
 	display: block;
 	margin-top: 4px;
@@ -247,7 +241,7 @@ summary {
 	background-color: var(--secondary-color);
 }
 
-/* Top right style selector to push titleHeader less vertically (temp, PC-only) */
+/* Top right style selector to push titleHeader less vertically (PC-only) */
 @media screen and (min-width: 1020px) {
 	.styleSelectorContainer {
 		float: right;

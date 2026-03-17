@@ -13,6 +13,24 @@ document.addEventListener("DOMContentLoaded", () => {
 	const progressText = document.getElementById("progressText");
 	const submitButton = form.querySelector('button[type="submit"]');
 
+	// --- i18n ---
+	const languageMeta = document.getElementById("languageMeta");
+
+	const TEXT = {
+		uploading: languageMeta?.dataset.uploading || "Uploading...",
+		finalizing: languageMeta?.dataset.finalizing || "Finalizing...",
+		complete: languageMeta?.dataset.complete || "Complete!",
+		uploadErrorPrefix: languageMeta?.dataset.uploadErrorPrefix || "Upload error: ",
+		serverErrorFinalize: languageMeta?.dataset.serverErrorFinalize || "Server error during finalize (HTTP %s)",
+		serverError: languageMeta?.dataset.serverError || "Server error (HTTP %s)",
+		networkError: languageMeta?.dataset.networkError || "Network error — check your connection.",
+		uploadAborted: languageMeta?.dataset.uploadAborted || "Upload aborted."
+	};
+
+	function format(str, val) {
+		return str.replace("%s", val);
+	}
+
 	// Read chunk size from data attribute (set by PHP), default 2MB
 	const chunkSize = parseInt(form.dataset.chunkSize, 10) || (2 * 1024 * 1024);
 	const mainScript = form.dataset.mainScript || "warota.php";
@@ -35,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		// Show progress bar, disable submit
 		progressContainer.style.visibility = "visible";
 		submitButton.disabled = true;
-		updateProgress(0, "Uploading...");
+		updateProgress(0, TEXT.uploading);
 
 		let uploadId = null;
 		let totalBytesSent = 0;
@@ -80,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 
 			// All chunks sent — finalize
-			updateProgress(95, "Finalizing...");
+			updateProgress(95, TEXT.finalizing);
 
 			const finalizeData = new FormData();
 			finalizeData.append("request", "finalizeChunkUpload");
@@ -98,14 +116,14 @@ document.addEventListener("DOMContentLoaded", () => {
 			try {
 				finalResult = await finalResponse.json();
 			} catch (e) {
-				throw new Error("Server error during finalize (HTTP " + finalResponse.status + ")");
+				throw new Error(format(TEXT.serverErrorFinalize, finalResponse.status));
 			}
 
 			if (!finalResponse.ok || finalResult.error) {
-				throw new Error(finalResult.error || "Server error during finalize (HTTP " + finalResponse.status + ")");
+				throw new Error(finalResult.error || format(TEXT.serverErrorFinalize, finalResponse.status));
 			}
 
-			updateProgress(100, "Complete!");
+			updateProgress(100, TEXT.complete);
 
 			// Redirect on success
 			if (finalResult.redirect) {
@@ -115,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			progressContainer.style.visibility = "hidden";
 			updateProgress(0);
 			submitButton.disabled = false;
-			alert("Upload error: " + err.message);
+			alert(TEXT.uploadErrorPrefix + err.message);
 		}
 	}
 
@@ -139,19 +157,19 @@ document.addEventListener("DOMContentLoaded", () => {
 					result = JSON.parse(xhr.responseText);
 				} catch (e) {
 					// Server returned non-JSON (e.g. HTML error page)
-					reject(new Error("Server error (HTTP " + xhr.status + ")"));
+					reject(new Error(format(TEXT.serverError, xhr.status)));
 					return;
 				}
 
 				if (xhr.status >= 200 && xhr.status < 300) {
 					resolve(result);
 				} else {
-					reject(new Error(result.error || "Server error (HTTP " + xhr.status + ")"));
+					reject(new Error(result.error || format(TEXT.serverError, xhr.status)));
 				}
 			});
 
-			xhr.addEventListener("error", () => reject(new Error("Network error — check your connection.")));
-			xhr.addEventListener("abort", () => reject(new Error("Upload aborted.")));
+			xhr.addEventListener("error", () => reject(new Error(TEXT.networkError)));
+			xhr.addEventListener("abort", () => reject(new Error(TEXT.uploadAborted)));
 
 			xhr.send(formData);
 		});

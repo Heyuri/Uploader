@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 		<meta name="default-theme" content="{{defaultTheme}}">
 		<meta name="available-themes" content="{{availableThemes}}">
 		<meta name="static-url" content="{{staticUrl}}">

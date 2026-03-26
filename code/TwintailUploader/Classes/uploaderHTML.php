@@ -84,7 +84,7 @@ class uploaderHTML {
 			}
 		}
 
-		return $pageLinks;
+		return '<div class="pager">' . $pageLinks . '</div>';
 	}
 
 	public function drawFileListing(int $page = 1): void {
@@ -248,7 +248,12 @@ class uploaderHTML {
 		// Delete button cell — links to the deletion confirmation form
 		$deleteButton = '';
 		if ($cookie['showDeleteButton']) {
-			$deleteButton = '<td><a href="' . htmlspecialchars($this->conf['mainScript']) . '?request=deleteFileForm&deleteFileID=' . htmlspecialchars($data->getId()) . '">■</a></td>';
+			$deleteButton = '
+			<td>
+				<div class="deletionButton centerItem">
+					<a href="' . htmlspecialchars($this->conf['mainScript']) . '?request=deleteFileForm&deleteFileID=' . htmlspecialchars($data->getId()) . '">■</a>
+				</div>
+			</td>';
 		}
 
 		// Name cell — shows either a thumbnail preview with the file name, or just the file name as a link

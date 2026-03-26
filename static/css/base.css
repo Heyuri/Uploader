@@ -35,14 +35,18 @@ summary {
 
 .fileListingTable {
 	min-width: 100%;
-	text-align: center;
-	border-collapse: collapse;
 	font-size: var(--tablelisting-font-size);
+	border-spacing: 1px;
 }
 
 /* Ensure the header has a distinct background */
 .fileListingTable thead {
+	text-align: center;
 	background-color: var(--secondary-color);
+}
+
+.fileListingTable tbody {
+	word-break: break-word;
 }
 
 /* Style only odd-numbered rows inside tbody */

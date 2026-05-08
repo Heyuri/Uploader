@@ -4,7 +4,7 @@
 	source by ずるぽん(http://zurubon.virtualave.net/)
 	English translation & various modifications by Heyuri (https://www.heyuri.net/)
 
-	Heyuri updates (edition 20260316)
+	Heyuri updates (edition 20260326)
 		This uploader is a custom version of PHPぁぷろだ.
 		Many thanks to ずるぼん-sama for the original source and レッツPHP-sama for the PHP conversion.
 		The last update before Heyuri took over was Yakuba modifications (edition 20090922)
@@ -59,6 +59,7 @@
 	2024/12/31 v3.4 Fixed the bug about video thumbnails not getting deleted with videos
 	2026/03/08 v4.0 Major code refactor, added chunked uploads, and various other features and fixes.
 	2026/03/16 v4.1 Misc improvements including some front-end updates, Japanese language option added. A homepage for the software is created.
+	2026/03/26 v4.2 Minor tweaks to table HTML and CSS.
 ■Installation
 	・Clone repo into web directory (or unzip it there)
 	・cd into the directory and do this: "chmod +x prepare.sh", then run it with "./prepare.sh"

@@ -268,13 +268,13 @@ class uploaderHTML {
 		$commentCell = $cookie['showComment'] ? '<td><span class="comment">' . $this->renderComment($data->getComment()) . '</span></td>' : '';
 		$fileNameCell = $cookie['showFileName'] ? '<td><span class="fileName">' . htmlspecialchars($data->getOriginalFileName()) . '</span></td>' : '';
 		$fileSizeCell = $cookie['showFileSize'] ? '<td><span class="fileSize">' . bytesToHumanReadable($data->getSize()) . '</span></td>' : '';
-		$mimeTypeCell = $cookie['showMimeType'] ? '<td><span class="grayText">' . htmlspecialchars($data->getMimeType()) . '</span></td>' : '';
+		$mimeTypeCell = $cookie['showMimeType'] ? '<td><span class="grayText mimeTypeColumn">' . htmlspecialchars($data->getMimeType()) . '</span></td>' : '';
 
 		// Timestamp for date cell
 		$timestamp = $data->getTime();
 
 		// Date cell with formatted timestamp, also toggled by cookie settings
-		$dateCell = $cookie['showDate'] ? '<td><span class="grayText">' . ($timestamp ? htmlspecialchars(date('Y-m-d H:i:s', (int)$timestamp)) : '') . '</span></td>' : '';
+		$dateCell = $cookie['showDate'] ? '<td><span class="grayText dateColumn">' . ($timestamp ? htmlspecialchars(date('Y-m-d H:i:s', (int)$timestamp)) : '') . '</span></td>' : '';
 
 		// Admin-only cells: IP address and action links
 		$adminCells = '';
@@ -288,8 +288,8 @@ class uploaderHTML {
 			$adminCells .= '[<a href="' . $self . '?request=admin&modPage=manageFiles&modAction=deleteFile&fileID=' . $fileId . '">' . $this->lang->get('admin.deleteAction') . '</a>] ';
 			$adminCells .= '[<a href="' . $self . '?request=admin&modPage=manageFiles&modAction=banIP&targetIP=' . urlencode($ip) . '">' . $this->lang->get('admin.banUser') . '</a>] ';
 			$adminCells .= '[<a href="' . $self . '?request=admin&modPage=manageFiles&modAction=banFile&fileID=' . $fileId . '">' . $this->lang->get('admin.banFile') . '</a>]';
-			$adminCells .= '<td><input type="checkbox" name="fileIDs[]" value="' . $fileId . '"></td>';
 			$adminCells .= '</td>';
+			$adminCells .= '<td><input type="checkbox" name="fileIDs[]" value="' . $fileId . '"></td>';
 		}
 
 		// Render the assembled cells into the table-row template

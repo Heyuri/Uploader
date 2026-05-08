@@ -59,6 +59,10 @@ summary {
 	background-color: var(--tablelisting-hover-row);
 }
 
+.dateColumn {
+	white-space: nowrap;
+}
+
 .titleHeader {
 	background-color: var(--secondary-color);
 	max-width: 100%;

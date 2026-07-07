@@ -7,6 +7,7 @@ use TwintailUploader\Classes\logFile;
 use TwintailUploader\Classes\uploadEntry;
 use TwintailUploader\Classes\banChecker;
 use TwintailUploader\Classes\languageManager;
+use TwintailUploader\Classes\uploaderHTML;
 
 use function TwintailUploader\Functions\generatePasswordHash;
 use function TwintailUploader\Functions\getUserIP;
@@ -21,6 +22,7 @@ class chunkUploadService {
 		private logFile $logFile,
 		private banChecker $banChecker,
 		private languageManager $languageManager,
+		private uploaderHTML $uploaderHTML,
 	) {
 		// Ensure chunk directory exists, default to system temp directory if not configured
 		$this->chunkDir = sys_get_temp_dir() . '/';
@@ -193,7 +195,7 @@ class chunkUploadService {
 
 		// Now process the assembled file through the normal upload pipeline
 		try {
-			$this->processAssembledFile($assembledPath, $meta['fileName'], $meta['fileSize']);
+			$entry = $this->processAssembledFile($assembledPath, $meta['fileName'], $meta['fileSize']);
 		} catch (\Exception $e) {
 			$this->cleanupChunks($uploadId);
 			http_response_code(400);
@@ -204,20 +206,29 @@ class chunkUploadService {
 		// Cleanup chunks
 		$this->cleanupChunks($uploadId);
 
-		// Determine redirect target
+		// Re-render the listing for whichever view/page the uploader is on so the
+		// client can update it in place instead of reloading the page.
 		$requestFrom = $_POST['requestFrom'] ?? 'index';
-		$redirectUrl = $this->conf['mainScript'] . '?request=' . ($requestFrom === 'catalog' ? 'catalog' : 'index');
+		$pageNumber = filter_var($_POST['pageNumber'] ?? 1, FILTER_VALIDATE_INT) ?: 1;
+
+		$listingHtml = $requestFrom === 'catalog'
+			? $this->uploaderHTML->renderCatalog($pageNumber)
+			: $this->uploaderHTML->renderFileListing($pageNumber);
 
 		echo json_encode([
 			'success' => true,
-			'redirect' => $redirectUrl,
+			'file' => [
+				'name' => $entry->getFileName($this->conf),
+				'path' => $entry->getFilePath($this->conf),
+			],
+			'listingHtml' => $listingHtml,
 		]);
 	}
 
 	/**
 	 * Processes an assembled file through the same pipeline as a normal upload.
 	 */
-	private function processAssembledFile(string $filePath, string $originalFileName, int $fileSize): void {
+	private function processAssembledFile(string $filePath, string $originalFileName, int $fileSize): uploadEntry {
 		// Parse file info
 		$fileInfo = pathinfo($originalFileName);
 		if (!isset($fileInfo['extension'])) {
@@ -303,6 +314,8 @@ class chunkUploadService {
 
 		// Generate thumbnails
 		$this->uploadedFileRepository->createThumbnails($data);
+
+		return $data;
 	}
 
 	/**

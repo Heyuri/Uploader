@@ -88,6 +88,14 @@ class uploaderHTML {
 	}
 
 	public function drawFileListing(int $page = 1): void {
+		echo $this->renderFileListing($page);
+	}
+
+	/**
+	 * Builds the file listing HTML for a page and returns it as a string.
+	 * Wrapped in #fileListing so the chunk uploader can swap it in via JS.
+	 */
+	public function renderFileListing(int $page = 1): string {
 		$logFile = new LogFile($this->conf);
 		$count = $this->conf['filesPerListing'];
 
@@ -101,17 +109,16 @@ class uploaderHTML {
 
 		$fileHandle = fopen(\DATA_DIR . $this->conf['logFile'], 'r');
 		if (!$fileHandle) {
-			echo $this->lang->get('errors.unableOpenLog');
-			return;
+			return $this->lang->get('errors.unableOpenLog');
 		}
 
 		$this->skipLines($fileHandle, $lineOffset);
 
 		$cookie = $this->cookieSettingsManager->getSplitCookie();
-        
+
 		// Build table header
 		$tableHeader = $this->buildTableHeader($cookie);
-        
+
 		// Build table rows
 		$entries = $this->processFileLines($fileHandle, $count, false);
 		$tableRows = $this->buildTableRows($entries, $cookie);
@@ -122,13 +129,11 @@ class uploaderHTML {
 		$usageInfo = $this->buildUsageInfo($logFile);
 
 		// Render template
-		$html = $this->renderer->render('file-listing', [
+		return $this->renderer->render('file-listing', [
 			'tableHeader' => $tableHeader,
 			'tableRows' => $tableRows,
 			'usageInfo' => $usageInfo,
 		]);
-
-		echo $html;
 	}
 
 	/**
@@ -380,6 +385,14 @@ class uploaderHTML {
 	}
 	
 	public function drawCatalog(int $page = 1): void {
+		echo $this->renderCatalog($page);
+	}
+
+	/**
+	 * Builds the catalog HTML for a page and returns it as a string.
+	 * Wrapped in #fileListing so the chunk uploader can swap it in via JS.
+	 */
+	public function renderCatalog(int $page = 1): string {
 		$logFile = new LogFile($this->conf);
 		$count = $this->conf['filesPerListing'];
 
@@ -397,8 +410,7 @@ class uploaderHTML {
 
 		$fileHandle = fopen(\DATA_DIR . $this->conf['logFile'], 'r');
 		if (!$fileHandle) {
-			echo $this->lang->get('errors.unableOpenLog');
-			return;
+			return $this->lang->get('errors.unableOpenLog');
 		}
 
 		$this->skipLines($fileHandle, $lineOffset);
@@ -415,11 +427,9 @@ class uploaderHTML {
 		$catalogRows = $this->buildCatalogRows($batchedData, $cookie);
 
 		// Render template
-		$html = $this->renderer->render('catalog', [
+		return $this->renderer->render('catalog', [
 			'catalogRows' => $catalogRows,
 		]);
-
-		echo $html;
 	}
 
 	/**

@@ -61,6 +61,9 @@ return [
 		'serverError' => 'サーバーエラー (HTTP %s)',
 		'networkError' => '通信エラーが発生しました。接続をご確認ください。',
 		'uploadAborted' => 'アップロード中断',
+		'uploadedFilesHeading' => 'アップロードしたファイル：',
+		'copyLink' => 'リンクをコピー',
+		'copied' => 'コピーしました',
 	],
 	'table' => [
 		'delete' => 'ACT',

@@ -24,8 +24,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		serverErrorFinalize: languageMeta?.dataset.serverErrorFinalize || "Server error during finalize (HTTP %s)",
 		serverError: languageMeta?.dataset.serverError || "Server error (HTTP %s)",
 		networkError: languageMeta?.dataset.networkError || "Network error — check your connection.",
-		uploadAborted: languageMeta?.dataset.uploadAborted || "Upload aborted."
+		uploadAborted: languageMeta?.dataset.uploadAborted || "Upload aborted.",
+		copyLink: languageMeta?.dataset.copyLink || "Copy link",
+		copied: languageMeta?.dataset.copied || "Copied"
 	};
+
+	const uploadedFilesContainer = document.getElementById("uploadedFiles");
+	const uploadedFilesList = document.getElementById("uploadedFilesList");
 
 	function format(str, val) {
 		return str.replace("%s", val);
@@ -106,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			finalizeData.append("comment", comment);
 			finalizeData.append("password", password);
 			finalizeData.append("requestFrom", requestFrom);
+			finalizeData.append("pageNumber", currentPageNumber());
 
 			const finalResponse = await fetch(mainScript + "?request=finalizeChunkUpload", {
 				method: "POST",
@@ -125,10 +131,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			updateProgress(100, TEXT.complete);
 
-			// Redirect on success
-			if (finalResult.redirect) {
-				window.location.href = finalResult.redirect;
+			// Update the page in place instead of reloading
+			if (finalResult.file) {
+				addUploadedFileEntry(finalResult.file);
 			}
+			if (typeof finalResult.listingHtml === "string") {
+				replaceListing(finalResult.listingHtml);
+			}
+			resetForNextUpload();
 		} catch (err) {
 			progressContainer.style.visibility = "hidden";
 			updateProgress(0);
@@ -178,5 +188,108 @@ document.addEventListener("DOMContentLoaded", () => {
 	function updateProgress(percent, text) {
 		progressBar.value = percent;
 		progressText.textContent = text || (percent + "%");
+	}
+
+	// Reads the page the listing is currently showing so the server can re-render it.
+	function currentPageNumber() {
+		const page = new URLSearchParams(window.location.search).get("pageNumber");
+		return page || "1";
+	}
+
+	// Swaps the freshly rendered listing into the page.
+	function replaceListing(html) {
+		const current = document.getElementById("fileListing");
+		if (!current) return;
+
+		const holder = document.createElement("div");
+		holder.innerHTML = html;
+		const fresh = holder.querySelector("#fileListing");
+		if (fresh) {
+			current.replaceWith(fresh);
+		} else {
+			current.innerHTML = html;
+		}
+	}
+
+	// Appends one uploaded file (name + copy-link button) to the session list.
+	function addUploadedFileEntry(file) {
+		if (!uploadedFilesList) return;
+		if (uploadedFilesContainer) uploadedFilesContainer.classList.remove("hidden");
+
+		const absoluteUrl = new URL(file.path, window.location.href).href;
+
+		const entry = document.createElement("li");
+		entry.className = "uploadedFileEntry";
+
+		const name = document.createElement("span");
+		name.className = "uploadedFileName";
+		name.textContent = file.name;
+
+		const button = document.createElement("button");
+		button.type = "button";
+		button.className = "copyLinkButton";
+		button.title = TEXT.copyLink;
+		button.setAttribute("aria-label", TEXT.copyLink);
+		button.dataset.copyUrl = absoluteUrl;
+
+		entry.appendChild(name);
+		entry.appendChild(button);
+		uploadedFilesList.appendChild(entry);
+	}
+
+	// Clears the file selection so another file can be uploaded right away.
+	function resetForNextUpload() {
+		progressContainer.style.visibility = "hidden";
+		updateProgress(0);
+		submitButton.disabled = false;
+		fileInput.value = "";
+
+		const preview = document.getElementById("fileListContainer");
+		if (preview) preview.remove();
+	}
+
+	function copyToClipboard(text, button) {
+		const done = () => showCopied(button);
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done));
+		} else {
+			fallbackCopy(text, done);
+		}
+	}
+
+	function fallbackCopy(text, done) {
+		const textarea = document.createElement("textarea");
+		textarea.value = text;
+		textarea.className = "offscreenTextarea";
+		document.body.appendChild(textarea);
+		textarea.select();
+		try {
+			document.execCommand("copy");
+		} catch (e) {
+			// Ignore — nothing more we can do
+		}
+		document.body.removeChild(textarea);
+		done();
+	}
+
+	// Briefly swaps the clipboard icon for a "Copied" label.
+	function showCopied(button) {
+		if (button.dataset.reverting === "1") return;
+		button.dataset.reverting = "1";
+		button.classList.add("copied");
+		button.textContent = TEXT.copied;
+		setTimeout(() => {
+			button.textContent = "";
+			button.classList.remove("copied");
+			button.dataset.reverting = "0";
+		}, 2000);
+	}
+
+	if (uploadedFilesList) {
+		uploadedFilesList.addEventListener("click", (e) => {
+			const button = e.target.closest(".copyLinkButton");
+			if (!button) return;
+			copyToClipboard(button.dataset.copyUrl, button);
+		});
 	}
 });

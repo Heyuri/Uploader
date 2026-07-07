@@ -20,14 +20,22 @@
 	<label for="password"><span title="{{lang.upload.passwordTooltip}}">{{lang.upload.password}}</span></label>
 	<input type="password" id="password" name="password">
 
-	<div id="uploadProgress" class="chunk-only" style="margin-top:5px; visibility:hidden;">
-		<progress id="progressBar" value="0" max="100" style="width:200px; vertical-align:middle;"></progress>
-		<span id="progressText" style="font-size:12px;"></span>
+	<div id="uploadProgress" class="chunk-only uploadProgress">
+		<progress id="progressBar" class="uploadProgressBar" value="0" max="100"></progress>
+		<span id="progressText" class="uploadProgressText"></span>
 	</div>
 
-	<details>
-		<summary><span class="summaryLabel">{{lang.upload.allowedExtensions}}</span></summary>
-		<p>{{allowedExtensions}}</p>
-	</details>
+
 </form>
+
+<details>
+	<summary><span class="summaryLabel">{{lang.upload.allowedExtensions}}</span></summary>
+	<p>{{allowedExtensions}}</p>
+</details>
+
+<div id="uploadedFiles" class="uploadedFiles chunk-only hidden">
+	<p class="uploadedFilesHeading">{{lang.upload.uploadedFilesHeading}}</p>
+	<ul id="uploadedFilesList" class="uploadedFilesList"></ul>
+</div>
+
 <hr>

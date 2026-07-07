@@ -61,6 +61,9 @@ return [
 		'serverError' => 'Server error (HTTP %s)',
 		'networkError' => 'Network error — check your connection.',
 		'uploadAborted' => 'Upload aborted.',
+		'uploadedFilesHeading' => 'Uploaded files:',
+		'copyLink' => 'Copy link',
+		'copied' => 'Copied',
 	],
 	'table' => [
 		'delete' => 'Delete',

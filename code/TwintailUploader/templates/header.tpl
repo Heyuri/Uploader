@@ -25,6 +25,8 @@
 			data-server-error="{{lang.upload.serverError}}"
 			data-network-error="{{lang.upload.networkError}}"
 			data-upload-aborted="{{lang.upload.uploadAborted}}"
+			data-copy-link="{{lang.upload.copyLink}}"
+			data-copied="{{lang.upload.copied}}"
 		>
 		<title>{{boardTitle}}</title>
 	</head>

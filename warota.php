@@ -62,9 +62,9 @@
 	2026/03/26 v4.2 Minor tweaks to table HTML and CSS.
 ■Installation
 	・Clone repo into web directory (or unzip it there)
-	・cd into the directory and do this: "chmod +x prepare.sh", then run it with "./prepare.sh"
-	・Alternatively create the log file (default: souko.log), the count file (default: count.log), source dir. (src/) and thumb dir (thmb/) yourself
-	・If you change their names, you need to change them from configuration file too
+	・Make data/, src/ and thmb/ writable by the web user; the uploader creates its own
+	  log, counter and ban files in data/ on the first request
+	・If you rename any of them, change them in the configuration file too
 	・Set owner of all files in the directory to web user by "sudo chown -R webuser:webuser /path/to/Uploader"
 
 ■Cautions (it is recommended to check these)
@@ -77,26 +77,33 @@
 	・Hide the log files from displaying from internet with .htaccess, or change their default names so users don't know
 **************************************************************************/
 
-// define the data directory constant
-define('DATA_DIR', __DIR__ . '/data/');
+// repository root and the instance-wide data directory
+define('ROOT_DIR', __DIR__);
+define('GLOBAL_DATA_DIR', ROOT_DIR . '/data/');
 
 error_reporting(E_ALL);
 ini_set('display_errors', 'Off');
 ini_set('log_errors', 'On');
-ini_set('error_log', DATA_DIR . 'error.log');
+ini_set('error_log', GLOBAL_DATA_DIR . 'error.log');
 
 require __DIR__.'/code/TwintailUploader/include.php';
 require __DIR__.'/autoloader.php';
 
+use TwintailUploader\Classes\boardRepository;
 use TwintailUploader\Classes\languageManager;
 use TwintailUploader\Classes\requestHandler;
 use TwintailUploader\Classes\uploaderHTML;
 
+use function TwintailUploader\Functions\ensureDataFiles;
 use function TwintailUploader\Functions\forceJapaneseForJpUsers;
+
+// Set by boards/<uri>/index.php before it requires this file
+$boardUri = $boardUri ?? null;
+$board = null;
 
 try {
 	// Load configuration
-	$configFile = "config.php";
+	$configFile = ROOT_DIR . '/config.php';
 
 	// Check if config file exists
 	if(!file_exists($configFile)) throw new \Exception("Configuration file <i>$configFile</i> is missing.");
@@ -104,8 +111,37 @@ try {
 	// Load config
 	$conf = require $configFile;
 
-	// Check if log file exists
-	if (!file_exists(DATA_DIR . $conf['logFile'])) throw new \Exception("Log file " . DATA_DIR . $conf['logFile'] . " is missing. Please create it.");
+	// Keys the action log added, defaulted here so an instance whose config.php
+	// predates it still runs
+	$conf['actionLog'] = $conf['actionLog'] ?? true;
+	$conf['actionLogFile'] = $conf['actionLogFile'] ?? 'actions.log';
+	$conf['actionLogMaxEntries'] = (int) ($conf['actionLogMaxEntries'] ?? 2000);
+
+	// Resolve the board being served, if any, and scope every relative path to it.
+	// chdir() means "src/", "thmb/" and "data/" resolve inside the board directory
+	// while still doubling as URLs relative to boards/<uri>/index.php.
+	if ($boardUri !== null) {
+		if (!preg_match('/^[a-z0-9_-]{1,16}$/', $boardUri)) throw new \Exception("Invalid board.");
+
+		$board = (new boardRepository(GLOBAL_DATA_DIR . 'boards.log'))->getByUri($boardUri);
+		if ($board === null) throw new \Exception("This board does not exist.");
+
+		chdir(ROOT_DIR . '/' . $conf['boardsDir'] . $boardUri);
+		define('DATA_DIR', getcwd() . '/data/');
+
+		$conf = $board->applyToConfig($conf);
+	} else {
+		chdir(ROOT_DIR);
+		define('DATA_DIR', GLOBAL_DATA_DIR);
+	}
+
+	// Which proxies getUserIP() may believe about the real client address.
+	$GLOBALS['TWINTAIL_TRUSTED_PROXIES'] = $conf['trustedProxies'] ?? [];
+
+	// Create this scope's flat files if they aren't there yet, so an install
+	// only has to provide a writable data/ directory
+	ensureDataFiles($conf, DATA_DIR);
+	ensureDataFiles($conf, GLOBAL_DATA_DIR);
 
 	// load language manager
 	$languageManager = new languageManager(__DIR__ . '/lang', $conf['language'] ?? 'en');
@@ -121,9 +157,9 @@ try {
 	date_default_timezone_set($conf['timeZone']);
 
 	// Main logic
-	$requestHandler = new requestHandler($conf, $languageManager);
+	$requestHandler = new requestHandler($conf, $languageManager, $board);
 	$requestHandler->handleRequest();
-	
+
 } catch (\Exception $e) {
 	// Handle exceptions, logging, and displaying user-friendly error messages
 	if (!isset($conf) || !is_array($conf)) {
@@ -131,6 +167,14 @@ try {
 	}
 	if (!isset($languageManager) || !$languageManager instanceof languageManager) {
 		$languageManager = new languageManager(__DIR__ . '/lang', 'en');
+	}
+
+	// a board request that failed before its config was derived still renders
+	// from boards/<uri>/, so point the assets and the return link back up
+	if ($boardUri !== null && $board === null && !empty($conf)) {
+		$conf['staticUrl'] = '../../static/';
+		$conf['staticPath'] = ROOT_DIR . '/static/';
+		$conf['mainScript'] = '../../' . $conf['mainScript'];
 	}
 
 	// display a user-friendly error page with the error message

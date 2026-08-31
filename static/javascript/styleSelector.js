@@ -1,14 +1,44 @@
+// The board's own palette, when it has one, is a <style> block in the head
+// rather than a file in css/themes — switching to it turns the theme link off
+// and the block on, so it applies on top of base.css alone.
+const CUSTOM_THEME = "Custom";
+
+function metaContent(name, fallback) {
+	const metaTag = document.querySelector('meta[name="' + name + '"]');
+	return metaTag ? metaTag.content : fallback;
+}
+
+function availableThemes() {
+	const defaultTheme = metaContent("default-theme", "Futaba");
+	const themes = metaContent("available-themes", defaultTheme).split(",").filter(Boolean);
+
+	// the custom palette is only on offer when the page actually carries one
+	return themes.filter(theme => theme !== CUSTOM_THEME || document.getElementById("custom-theme"));
+}
+
+function applyTheme(themeName) {
+	const linkEl = document.getElementById("theme-style");
+	const customEl = document.getElementById("custom-theme");
+	const isCustom = themeName === CUSTOM_THEME;
+
+	if (customEl) {
+		customEl.media = isCustom ? "all" : "not all";
+	}
+
+	if (linkEl) {
+		linkEl.media = isCustom ? "not all" : "all";
+		if (!isCustom) {
+			const staticUrl = metaContent("static-url", "static/");
+			linkEl.href = staticUrl + "css/themes/" + themeName + ".css";
+		}
+	}
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 	const styleDropdown = document.getElementById("style-selector");
 
-	const metaTag = document.querySelector('meta[name="default-theme"]');
-	const defaultTheme = metaTag ? metaTag.content : "Futaba";
-
-	const staticUrlTag = document.querySelector('meta[name="static-url"]');
-	const staticUrl = staticUrlTag ? staticUrlTag.content : "static/";
-
-	const themesMetaTag = document.querySelector('meta[name="available-themes"]');
-	const themes = themesMetaTag ? themesMetaTag.content.split(",") : [defaultTheme];
+	const defaultTheme = metaContent("default-theme", "Futaba");
+	const themes = availableThemes();
 
 	let savedTheme = localStorage.getItem("selectedTheme");
 
@@ -38,26 +68,13 @@ document.addEventListener("DOMContentLoaded", () => {
 			localStorage.setItem("selectedTheme", selectedTheme);
 		});
 	}
-
-	function applyTheme(themeName) {
-		const linkEl = document.getElementById("theme-style");
-		if (linkEl) {
-			linkEl.href = staticUrl + "css/themes/" + themeName + ".css";
-		}
-	}
 });
 
 // Early-apply non-default theme to prevent flash of wrong theme
 (function() {
-	const metaTag = document.querySelector('meta[name="default-theme"]');
-	const defaultTheme = metaTag ? metaTag.content : "Futaba";
+	const defaultTheme = metaContent("default-theme", "Futaba");
 	const savedTheme = localStorage.getItem("selectedTheme");
-	if (savedTheme && savedTheme !== defaultTheme) {
-		const staticUrlTag = document.querySelector('meta[name="static-url"]');
-		const staticUrl = staticUrlTag ? staticUrlTag.content : "static/";
-		const linkEl = document.getElementById("theme-style");
-		if (linkEl) {
-			linkEl.href = staticUrl + "css/themes/" + savedTheme + ".css";
-		}
+	if (savedTheme && savedTheme !== defaultTheme && availableThemes().includes(savedTheme)) {
+		applyTheme(savedTheme);
 	}
 })();

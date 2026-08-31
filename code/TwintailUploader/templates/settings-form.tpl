@@ -31,6 +31,10 @@
 				<input type="checkbox" id="showDate" name="showDate" value="checked" {{showDate}}>
 				<label for="showDate">{{lang.settings.showDate}}</label>
 			</li>
+			<li>
+				<input type="checkbox" id="showBottomPager" name="showBottomPager" value="checked" {{showBottomPager}}>
+				<label for="showBottomPager">{{lang.settings.showBottomPager}}</label>
+			</li>
 		</ul>
 
 		<input type="hidden" name="action" value="setUserSettings">

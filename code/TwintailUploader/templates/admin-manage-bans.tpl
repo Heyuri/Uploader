@@ -9,6 +9,7 @@
 		<label for="banValue">{{lang.admin.ipAddress}}</label>
 		<input type="text" id="banValue" name="banValue" required>
 		<input type="hidden" name="banType" value="ip">
+		<input type="hidden" name="csrfToken" value="{{csrfToken}}">
 		<button type="submit">{{lang.admin.ban}}</button>
 	</form>
 	{{bannedIPsList}}
@@ -20,6 +21,7 @@
 		<label for="banHashValue">{{lang.admin.fileHashLabel}}</label>
 		<input type="text" id="banHashValue" name="banValue" size="64" required>
 		<input type="hidden" name="banType" value="hash">
+		<input type="hidden" name="csrfToken" value="{{csrfToken}}">
 		<button type="submit">{{lang.admin.ban}}</button>
 	</form>
 	{{bannedHashesList}}

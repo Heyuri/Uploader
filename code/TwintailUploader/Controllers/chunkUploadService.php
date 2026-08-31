@@ -8,6 +8,9 @@ use TwintailUploader\Classes\uploadEntry;
 use TwintailUploader\Classes\banChecker;
 use TwintailUploader\Classes\languageManager;
 use TwintailUploader\Classes\uploaderHTML;
+use TwintailUploader\Classes\temporaryHosting;
+use TwintailUploader\Classes\actionLogEntry;
+use TwintailUploader\Classes\uploadPasswordCookie;
 
 use function TwintailUploader\Functions\generatePasswordHash;
 use function TwintailUploader\Functions\getUserIP;
@@ -23,6 +26,8 @@ class chunkUploadService {
 		private banChecker $banChecker,
 		private languageManager $languageManager,
 		private uploaderHTML $uploaderHTML,
+		private temporaryHosting $temporaryHosting,
+		private actionLogController $actionLog,
 	) {
 		// Ensure chunk directory exists, default to system temp directory if not configured
 		$this->chunkDir = sys_get_temp_dir() . '/';
@@ -77,6 +82,10 @@ class chunkUploadService {
 
 		// First chunk: generate upload ID and create session directory
 		if ($chunkIndex === 0) {
+			// Take out sessions a client started and never finalized, so
+			// abandoned chunks can't pile up and exhaust the disk.
+			$this->cleanupStaleSessions();
+
 			$uploadId = bin2hex(random_bytes(16));
 			$uploadDir = $this->chunkDir . $uploadId . '/';
 			mkdir($uploadDir, 0755, true);
@@ -117,7 +126,11 @@ class chunkUploadService {
 
 		// Store the chunk
 		$chunkPath = $uploadDir . $chunkIndex;
-		move_uploaded_file($_FILES['chunkData']['tmp_name'], $chunkPath);
+		if (!move_uploaded_file($_FILES['chunkData']['tmp_name'], $chunkPath)) {
+			http_response_code(500);
+			echo json_encode(['error' => $this->languageManager->get('upload.chunkUploadFailed')]);
+			return;
+		}
 
 		echo json_encode([
 			'success' => true,
@@ -211,18 +224,23 @@ class chunkUploadService {
 		$requestFrom = $_POST['requestFrom'] ?? 'index';
 		$pageNumber = filter_var($_POST['pageNumber'] ?? 1, FILTER_VALIDATE_INT) ?: 1;
 
-		$listingHtml = $requestFrom === 'catalog'
-			? $this->uploaderHTML->renderCatalog($pageNumber)
-			: $this->uploaderHTML->renderFileListing($pageNumber);
-
-		echo json_encode([
+		$response = [
 			'success' => true,
 			'file' => [
 				'name' => $entry->getFileName($this->conf),
 				'path' => $entry->getFilePath($this->conf),
 			],
-			'listingHtml' => $listingHtml,
-		]);
+		];
+
+		// an unlisted uploader has no listing to swap in — the uploader only
+		// ever gets a link to their own file
+		if (empty($this->conf['unlisted'])) {
+			$response['listingHtml'] = $requestFrom === 'catalog'
+				? $this->uploaderHTML->renderCatalog($pageNumber)
+				: $this->uploaderHTML->renderFileListing($pageNumber);
+		}
+
+		echo json_encode($response);
 	}
 
 	/**
@@ -258,9 +276,20 @@ class chunkUploadService {
 			throw new \Exception($this->languageManager->get('errors.fileBanned'));
 		}
 
+		// A temporary upload we are already hosting is handed back as-is: same
+		// URL, same expiry, no second copy on disk. The assembled file goes with
+		// the rest of the chunk session.
+		$fileHash = $this->temporaryHosting->hashFile($filePath);
+		$duplicate = $this->temporaryHosting->findDuplicate($fileHash, $fileExtension);
+		if ($duplicate !== null) {
+			return $duplicate;
+		}
+
 		// Generate new ID and file name
-		$newID = sprintf("%03d", $this->uploadEntryRepository->getNextID());
-		$newFileName = $this->conf['prefix'] . $newID . '.' . $fileExtension;
+		$id = $this->uploadEntryRepository->getNextID();
+		$storedName = $this->temporaryHosting->storedNameFor($id);
+		$newID = sprintf("%03d", $id);
+		$newFileName = $storedName . '.' . $fileExtension;
 
 		// Move assembled file to upload directory
 		$destPath = $this->conf['uploadDir'] . $newFileName;
@@ -279,17 +308,24 @@ class chunkUploadService {
 		$password = $_POST['password'] ?? '';
 		$hashedPassword = !empty($password) ? generatePasswordHash($password) : '';
 
+		// keep it around so the next upload form can offer it back
+		(new uploadPasswordCookie())->remember($password);
+
 		// Build the log entry
+		$uploadedAt = time();
 		$data = new uploadEntry([
 			$newID,
 			$fileExtension,
 			$comment,
 			getUserIP(),
-			time(),
+			$uploadedAt,
 			$fileSize,
 			$realMimeType,
 			$hashedPassword,
 			$fileName,
+			$storedName,
+			$this->temporaryHosting->expiryTimeFor($uploadedAt),
+			$fileHash,
 		]);
 
 		// Check file limit
@@ -315,6 +351,8 @@ class chunkUploadService {
 		// Generate thumbnails
 		$this->uploadedFileRepository->createThumbnails($data);
 
+		$this->actionLog->recordFile(actionLogEntry::UPLOAD, $data, $this->conf);
+
 		return $data;
 	}
 
@@ -323,6 +361,27 @@ class chunkUploadService {
 	 */
 	private function isValidUploadId(string $uploadId): bool {
 		return (bool) preg_match('/^[0-9a-f]{32}$/', $uploadId);
+	}
+
+	/**
+	 * Drops upload session directories whose metadata is older than an hour —
+	 * clients that started an upload and never finalized it.
+	 */
+	private function cleanupStaleSessions(): void {
+		$cutoff = time() - 3600;
+
+		foreach (glob($this->chunkDir . '*', GLOB_ONLYDIR) as $dir) {
+			$uploadId = basename($dir);
+			if (!$this->isValidUploadId($uploadId)) {
+				continue;
+			}
+
+			$meta = $dir . '/meta.json';
+			// no metadata, or metadata older than the cutoff → abandoned
+			if (!file_exists($meta) || filemtime($meta) < $cutoff) {
+				$this->cleanupChunks($uploadId);
+			}
+		}
 	}
 
 	/**

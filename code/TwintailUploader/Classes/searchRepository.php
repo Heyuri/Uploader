@@ -82,11 +82,18 @@ class searchRepository {
 			$sortDir = 'desc';
 		}
 
+		// A term is present when it is a non-empty string — "0" is a real term,
+		// so test the length rather than !empty(), which discards "0".
+		$term = static function ($value): ?string {
+			$value = is_scalar($value) ? (string) $value : '';
+			return $value !== '' ? $value : null;
+		};
+
 		return [
-			'fileExtension' => !empty($in['fileExtension']) ? (string)$in['fileExtension'] : null,
-			'comment' => !empty($in['comment']) ? (string)$in['comment'] : null,
-			'mimeType' => !empty($in['mimeType']) ? (string)$in['mimeType'] : null,
-			'originalFileName' => !empty($in['originalFileName']) ? (string)$in['originalFileName'] : null,
+			'fileExtension' => $term($in['fileExtension'] ?? null),
+			'comment' => $term($in['comment'] ?? null),
+			'mimeType' => $term($in['mimeType'] ?? null),
+			'originalFileName' => $term($in['originalFileName'] ?? null),
 			'sortDir' => $sortDir,
 		];
 	}
@@ -94,7 +101,8 @@ class searchRepository {
 	private function parseLogLine(string $line): ?array {
 		$parts = explode('<>', rtrim($line, "\r\n"));
 
-		if (count($parts) !== 9) {
+		// entries written before temporary hosting existed stop at originalFileName
+		if (count($parts) < 9) {
 			return null;
 		}
 
@@ -108,6 +116,9 @@ class searchRepository {
 			'mimeType' => (string)$parts[6],
 			'password' => (string)$parts[7],
 			'originalFileName' => (string)$parts[8],
+			'storedName' => (string)($parts[9] ?? ''),
+			'expiresTime' => (int)($parts[10] ?? 0),
+			'fileHash' => (string)($parts[11] ?? ''),
 		];
 	}
 

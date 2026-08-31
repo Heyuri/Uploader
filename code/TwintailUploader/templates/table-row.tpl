@@ -1,4 +1,5 @@
 <tr>
+{{sourceCell}}
 {{deleteButton}}
 {{nameCell}}
 {{commentCell}}

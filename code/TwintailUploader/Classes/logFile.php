@@ -21,11 +21,17 @@ class logFile {
 		$mimeType = $data->getMimeType();
 		$password = $data->getPassword();
 		$originalFileName = $data->getOriginalFileName();
+		$storedName = $data->getStoredName();
+		$expiresTime = $data->getExpiresTime();
+		$fileHash = $data->getFileHash();
 
-		// replace dellimeter with an equivelant
-		$comment = str_replace('<>', '‹›', $comment);
+		// Strip control chars FIRST, then replace the delimiter: doing it the
+		// other way round lets "<\r>" survive the delimiter pass and re-form a
+		// literal "<>" once the \r is stripped, injecting an extra field/line.
+		$comment = str_replace('<>', '‹›', str_replace(["\r", "\n", "\t", "\0"], '', $comment));
+		$originalFileName = str_replace('<>', '‹›', str_replace(["\r", "\n", "\t", "\0"], '', $originalFileName));
 
-		$stringData = "$id<>$fileExtention<>$comment<>$host<>$dateUploaded<>$sizeInBytes<>$mimeType<>$password<>$originalFileName" . "\n";
+		$stringData = "$id<>$fileExtention<>$comment<>$host<>$dateUploaded<>$sizeInBytes<>$mimeType<>$password<>$originalFileName<>$storedName<>$expiresTime<>$fileHash" . "\n";
 
 		$fileHandle = fopen(\DATA_DIR . $this->conf['logFile'], "c+");
 
@@ -104,13 +110,14 @@ class logFile {
 	}
 
 	public function removeLastData(): array {
-		$fileHandle = fopen(\DATA_DIR . $this->conf['logFile'], 'r+'); 
-		flock($fileHandle, LOCK_EX);
-	
+		$fileHandle = @fopen(\DATA_DIR . $this->conf['logFile'], 'r+');
+
 		if (!$fileHandle) {
 			return [false, ""]; // Return false and an empty string if the file cannot be opened
 		}
-	
+
+		flock($fileHandle, LOCK_EX);
+
 		$lastLine = '';
 		$len = 0; // To track the length of the last line
 	
@@ -144,6 +151,85 @@ class logFile {
 		$data = explode("<>", $lastLine);
 	
 		return [true, $lastLine]; // Return true and the last line
+	}
+
+	/**
+	 * Returns the first entry $matches accepts, reading newest to oldest.
+	 *
+	 * @param callable $matches fn(uploadEntry): bool
+	 */
+	public function findEntry(callable $matches): ?uploadEntry {
+		$fileHandle = fopen(\DATA_DIR . $this->conf['logFile'], 'r');
+		if ($fileHandle === false) {
+			return null;
+		}
+
+		$found = null;
+
+		while (($line = fgets($fileHandle)) !== false) {
+			if (trim($line) === '') {
+				continue;
+			}
+
+			$entry = new uploadEntry(explode('<>', rtrim($line, "\r\n")));
+
+			if ($matches($entry)) {
+				$found = $entry;
+				break;
+			}
+		}
+
+		fclose($fileHandle);
+
+		return $found;
+	}
+
+	/**
+	 * Rewrites the log without the entries $shouldRemove accepts and hands them
+	 * back, so the caller can take their files with them. Holds the same
+	 * exclusive lock the writes do.
+	 *
+	 * @param callable $shouldRemove fn(uploadEntry): bool
+	 * @return uploadEntry[] the removed entries
+	 */
+	public function pruneEntries(callable $shouldRemove): array {
+		$fileHandle = fopen(\DATA_DIR . $this->conf['logFile'], 'c+');
+		if ($fileHandle === false) {
+			return [];
+		}
+
+		if (!flock($fileHandle, LOCK_EX)) {
+			fclose($fileHandle);
+			return [];
+		}
+
+		$removed = [];
+		$keptLines = '';
+
+		foreach (explode("\n", stream_get_contents($fileHandle)) as $line) {
+			if (trim($line) === '') {
+				continue;
+			}
+
+			$entry = new uploadEntry(explode('<>', rtrim($line, "\r\n")));
+
+			if ($shouldRemove($entry)) {
+				$removed[] = $entry;
+			} else {
+				$keptLines .= $line . "\n";
+			}
+		}
+
+		if (!empty($removed)) {
+			rewind($fileHandle);
+			ftruncate($fileHandle, 0);
+			fwrite($fileHandle, $keptLines);
+		}
+
+		flock($fileHandle, LOCK_UN);
+		fclose($fileHandle);
+
+		return $removed;
 	}
 
 	public function getOldestData(): ?uploadEntry {

@@ -1,5 +1,6 @@
 <thead>
     <tr>
+        {{sourceHeader}}
         {{deleteButtonHeader}}
         <th class="nameColumn">{{lang.table.name}}</th>
         {{commentHeader}}

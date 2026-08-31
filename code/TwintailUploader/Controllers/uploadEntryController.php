@@ -1,6 +1,7 @@
 <?php
 namespace TwintailUploader\Controllers;
 
+use TwintailUploader\Classes\actionLogEntry;
 use TwintailUploader\Classes\uploadEntry;
 use TwintailUploader\Classes\uploadEntryRepository;
 use TwintailUploader\Classes\uploadedFileRepository;
@@ -11,13 +12,11 @@ class uploadEntryController {
 
 	public function __construct(
 		private uploadEntry $uploadEntry,
-		private uploadEntryRepository $uploadEntryRepository, 
-		private uploadedFileRepository $uploadedFileRepository, 
+		private uploadEntryRepository $uploadEntryRepository,
+		private uploadedFileRepository $uploadedFileRepository,
 		private uploaderHTML $uploaderHTML,
-		private string $thumbDir, 
-		private string $prefix, 
-		private string $adminPassword, 
-		private string $videoThumbnailExtension
+		private array $conf,
+		private actionLogController $actionLog
 	) {
 		$this->lang = $this->uploaderHTML->getLang();
 	}
@@ -27,25 +26,10 @@ class uploadEntryController {
 			$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.deletionError'), $this->lang->get('errors.fileNotFound'));
 		}
 
-		// Delete entry from log
-		$this->uploadEntryRepository->deleteDataFromLogByID($this->uploadEntry->getId());
+		// recorded as whoever the request authenticated as — admin or board owner
+		$this->actionLog->recordFile(actionLogEntry::DELETE_MOD, $this->uploadEntry, $this->conf);
 
-		// Determine thumbnail path - use video extension for videos, regular extension otherwise
-		if (preg_match('/video/i', $this->uploadEntry->getMimeType())) {
-			$conf = ['thumbDir' => $this->thumbDir, 'prefix' => $this->prefix, 'thumbnailExtension' => $this->videoThumbnailExtension];
-			$thumbPath = $this->uploadEntry->getVideoThumbPath($conf);
-		} else {
-			$conf = ['thumbDir' => $this->thumbDir, 'prefix' => $this->prefix, 'uploadDir' => ''];
-			$thumbPath = $this->uploadEntry->getThumbPath($conf);
-		}
-
-		// Secure file deletion to prevent unauthorized access
-		if (file_exists($thumbPath) && str_contains(realpath($thumbPath), realpath($this->thumbDir)) === false) {
-			unlink($thumbPath);
-		}
-
-		// Delete the actual file
-		$this->uploadedFileRepository->deleteFileByData($this->uploadEntry);
+		$this->deleteEntry();
 
 		if ($showMessage) {
 			$this->uploaderHTML->drawMessageAndRedirectHome($this->lang->get('messages.fileDeleted'), $this->lang->get('messages.pageNoChange'));
@@ -67,38 +51,32 @@ class uploadEntryController {
 
 		$postPassword = $this->uploadEntry->getPassword();
 
-		// Check if password matches or if admin password is used
-		if (password_verify($password, $postPassword) || $password === $this->adminPassword) {
-			// Delete entry from log
-			$this->uploadEntryRepository->deleteDataFromLogByID($this->uploadEntry->getId());
+		// Check if password matches or if admin password is used (constant-time)
+		$isAdmin = hash_equals((string) $this->conf['adminPassword'], (string) $password);
+		if (password_verify($password, $postPassword) || $isAdmin) {
+			$this->actionLog->recordFile(actionLogEntry::DELETE_USER, $this->uploadEntry, $this->conf);
 
-			// Determine thumbnail path - use video extension for videos, regular extension otherwise
-			if (preg_match('/video/i', $this->uploadEntry->getMimeType())) {
-				// Build config array for video thumbnail
-				$conf = ['thumbDir' => $this->thumbDir, 'prefix' => $this->prefix, 'thumbnailExtension' => $this->videoThumbnailExtension];
-				$thumbPath = $this->uploadEntry->getVideoThumbPath($conf);
-			} else {
-				// Use regular thumbnail path
-				$conf = ['thumbDir' => $this->thumbDir, 'prefix' => $this->prefix, 'uploadDir' => ''];
-				$thumbPath = $this->uploadEntry->getThumbPath($conf);
-			}
-
-			// Secure file deletion to prevent unauthorized access
-			if (file_exists($thumbPath) && str_contains(realpath($thumbPath), realpath($this->thumbDir)) === false) {
-				unlink($thumbPath);
-			}
-
-			// Delete the actual file
-			$this->uploadedFileRepository->deleteFileByData($this->uploadEntry);
+			$this->deleteEntry();
 
 			$this->uploaderHTML->drawMessageAndRedirectHome($this->lang->get('messages.fileDeleted'), $this->lang->get('messages.pageNoChange'));
-		} elseif (empty($postPassword) && $password !== $this->adminPassword) {
+		} elseif (empty($postPassword) && !$isAdmin) {
 			$this->uploaderHTML->drawErrorPageAndExit(
-				$this->lang->get('errors.deletionError'), 
+				$this->lang->get('errors.deletionError'),
 				$this->lang->get('errors.noPasswordOnPost')
 			);
 		} else {
 			$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.deletionError'), $this->lang->get('errors.passwordIncorrect'));
 		}
+	}
+
+	/**
+	 * Removes the entry from the log and takes its file and thumbnail with it.
+	 */
+	private function deleteEntry(): void {
+		// Delete entry from log
+		$this->uploadEntryRepository->deleteDataFromLogByID($this->uploadEntry->getId());
+
+		// Delete the actual file and its thumbnail
+		$this->uploadedFileRepository->deleteFileByData($this->uploadEntry);
 	}
 }

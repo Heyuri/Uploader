@@ -2,13 +2,30 @@
 namespace TwintailUploader\Classes;
 
 class banChecker {
-	private string $dataDir = 'data/';
+	private string $dataDir;
 	private string $banListFile;
 	private string $bannedHashesFile;
 
-	public function __construct() {
+	/** Ban files of a wider scope that are checked but never written to */
+	private array $inheritedBanListFiles = [];
+	private array $inheritedBannedHashesFiles = [];
+
+	/**
+	 * @param string  $dataDir        scope bans are read from and written to
+	 * @param ?string $inheritedFromDir wider scope that is only read (a board
+	 *                                  inherits the instance-wide ban lists)
+	 */
+	public function __construct(string $dataDir, ?string $inheritedFromDir = null) {
+		$this->dataDir = rtrim($dataDir, '/') . '/';
 		$this->banListFile = $this->dataDir . 'banlist.dat';
 		$this->bannedHashesFile = $this->dataDir . 'banned_hashes.dat';
+
+		if ($inheritedFromDir !== null && rtrim($inheritedFromDir, '/') . '/' !== $this->dataDir) {
+			$inheritedDir = rtrim($inheritedFromDir, '/') . '/';
+			$this->inheritedBanListFiles[] = $inheritedDir . 'banlist.dat';
+			$this->inheritedBannedHashesFiles[] = $inheritedDir . 'banned_hashes.dat';
+		}
+
 		$this->ensureFilesExist();
 	}
 
@@ -27,8 +44,13 @@ class banChecker {
 	}
 
 	public function isBanned(string $host): bool {
-		if ($host === "1337") return false;
-		return $this->isInFile($this->banListFile, $host);
+		foreach (array_merge([$this->banListFile], $this->inheritedBanListFiles) as $file) {
+			if ($this->isInFile($file, $host)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public function addBan(string $ip): void {
@@ -49,11 +71,19 @@ class banChecker {
 			return false;
 		}
 
-		return $this->isInFile($this->bannedHashesFile, $hash);
+		foreach (array_merge([$this->bannedHashesFile], $this->inheritedBannedHashesFiles) as $file) {
+			if ($this->isInFile($file, $hash)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private function isInFile(string $file, string $needle): bool {
-		if (!file_exists($file)) {
+		// An empty needle would match a blank line in the file, so an unparseable
+		// address or a stray newline in the ban list must never count as a hit.
+		if ($needle === '' || !file_exists($file)) {
 			return false;
 		}
 
@@ -116,7 +146,9 @@ class banChecker {
 	}
 
 	private function addToFile(string $file, string $entry): void {
-		if ($this->isInFile($file, $entry)) {
+		// one entry per line — never let a value smuggle in extra lines
+		$entry = str_replace(["\r", "\n", "\t", "\0"], '', $entry);
+		if ($entry === '' || $this->isInFile($file, $entry)) {
 			return;
 		}
 

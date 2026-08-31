@@ -1,6 +1,6 @@
 {{capacityWarning}}
 <noscript>
-	<link rel="stylesheet" href="static/css/fallback-noscript.css">
+	<link rel="stylesheet" href="{{staticUrl}}css/fallbackNoscript.css">
 	<div class="redText">{{lang.upload.javascriptQoL}}</div>
 </noscript>
 <form id="uploadForm" method="post" enctype="multipart/form-data" action="{{action}}" data-chunk-size="{{chunkSize}}" data-main-script="{{mainScript}}">
@@ -8,6 +8,7 @@
 	<input type="hidden" name="requestFrom" value="{{requestFrom}}">
 
 	<p class="maxFileSize">{{maxFileSize}}</p>
+	{{temporaryNotice}}
 
 	<label for="upfile"><span title="{{lang.upload.chooseFileTooltip}}">{{lang.upload.chooseFile}}</span></label>
 	<input type="file" id="upfile" name="upfile" required> <br>
@@ -18,7 +19,7 @@
 	<button type="reset">{{lang.upload.cancel}}</button><br>
 
 	<label for="password"><span title="{{lang.upload.passwordTooltip}}">{{lang.upload.password}}</span></label>
-	<input type="password" id="password" name="password">
+	<input type="password" id="password" name="password" value="{{uploadPassword}}" autocomplete="off">
 
 	<div id="uploadProgress" class="chunk-only uploadProgress">
 		<progress id="progressBar" class="uploadProgressBar" value="0" max="100"></progress>

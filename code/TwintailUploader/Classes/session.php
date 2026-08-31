@@ -4,7 +4,23 @@ namespace TwintailUploader\Classes;
 class session {
 	public function __construct() {
 		if (session_status() == PHP_SESSION_NONE) {
+			$https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+				|| ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+
+			session_set_cookie_params([
+				'httponly' => true,
+				'samesite' => 'Lax',
+				'secure' => $https,
+			]);
+
 			session_start();
+		}
+	}
+
+	// Rotate the session ID (e.g. right after a privilege change) to defeat fixation
+	public function regenerate(): void {
+		if (session_status() === PHP_SESSION_ACTIVE) {
+			session_regenerate_id(true);
 		}
 	}
 

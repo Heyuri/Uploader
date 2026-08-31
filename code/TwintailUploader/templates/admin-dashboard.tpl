@@ -10,7 +10,10 @@
 		<h4>{{lang.admin.modPages}}</h4>
 		<ul class="subtleList">
 			<li><a href="{{manageFilesUrl}}">{{lang.admin.files}}</a></li>
+			<li><a href="{{recentFilesUrl}}">{{lang.admin.recentFiles}}</a></li>
+			<li><a href="{{actionLogUrl}}">{{lang.actionLog.title}}</a></li>
 			<li><a href="{{manageBansUrl}}">{{lang.admin.bans}}</a></li>
+			<li><a href="{{manageBoardsUrl}}">{{lang.boards.manageBoards}}</a></li>
 			<li><a href="{{configUrl}}">{{lang.admin.config}}</a></li>
 		</ul>
 	</div>

@@ -8,6 +8,7 @@
 		<meta name="available-themes" content="{{availableThemes}}">
 		<meta name="static-url" content="{{staticUrl}}">
 		{{themeLink}}
+		{{customThemeStyle}}
 		{{preloadLinks}}
 		<script src="{{staticUrl}}javascript/styleSelector.js"></script>
 		<script src="{{staticUrl}}javascript/chunkUploader.js" defer></script>

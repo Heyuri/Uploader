@@ -106,6 +106,13 @@ summary {
 	padding-right: 0.25em;
 }
 
+/* Listings shrink to the viewport first, then scroll on their own rather
+   than pushing the page wider than the screen */
+.tableScroll {
+	max-width: 100%;
+	overflow-x: auto;
+}
+
 .fileListingTable {
 	min-width: 100%;
 	font-size: var(--tablelisting-font-size);
@@ -132,7 +139,11 @@ summary {
 	background-color: var(--tablelisting-hover-row);
 }
 
-.dateColumn {
+.dateColumn,
+.mimeTypeColumn,
+.fileSize,
+.ipCell,
+.fileSizeColumn {
 	white-space: nowrap;
 }
 
@@ -266,6 +277,15 @@ summary {
 }
 
 /* Admin manage files page */
+.sourceColumn {
+	width: 8%;
+}
+
+.sourceCell {
+	font-size: 12px;
+	word-break: break-word;
+}
+
 .selectColumn {
 	width: 3%;
 }
@@ -292,9 +312,94 @@ summary {
 	font-size: 12px;
 }
 
+/* active address filter on a mod listing */
+.filterNotice {
+	font-size: 13px;
+}
+
 .manageFilesPage .utilityOptions {
 	margin-bottom: 8px;
 	font-size: 13px;
+}
+
+/* User boards */
+/* hint above the field it describes, on its own line */
+.fieldHint {
+	font-size: small;
+	color: var(--gray-text);
+}
+
+.aiHelper {
+	text-align: center;
+	margin: 8px 0;
+}
+
+.aiImage img {
+	border: 1px solid var(--secondary-color);
+}
+
+.boardCreatedAddress {
+	font-family: monospace;
+	font-size: 18px;
+}
+
+/* sized to its content rather than the full width fileListingTable forces, and centred */
+.boardListTable {
+	min-width: 0;
+	margin: 0 auto;
+}
+
+.boardUriColumn,
+.boardUriCell {
+	white-space: nowrap;
+	font-family: monospace;
+}
+
+/* Board list: the URL and created columns sit centred under their headings.
+   Scoped to this table so the file listings and action log keep their own
+   left-aligned dates. */
+.boardListTable th.boardUriColumn,
+.boardListTable td.boardUriCell,
+.boardListTable th.dateColumn {
+	text-align: center;
+}
+
+/* the date's class is on a span inside the cell, so it has to fill the cell
+   before its text can be centred within it */
+.boardListTable td .dateColumn {
+	display: block;
+	text-align: center;
+}
+
+.boardListPage .utilityOptions,
+.boardCreatePage .utilityOptions {
+	margin-bottom: 8px;
+	font-size: 13px;
+}
+
+.manageBoardsTable {
+	font-size: 12px;
+}
+
+/* Board theme editor */
+.themeVariableTable input[type="color"] {
+	vertical-align: middle;
+	width: 4em;
+	height: 1.6em;
+	padding: 0;
+}
+
+.themeVarValue {
+	font-size: 12px;
+	color: var(--gray-text);
+}
+
+.manageBoardsTable input[type="password"] {
+	width: 6em;
+}
+
+.manageBoardsTable form {
+	display: inline;
 }
 
 .utilityLink a {

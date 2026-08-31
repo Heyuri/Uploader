@@ -9,12 +9,20 @@ class uploadEntryRepository {
 
 	/* Data Getters */
 	public function getLastID() {
-		$openFile = fopen($this->logFile, "r");
+		$openFile = @fopen($this->logFile, "r");
+		if ($openFile === false) {
+			return 1;
+		}
 
 		$firstLine = fgets($openFile);
-		$array = explode("<>", $firstLine);
 		fclose($openFile);
 
+		// An empty log (no first line) has no last ID
+		if ($firstLine === false) {
+			return 1;
+		}
+
+		$array = explode("<>", $firstLine);
 		return $array[0] ?? 1;
 	}
 
@@ -27,10 +35,9 @@ class uploadEntryRepository {
 		flock($fp, LOCK_EX);
 		$count = (int) fgets($fp, 64);
 
-		// If counter was reset or is behind the log, recover from the log
-		if ($count <= 0) {
-			$count = $this->getHighestIDFromLog();
-		}
+		// Never hand out an ID the log already uses: a stale-but-positive counter
+		// (restore, manual edit, corruption) would otherwise overwrite a file.
+		$count = max($count, $this->getHighestIDFromLog());
 
 		$count++;
 		fseek($fp, 0);
@@ -62,11 +69,16 @@ class uploadEntryRepository {
 	}
 
 	public function getDataByID($id): uploadEntry {
-		$openFile = fopen($this->logFile, "r");
-		$data = null;
+		// An unknown ID comes back as an empty entry rather than a fatal — the
+		// constructor needs an array, never null.
+		$data = [];
 
-		while (!feof($openFile)) {
-			$line = fgets($openFile);
+		$openFile = @fopen($this->logFile, "r");
+		if ($openFile === false) {
+			return new uploadEntry($data);
+		}
+
+		while (($line = fgets($openFile)) !== false) {
 			$array = explode("<>", $line);
 			if ($array[0] == $id) {
 				$data = $array;
@@ -79,38 +91,47 @@ class uploadEntryRepository {
 	}
 
 	public function deleteDataFromLogByID(int $id): bool {
-		$openLogFile = fopen($this->logFile, "r");
+		// Hold one exclusive lock across the whole read-filter-rewrite so a
+		// concurrent upload can't be lost between the read and the truncate.
+		$openLogFile = fopen($this->logFile, "c+");
+		if ($openLogFile === false) {
+			return false;
+		}
+		if (!flock($openLogFile, LOCK_EX)) {
+			fclose($openLogFile);
+			return false;
+		}
+
 		$dataIsFoundInFile = false;
 		$newFileContent = [];
-	
-		// while not at the end of the file.
-		while (!feof($openLogFile)) {
-			$line = fgets($openLogFile);
+
+		foreach (explode("\n", stream_get_contents($openLogFile)) as $line) {
+			if ($line === '') {
+				continue;
+			}
 			$data = explode("<>", $line);
-	
 			if ($data[0] == $id) {
 				$dataIsFoundInFile = true;
 			} else {
 				$newFileContent[] = $line;
 			}
 		}
-		fclose($openLogFile);
-	
-		// data was not found.
-		if ($dataIsFoundInFile == false) {
+
+		if ($dataIsFoundInFile === false) {
+			flock($openLogFile, LOCK_UN);
+			fclose($openLogFile);
 			return false;
 		}
-	
-	
-		$openLogFile = fopen($this->logFile, "w");
-		flock($openLogFile, LOCK_EX);
-	
-		foreach ($newFileContent as $line) {
-			fwrite($openLogFile, $line);
+
+		rewind($openLogFile);
+		ftruncate($openLogFile, 0);
+		if (!empty($newFileContent)) {
+			fwrite($openLogFile, implode("\n", $newFileContent) . "\n");
 		}
+
+		flock($openLogFile, LOCK_UN);
 		fclose($openLogFile);
-		
-	
+
 		return true;
 	}
 }

@@ -74,14 +74,11 @@ Run chmod on the following files. E.g (`chmod 755 warota.php` and so on)
 - 755 autoloader.php
 - 755 code/
 - run: `chmod -R 755 code`
-- 775 data/
-- 775 data/count.log
-- 775 data/souko.log
-- 775 data/banned_hashes.dat
-- 775 data/banlist.dat
+- 775 data/ - note: the uploader creates its log and ban files in here, so it has to be writable
+- 775 boards/ - note: the web user creates a directory in here for every user board
 
 ### Restricting access
-`data/` contains sensitive information and shouldn't be visible to users.
+`data/` contains sensitive information and shouldn't be visible to users. Each user board keeps its own `boards/<name>/data/`, so block those too.
 
 #### httpd (openBSD)
 Open /etc/httpd.conf In the server block for the site your uploader instance is on and paste the following location block into it:
@@ -93,6 +90,10 @@ location "/Uploader/data/*" {
 location "/Uploader/data/" {
   block
 }
+
+location match "/Uploader/boards/.*/data/.*" {
+  block
+}
 ```
 #### nginx
 Open your site conf file in `/etc/nginx/sites-available/` and add this to the server block:
@@ -101,9 +102,14 @@ location ~ ^/Uploader/data/ {
     deny all;
     return 403;
 }
+
+location ~ ^/Uploader/boards/[^/]+/data/ {
+    deny all;
+    return 403;
+}
 ```
 #### Apache
-There is already a .htaccess file in data that will prevent accesses to data 
+There is already a .htaccess file in data that will prevent accesses to data. The same file is written into every user board's data directory when the board is created.
 
 ### Configuration
 After setting permissions, you shouldn't need to do much else however you should change the admin password. 
@@ -113,6 +119,101 @@ You can find the admin password in `config.php` under 'adminPassword'.
 You can configure the instance through a web UI by going to 'Admin room' on `warota.php`, entering the password, then going to 'Config' in the vertical list of admin pages.
 
 Be aware that only simple integer values will appear, and that `config.php` may change after submitting an edit.
+
+### Unlisted mode
+
+Setting `unlisted` in `config.php` hides the file list from users. The index shows only the upload form, the catalog and search send visitors back to it, and their nav links go away. An upload then ends on a page with the uploader's own link on it rather than a redirect back to a listing, so a file is only reachable by someone who was given its URL.
+
+Mod pages are unaffected — logged in, the whole list is still there. Boards inherit the switch.
+
+### Temporary hosting
+
+Setting `temporaryHosting` turns the uploader into a drop box: every upload is stored under a random name instead of a numbered one, is stamped with an expiry, and is deleted once that passes.
+
+- `temporaryHosting` — turn it on
+- `temporaryHostingHours` — how long an upload is kept
+- `temporaryFileNameLength` — length of the random file name, 4 to 32
+
+Names are random rather than derived from the file, so a re-upload after expiry never resurrects an old URL. Within the lifetime, though, uploading an identical file again hands back the entry that already exists instead of storing a second copy.
+
+Files are swept lazily while the uploader serves requests, at most once a minute. That is enough for a busy instance; where files have to go on time regardless of traffic, run the sweep from cron instead:
+
+```bash
+php expireFiles.php              # the main uploader
+php expireFiles.php <boardName>  # one user board
+php expireFiles.php --all        # the main uploader and every board
+```
+
+Files that were already given an expiry keep it, so turning `temporaryHosting` back off does not rescue them.
+
+### User boards
+
+Users can run their own uploaders at `boards/<name>/`. Each board has its own file list, upload directory, thumbnails, counter, bans, and settings. But shares the instance's code, themes, languages and allowed extensions. Board owners can never change anything security-relevant.
+
+The registry of boards is a flat file, `data/boards.log`, one `<>`-delimited line per board. It is created automatically the first time it is needed.
+
+Relevant `config.php` keys:
+
+- `allowUserBoards` — turn board creation on or off
+- `boardsDir` — where boards live, `boards/` by default
+- `maxUserBoards` — how many boards may exist at once
+- `boardMaxAmountOfFiles`, `boardMaxUploadSize`, `boardMaxTotalSize` — per-board limits, applied to every board
+
+**Board owners** log in at their board's *Admin room* with the password they chose at creation. They can delete files, ban posters and files from their own board, and change their board's name, description, default comment, listing, theme and password. They never see an uploader's IP address: every uploader is shown as a hash salted with a secret unique to that board, and bans are made by clicking a post rather than by typing an address.
+
+**Theming** is the one thing an owner changes about how the board looks. A board can default to any of the instance's installed themes, or to a palette of its own: a fixed list of colours (background, text, links, accents, file list rows) and the file list's font size. Visitors still get the style selector and can pick another theme; the board's palette is simply the one it starts on, and joins the installed themes in the selector as *Custom*.
+
+Owners set values, never CSS. Colours have to be hex and the font size a pixel count between 8 and 24; anything else is dropped, on save and again every time the page is drawn. A board cannot add a rule, load a font or an image, or otherwise put styling of its own choosing on the page.
+
+**The instance admin** gets a *Boards* mod page listing every board with its size, file count, creator and state. From there a board can be listed/unlisted, locked (kept readable but closed to uploads), have its owner password reset, be deleted along with all of its files, or be moderated directly. Admins see real IPs on boards, and instance-wide IP and file-hash bans apply to every board.
+
+### Action log
+
+Uploads, deletions, bans, logins, board changes and config edits are recorded in `data/actions.log`, a `<>`-delimited flat file that is created automatically. Every user board keeps its own, next to its upload log, so a board's history lives with the board.
+
+The admin's *Action log* mod page merges the instance's log with every board's, newest first, and can be narrowed to one kind of action. Every address in it is a link that narrows the log to that poster, matching whether they acted or were acted on, so following one shows everything the log has on them; the same links are on the addresses in the file listings. Board owners get the same page for their own board, where addresses appear as the same poster hashes they see everywhere else — including the address a ban was placed on.
+
+Relevant `config.php` keys:
+
+- `actionLog` — turn recording on or off
+- `actionLogFile` — file name, `actions.log` by default
+- `actionLogMaxEntries` — how many actions each log keeps; the oldest fall off the front once it is full
+
+### Migrating boards made before 4.3
+
+Older versions kept user boards in `user/boards/<name>/`, each a standalone copy of the uploader with its own `config.php`. `migrateUserBoards.php` converts those into the current layout. It only reads the old boards, so it is safe to run and re-run:
+
+```bash
+php migrateUserBoards.php --dry-run   # report what would happen
+php migrateUserBoards.php             # do it
+```
+
+It can only be run from the command line — requesting it over the web returns 403. Pass `--source=path/to/user/boards` if the old boards aren't in the default place. Boards that are already registered, whose directory already exists, or whose name is reserved or unusable are reported and skipped, so a partial run can simply be run again.
+
+Per board it creates `boards/<name>/` with the usual `src/`, `thmb/` and `data/`, copies the uploads across, renames thumbnails from the old `<prefix><id>_thumb.<ext>` to the current `<prefix><id>s.jpg`, seeds `data/count.log` from the highest ID in the log, turns the old `denylist` and `hardBanList` into the board's own ban list, and registers the board in `data/boards.log`. The old `defaultTheme` is kept as the board's theme when the instance still ships a theme by that name, and dropped otherwise.
+
+Two things are rewritten rather than copied. The board's admin password and every per-file deletion password were stored in plain text; they are hashed on the way in, so the old passwords keep working but are no longer readable on disk. Everything else is carried over as-is.
+
+Some old settings have no equivalent and are reported as they are dropped: `deletionPassword` (a board-wide deletion password), `passwordRequired`, and the per-board `maxAmountOfFiles` / `maxUploadSize` / `maxTotalSize`, which are now instance-wide `boardMax*` values. Per-board custom CSS (`csrc/custom.css`) is not carried over either. Old boards also mostly stored `1337` instead of an IP, since they defaulted to not logging them — those posts stay unattributable and can't be banned by poster.
+
+Once the new boards look right, the old `user/` directory can be deleted.
+
+The boards it creates belong to whoever ran it. If that is not the user your web server runs as, the new board will render fine but every upload, deletion and ban on it will fail, because the uploader cannot write its `data/`, `src/` and `thmb/`. Either run the migrator as that user, or hand the boards over afterwards:
+
+```bash
+chown -R www-data:www-data boards/<name>
+```
+
+### Cloudflare
+
+If the uploader sits behind Cloudflare, deleted files can keep being served from the CDN cache until it expires. Setting these keys in `config.php` (or in the admin config page) makes the uploader purge the cache of a file and its thumbnail whenever the file is deleted:
+
+- `cloudflareEnabled` — turn the integration on
+- `cloudflareApiToken` — an API token with the *Zone -> Cache Purge* permission
+- `cloudflareZoneId` — the zone ID of the domain serving the uploads (shown on the domain's overview page)
+- `cloudflareBaseUrl` — public URL of the uploader root without a trailing slash, e.g. `https://files.example.com/up`. Leave empty to detect it from the current request
+
+Purge failures are written to the PHP error log and never block a deletion.
 
 ## Cautions (it is recommended to check these)
 - These variables in php.ini may need to be changed if you want to allow files larger than 2MBs to get uploaded:

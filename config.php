@@ -49,6 +49,34 @@ return $conf = [
     'forceJapaneseForJpUsers' => true,    // force Japanese language for users with Japanese browser settings / 日本語のブラウザ設定を持つユーザーに日本語を強制する
     'allowDisplayingAllEntries' => true,    // allow users to view all entries on one page (can be performance heavy with many files) / すべてのエントリーを1ページで表示することを許可する（ファイル数が多いとパフォーマンスに影響する可能性あり）
 
+    /* Unlisted mode / 非公開モード */
+    'unlisted' => false,    // hide the file list, catalog and search from users; uploaders only get the link to their own file / ファイル一覧・カタログ・検索をユーザーから隠す（投稿者は自分のファイルのURLのみ受け取る）
+
+    /* Temporary hosting / 一時ホスティング */
+    'temporaryHosting' => false,        // delete uploads after a while and store them under a random name instead of a numbered one / アップロードを一定時間後に削除し、連番ではなくランダムなファイル名で保存する
+    'temporaryHostingHours' => 24,      // how many hours an upload is kept for / アップロードを保持する時間（時間単位）
+    'temporaryFileNameLength' => 8,     // length of the random file name (4-32) / ランダムなファイル名の長さ（4〜32）
+    // note: files already uploaded keep the expiry they were given, so turning temporaryHosting
+    // off does not rescue them / 注意: アップロード済みのファイルは付与された期限を保持するため、temporaryHosting を無効にしても削除は止まらない
+
+    /* Action log / 操作ログ */
+    'actionLog' => true,                // record uploads, deletions, bans, logins and mod actions / アップロード・削除・BAN・ログイン・管理操作を記録する
+    'actionLogFile' => 'actions.log',   // name of the action log file, one per board too (found in data/) / 操作ログのファイル名（掲示板ごとに data/ 内に作成される）
+    'actionLogMaxEntries' => 2000,      // how many actions each log keeps before the oldest ones fall off / 各ログが保持する操作の件数（超えると古いものから削除）
+
+    /* User boards / ユーザー掲示板 */
+    'allowUserBoards' => true,          // let visitors create their own boards under boards/ / 訪問者が boards/ 以下に独自の掲示板を作成できるようにする
+    'boardsDir' => 'boards/',           // directory user boards live in, trailing slash required / ユーザー掲示板を置くディレクトリ（末尾スラッシュ必須）
+    'maxUserBoards' => 100,             // maximum number of user boards that can exist / 作成できるユーザー掲示板の最大数
+    'boardMaxAmountOfFiles' => 200,     // maximum number of files stored per user board / 1掲示板あたりに保存できるファイルの最大数
+    'boardMaxTotalSize' => 2048,        // total size limit per user board in megabytes / 1掲示板あたりの合計サイズ上限（MB）
+    'boardMaxUploadSize' => 20,         // maximum upload size per file on a user board (MB) / ユーザー掲示板での1ファイルあたりの最大サイズ（MB）
+
+    'cloudflareEnabled' => false,   // purge the Cloudflare cache when a file is deleted / ファイル削除時にCloudflareのキャッシュを削除する
+    'cloudflareApiToken' => '',     // Cloudflare API token with the "Zone.Cache Purge" permission / 「ゾーン.キャッシュパージ」権限を持つCloudflare APIトークン
+    'cloudflareZoneId' => '',       // zone ID of the domain serving the uploads / アップロードを配信するドメインのゾーンID
+    'cloudflareBaseUrl' => '',      // public URL of the uploader root, no trailing slash (e.g. https://files.example.com/up). Empty = detect from the current request / アップローダのルートURL（末尾スラッシュなし）。空の場合は現在のリクエストから自動判定
+
     'allowedExtensions' =>  [
         'dat','htm','torrent','deb','lzh','ogm','doc','class','js','swift','cc','tga','ape','woff2','cab','whl','mpe',
         'rmvb','srt','pdf','xz','exe','m4a','crx','vob','tif','gz','roq','m4v','gif','rb','3g2','m4a','rvb','sid','ai',
@@ -77,6 +105,7 @@ return $conf = [
         'showFileName' => 'checked',      // show original file name / 元ファイル名を表示
         'showFileSize' => 'checked',      // show file size / ファイルサイズを表示
         'showMimeType' => '',             // show MIME type / MIMEタイプを表示
-        'showDate' => 'checked'           // show upload date / 投稿日時を表示
+        'showDate' => 'checked',          // show upload date / 投稿日時を表示
+        'showBottomPager' => ''           // also show the page links underneath the file list and catalog / ファイル一覧・カタログの下にもページリンクを表示する
     ], // default UI display options stored in cookies / クッキーに保存される表示設定の初期値
 ];

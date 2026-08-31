@@ -7,6 +7,7 @@
 	{{statusMessage}}
 
 	<form method="post" action="{{saveUrl}}">
+		<input type="hidden" name="csrfToken" value="{{csrfToken}}">
 		<table class="configEditorTable">
 			<tbody>
 				{{configRows}}

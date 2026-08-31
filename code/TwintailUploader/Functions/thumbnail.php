@@ -19,6 +19,18 @@ function thumbnailImage(string $imagePath, string $thumbPath, int $w, int $h): v
         return;
     }
 
+    // Reject decompression bombs before decoding: a tiny file can declare huge
+    // dimensions and blow the memory limit inside imagecreatefromstring().
+    $info = @getimagesizefromstring($imageData);
+    if ($info === false) {
+        error_log("Could not read image dimensions: $imagePath");
+        return;
+    }
+    if (($info[0] * $info[1]) > 50000000) {
+        error_log("Image too large to thumbnail ({$info[0]}x{$info[1]}): $imagePath");
+        return;
+    }
+
     $image = imagecreatefromstring($imageData);
     if ($image === false) {
         error_log("Failed to create image from string: $imagePath (invalid image format)");

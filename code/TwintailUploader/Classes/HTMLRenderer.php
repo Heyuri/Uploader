@@ -4,10 +4,18 @@ namespace TwintailUploader\Classes;
 class HTMLRenderer {
 	private $templatesPath;
 	private ?languageManager $lang;
+	private array $globals = [];
 
 	public function __construct(string $templatesPath, ?languageManager $lang = null) {
 		$this->templatesPath = rtrim($templatesPath, '/');
 		$this->lang = $lang;
+	}
+
+	/**
+	 * Register a variable available to every render (like the language strings).
+	 */
+	public function addGlobal(string $key, string $value): void {
+		$this->globals[$key] = $value;
 	}
 
 	/**
@@ -22,19 +30,27 @@ class HTMLRenderer {
 
 		$content = file_get_contents($templatePath);
 
-		// Inject language strings so {{lang.x.y}} placeholders are resolved
+		// Inject language strings (so {{lang.x.y}} resolves) and globals, with
+		// caller variables winning on any key collision.
 		if ($this->lang !== null) {
 			$variables = array_merge($this->lang->getAll(), $variables);
 		}
-		
-		// Replace template variables
-		foreach ($variables as $key => $value) {
-			$placeholder = '{{' . $key . '}}';
-			$content = str_replace($placeholder, (string)$value, $content);
-		}
+		$variables = array_merge($this->globals, $variables);
 
-		// Remove any unreplaced placeholders
-		$content = preg_replace('/{{[^}]+}}/', '', $content);
+		// Build the placeholder map and substitute in a single pass: strtr never
+		// re-scans inserted text, so a user value containing "{{someKey}}" can't
+		// be resolved against another variable.
+		$replacements = [];
+		foreach ($variables as $key => $value) {
+			$replacements['{{' . $key . '}}'] = (string) $value;
+		}
+		$content = strtr($content, $replacements);
+
+		// Remove any unreplaced placeholders. Match only real placeholder-key
+		// shapes (letters, digits, _ . -) so a user value that happens to
+		// contain "{{" can't make this swallow the template text up to the next
+		// "}}" — placeholder keys never contain markup characters.
+		$content = preg_replace('/{{[A-Za-z0-9_.-]+}}/', '', $content);
 
 		return $content;
 	}

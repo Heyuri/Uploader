@@ -7,6 +7,9 @@ use TwintailUploader\Classes\logFile; // Assuming this is the correct class
 use TwintailUploader\Classes\uploadEntry;
 use TwintailUploader\Classes\uploaderHTML; // Assuming this class handles UI output
 use TwintailUploader\Classes\banChecker;
+use TwintailUploader\Classes\temporaryHosting;
+use TwintailUploader\Classes\actionLogEntry;
+use TwintailUploader\Classes\uploadPasswordCookie;
 
 use function TwintailUploader\Functions\generatePasswordHash;
 use function TwintailUploader\Functions\logFileData;
@@ -19,10 +22,13 @@ class uploadedFileService {
 	private $lang;
 	private $allowedExtensions;
 	private $extensionsToBeConvertedToText;
-	private $prefix;
 	private $maxAmountOfFiles;
 	private $deleteOldestOnMaxFiles;
 	private $banChecker;
+	private $temporaryHosting;
+	private $maxUploadSize;
+	private $actionLog;
+	private $conf;
 
 	public function __construct(
 		uploadedFileRepository $uploadedFileRepository,
@@ -31,10 +37,13 @@ class uploadedFileService {
 		uploaderHTML $uploaderHTML,
 		array $allowedExtensions,
 		array $extensionsToBeConvertedToText,
-		string $prefix,
 		int $maxAmountOfFiles,
 		bool $deleteOldestOnMaxFiles,
-		banChecker $banChecker
+		banChecker $banChecker,
+		temporaryHosting $temporaryHosting,
+		int $maxUploadSize,
+		actionLogController $actionLog,
+		array $conf
 	) {
 		$this->uploadedFileRepository = $uploadedFileRepository;
 		$this->uploadEntryRepository = $uploadEntryRepository;
@@ -43,16 +52,21 @@ class uploadedFileService {
 		$this->lang = $this->uploaderHTML->getLang();
 		$this->allowedExtensions = $allowedExtensions;
 		$this->extensionsToBeConvertedToText = $extensionsToBeConvertedToText;
-		$this->prefix = $prefix;
 		$this->maxAmountOfFiles = $maxAmountOfFiles;
 		$this->deleteOldestOnMaxFiles = $deleteOldestOnMaxFiles;
 		$this->banChecker = $banChecker;
+		$this->temporaryHosting = $temporaryHosting;
+		$this->maxUploadSize = $maxUploadSize;
+		$this->actionLog = $actionLog;
+		$this->conf = $conf;
 	}
 
 	/**
 	 * Handles the file upload process
+	 *
+	 * @return uploadEntry|null the stored entry, or null when the upload was rejected
 	 */
-	public function processFiles(): void {
+	public function processFiles(): ?uploadEntry {
 		// Ensure a file is uploaded
 		$file = $this->validateUpload();
 
@@ -74,11 +88,19 @@ class uploadedFileService {
 		// Check if the file is banned by hash
 		if ($this->banChecker->isFileBanned($fileTmpName)) {
 			$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.uploadRejected'), $this->lang->get('errors.fileBanned'));
-			return;
+			return null;
+		}
+
+		// A temporary upload we are already hosting is handed back as-is: same
+		// URL, same expiry, no second copy on disk.
+		$fileHash = $this->temporaryHosting->hashFile($fileTmpName);
+		$duplicate = $this->temporaryHosting->findDuplicate($fileHash, $fileExtension);
+		if ($duplicate !== null) {
+			return $duplicate;
 		}
 
 		// Generate new ID and new file name
-		[$newID, $newFileName] = $this->generateNewIDAndFileName($fileExtension);
+		[$newID, $storedName, $newFileName] = $this->generateNewIDAndFileName($fileExtension);
 
 		// Move the file to the upload directory
 		$this->uploadedFileRepository->moveFile($fileTmpName, $newFileName);
@@ -90,14 +112,18 @@ class uploadedFileService {
 		$comment = $this->appendConversionNoticeIfNeeded($comment, $originalExtension, $fileExtension);
 
 		// Process password
-		$passwordHash = generatePasswordHash($_POST['password'] ?? '');
+		$password = $_POST['password'] ?? '';
+		$passwordHash = generatePasswordHash($password);
+
+		// keep it around so the next upload form can offer it back
+		(new uploadPasswordCookie())->remember($password);
 
 		// Log data
-		$data = logFileData($newID, $fileExtension, $comment, $realMimeType, $passwordHash, $fileName);
+		$data = logFileData($newID, $fileExtension, $comment, $realMimeType, $passwordHash, $fileName, $storedName, $this->temporaryHosting->expiryTimeFor(time()), $fileHash);
 
 		// Check file limit
 		if (!$this->enforceFileLimit()) {
-			return;
+			return null;
 		}
 
 		// Write data to logs
@@ -105,12 +131,23 @@ class uploadedFileService {
 
 		// Generate thumbnail if applicable
 		$this->createFileThumbnails($data);
+
+		$this->actionLog->recordFile(actionLogEntry::UPLOAD, $data, $this->conf);
+
+		return $data;
 	}
 
 	private function validateUpload(): array {
 		if (!isset($_FILES['upfile']) || $_FILES['upfile']['error'] !== UPLOAD_ERR_OK) {
 			throw new \Exception($this->lang->get('errors.noFileUploaded'));
 		}
+
+		// Enforce the size cap at the app level too — php.ini alone isn't the
+		// board's limit, and the chunked path already checks this.
+		if ($this->maxUploadSize > 0 && $_FILES['upfile']['size'] > $this->maxUploadSize * 1024 * 1024) {
+			$this->uploaderHTML->drawErrorPageAndExit($this->lang->get('errors.uploadRejected'), $this->lang->get('upload.fileExceedsMaxSize'));
+		}
+
 		return $_FILES['upfile'];
 	}
 
@@ -142,10 +179,14 @@ class uploadedFileService {
 		return $this->uploadedFileRepository->getFileMimeType($fileTmpName);
 	}
 
+	/**
+	 * @return array [padded ID for the log, stored name, file name on disk]
+	 */
 	private function generateNewIDAndFileName(string $fileExtension): array {
-		$newID = sprintf("%03d", $this->uploadEntryRepository->getNextID());
-		$newFileName = $this->prefix . $newID . "." . $fileExtension;
-		return [$newID, $newFileName];
+		$id = $this->uploadEntryRepository->getNextID();
+		$storedName = $this->temporaryHosting->storedNameFor($id);
+
+		return [sprintf("%03d", $id), $storedName, $storedName . "." . $fileExtension];
 	}
 
 	private function appendConversionNoticeIfNeeded(string $comment, string $originalExtension, string $fileExtension): string {
@@ -183,6 +224,13 @@ class uploadedFileService {
 		if ($oldestFileData) {
 			$this->logFile->removeLastData();
 			$this->uploadedFileRepository->deleteFileByData($oldestFileData);
+
+			// the app rotating a file out, not the visitor who happened to trigger it
+			$this->actionLog->recordSystem(
+				actionLogEntry::DELETE_OLDEST,
+				$oldestFileData->getFileName($this->conf),
+				$oldestFileData->getOriginalFileName()
+			);
 		}
 	}
 }

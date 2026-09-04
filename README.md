@@ -114,9 +114,9 @@ location ~ ^/Uploader/boards/[^/]+/data/ {
 There is already a .htaccess file in data that will prevent accesses to data. The same file is written into every user board's data directory when the board is created.
 
 ### Configuration
-After setting permissions, you shouldn't need to do much else however you should change the admin password. 
+After setting permissions, you shouldn't need to do much else however you should change the admin password.
 
-You can find the admin password in `config.php` under 'adminPassword'. 
+You can find the admin password in `config.php` under 'adminPassword'.
 
 You can configure the instance through a web UI by going to 'Admin room' on `warota.php`, entering the password, then going to 'Config' in the vertical list of admin pages.
 
@@ -181,7 +181,7 @@ Relevant `config.php` keys:
 - `actionLogFile` — file name, `actions.log` by default
 - `actionLogMaxEntries` — how many actions each log keeps; the oldest fall off the front once it is full
 
-### Migrating boards made before 4.3
+### Migrating boards made before 4.4
 
 Older versions kept user boards in `user/boards/<name>/`, each a standalone copy of the uploader with its own `config.php`. `migrateUserBoards.php` converts those into the current layout. It only reads the old boards, so it is safe to run and re-run:
 
@@ -194,7 +194,7 @@ It can only be run from the command line — requesting it over the web returns 
 
 Per board it creates `boards/<name>/` with the usual `src/`, `thmb/` and `data/`, copies the uploads across, renames thumbnails from the old `<prefix><id>_thumb.<ext>` to the current `<prefix><id>s.jpg`, seeds `data/count.log` from the highest ID in the log, turns the old `denylist` and `hardBanList` into the board's own ban list, and registers the board in `data/boards.log`. The old `defaultTheme` is kept as the board's theme when the instance still ships a theme by that name, and dropped otherwise.
 
-Two things are rewritten rather than copied. The board's admin password and every per-file deletion password were stored in plain text; they are hashed on the way in, so the old passwords keep working but are no longer readable on disk. Everything else is carried over as-is.
+Every per-file deletion passwords were stored in plain text; they are hashed on the way in, so the old passwords keep working but are no longer readable on disk. Everything else is carried over as-is.
 
 Some old settings have no equivalent and are reported as they are dropped: `deletionPassword` (a board-wide deletion password), `passwordRequired`, and the per-board `maxAmountOfFiles` / `maxUploadSize` / `maxTotalSize`, which are now instance-wide `boardMax*` values. Per-board custom CSS (`csrc/custom.css`) is not carried over either. Old boards also mostly stored `1337` instead of an IP, since they defaulted to not logging them — those posts stay unattributable and can't be banned by poster.
 

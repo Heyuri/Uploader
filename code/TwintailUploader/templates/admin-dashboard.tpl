@@ -2,7 +2,7 @@
 	<h3>{{lang.admin.title}}</h3>
 	<div class="tenmaWelcome">
 		<div class="tenmaImage">
-			<img src="{{tenmaWelcomeImageUrl}}" width="125" height="150" alt="irashaimasen">
+			<img src="{{tenmaWelcomeImageUrl}}" width="125" height="150" alt="irasshaimase">
 		</div>
 		<i class="tenmaComment">{{lang.admin.welcome}}</i>
 	</div>

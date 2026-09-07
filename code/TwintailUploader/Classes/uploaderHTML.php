@@ -94,15 +94,21 @@ class uploaderHTML {
 
 		$preloadLinks = $themeManager->generatePreloadLinks();
 
+		// config title may carry HTML; a board's is owner text and stays escaped
+		$rawTitle = $this->board === null;
+		$title = $this->conf['boardTitle'];
+		$subTitle = $this->conf['boardSubTitle'];
+
 		$html = $this->renderer->render('header', [
+			'pageTitle' => htmlspecialchars($rawTitle ? strip_tags($title) : $title),
 			'defaultTheme' => htmlspecialchars($defaultTheme),
 			'themeLink' => $themeLink,
 			'customThemeStyle' => $customThemeStyle,
 			'preloadLinks' => $preloadLinks,
 			'availableThemes' => htmlspecialchars($availableThemes),
 			'staticUrl' => $this->conf['staticUrl'],
-			'boardTitle' => htmlspecialchars($this->conf['boardTitle']),
-			'boardSubTitle' => htmlspecialchars($this->conf['boardSubTitle']),
+			'boardTitle' => $rawTitle ? $title : htmlspecialchars($title),
+			'boardSubTitle' => $rawTitle ? $subTitle : htmlspecialchars($subTitle),
 		]);
 
 		echo $html;

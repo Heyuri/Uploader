@@ -29,7 +29,7 @@
 			data-copy-link="{{lang.upload.copyLink}}"
 			data-copied="{{lang.upload.copied}}"
 		>
-		<title>{{boardTitle}}</title>
+		<title>{{pageTitle}}</title>
 	</head>
 	
 	<body>

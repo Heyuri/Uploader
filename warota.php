@@ -123,12 +123,12 @@ try {
 	// chdir() means "src/", "thmb/" and "data/" resolve inside the board directory
 	// while still doubling as URLs relative to boards/<uri>/index.php.
 	if ($boardUri !== null) {
-		if (!preg_match('/^[a-z0-9_-]{1,16}$/', $boardUri)) throw new \Exception("Invalid board.");
+		if (!preg_match('/^[A-Za-z0-9_-]{1,16}$/', $boardUri)) throw new \Exception("Invalid board.");
 
 		$board = (new boardRepository(GLOBAL_DATA_DIR . 'boards.log'))->getByUri($boardUri);
 		if ($board === null) throw new \Exception("This board does not exist.");
 
-		chdir(ROOT_DIR . '/' . $conf['boardsDir'] . $boardUri);
+		chdir(ROOT_DIR . '/' . $conf['boardsDir'] . $board->getUri());
 		define('DATA_DIR', getcwd() . '/data/');
 
 		$conf = $board->applyToConfig($conf);

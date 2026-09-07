@@ -53,11 +53,11 @@ class boardController {
 			$this->fail($this->lang->get('boards.limitReached'));
 		}
 
-		$uri = strtolower(trim($input['uri'] ?? ''));
-		if (!preg_match('/^[a-z0-9_-]{1,16}$/', $uri)) {
+		$uri = trim($input['uri'] ?? '');
+		if (!preg_match('/^[A-Za-z0-9_-]{1,16}$/', $uri)) {
 			$this->fail($this->lang->get('boards.invalidUri'));
 		}
-		if (in_array($uri, self::RESERVED_URIS, true)) {
+		if (in_array(strtolower($uri), self::RESERVED_URIS, true)) {
 			$this->fail($this->lang->get('boards.reservedUri'));
 		}
 		if ($this->boardRepository->uriExists($uri) || is_dir($this->boardDirPath($uri))) {
@@ -281,7 +281,7 @@ class boardController {
 	 * Recursively removes a board directory, after checking it really is one.
 	 */
 	private function deleteBoardDirectory(string $uri): void {
-		if (!preg_match('/^[a-z0-9_-]{1,16}$/', $uri)) {
+		if (!preg_match('/^[A-Za-z0-9_-]{1,16}$/', $uri)) {
 			return;
 		}
 

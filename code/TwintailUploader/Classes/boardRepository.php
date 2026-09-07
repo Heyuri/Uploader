@@ -64,9 +64,10 @@ class boardRepository {
 		return array_values(array_filter($this->getAll(), fn(board $b) => $b->isListed()));
 	}
 
+	/** URIs keep their case but are unique case-insensitively */
 	public function getByUri(string $uri): ?board {
 		foreach ($this->getAll() as $board) {
-			if ($board->getUri() === $uri) {
+			if (strcasecmp($board->getUri(), $uri) === 0) {
 				return $board;
 			}
 		}
@@ -97,7 +98,7 @@ class boardRepository {
 
 			// a concurrent creation may have already taken this URI
 			foreach ($boards as $stored) {
-				if ($stored->getUri() === $board->getUri()) {
+				if (strcasecmp($stored->getUri(), $board->getUri()) === 0) {
 					return false;
 				}
 			}

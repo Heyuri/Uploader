@@ -111,11 +111,11 @@ function findOldBoards(string $sourceDir): array {
 function migrateBoard(string $uri, string $oldConfigFile, array $conf, string $boardsRoot, boardRepository $boardRepository, bool $dryRun): array {
 	$messages = [];
 
-	if (!preg_match('/^[a-z0-9_-]{1,16}$/', $uri)) {
+	if (!preg_match('/^[A-Za-z0-9_-]{1,16}$/', $uri)) {
 		return ['migrated' => false, 'messages' => ['SKIPPED: the directory name is not a usable board URL (letters, numbers, dashes and underscores, up to 16 characters).']];
 	}
 
-	if (in_array($uri, RESERVED_URIS, true)) {
+	if (in_array(strtolower($uri), RESERVED_URIS, true)) {
 		return ['migrated' => false, 'messages' => ['SKIPPED: that board URL is reserved. Rename the directory and run again.']];
 	}
 

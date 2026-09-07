@@ -52,7 +52,7 @@ if ($target === '--all') {
 
 $board = null;
 if ($target !== null) {
-	if (!preg_match('/^[a-z0-9_-]{1,16}$/', $target)) {
+	if (!preg_match('/^[A-Za-z0-9_-]{1,16}$/', $target)) {
 		exit("Invalid board.\n");
 	}
 

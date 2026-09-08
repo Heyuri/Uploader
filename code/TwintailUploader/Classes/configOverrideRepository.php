@@ -2,16 +2,18 @@
 namespace TwintailUploader\Classes;
 
 /**
- * Admin-set values every user board inherits, stored in data/boardDefaults.log.
+ * Admin-set overrides of the config a user board inherits, one "key<>value"
+ * line per override.
  *
- * One "key<>value" line per override. A key that is absent falls back to
- * config.php, so the file is a layer between the global config and
- * board::applyToConfig(). Only KEYS may be stored — anything else on disk is
- * ignored — and a value is coerced to the type config.php gives the key both
- * when saved and when read, so a hand-edited file is no more trusted than a
- * form post.
+ * Two files use this format and stack: data/boardDefaults.log holds the
+ * defaults every board gets, boards/<uri>/data/boardConfig.log holds one
+ * board's own. A key absent from both falls back to config.php, so together
+ * they are the layer between the global config and board::applyToConfig().
+ * Only KEYS may be stored — anything else on disk is ignored — and a value is
+ * coerced to the type config.php gives the key both when saved and when read,
+ * so a hand-edited file is no more trusted than a form post.
  */
-class boardDefaultsRepository {
+class configOverrideRepository {
 	/** Keys boards inherit that an admin may override for all of them at once */
 	public const KEYS = [
 		'boardMaxAmountOfFiles',
@@ -32,6 +34,26 @@ class boardDefaultsRepository {
 	];
 
 	public function __construct(private string $file) {}
+
+	/** The defaults every board inherits */
+	public static function instanceDefaults(): self {
+		return new self(\GLOBAL_DATA_DIR . 'boardDefaults.log');
+	}
+
+	/** One board's own overrides, kept in its directory so they die with it */
+	public static function forBoard(board $board, array $rootConf): self {
+		return new self(\ROOT_DIR . '/' . $board->getDir($rootConf) . 'data/boardConfig.log');
+	}
+
+	/**
+	 * The global config with both layers applied, ready for
+	 * board::applyToConfig(). Every entry point serving a board goes through
+	 * this so the layers can't drift apart.
+	 */
+	public static function applyLayers(array $rootConf, board $board): array {
+		$conf = self::instanceDefaults()->apply($rootConf);
+		return self::forBoard($board, $rootConf)->apply($conf);
+	}
 
 	/**
 	 * @return array<string,string> stored overrides, whitelisted keys only

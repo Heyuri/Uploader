@@ -9,6 +9,7 @@
 			<li><a href="{{manageBansUrl}}">{{lang.admin.bans}}</a></li>
 			<li><a href="{{actionLogUrl}}">{{lang.actionLog.title}}</a></li>
 			<li><a href="{{settingsUrl}}">{{lang.boards.boardSettings}}</a></li>
+			{{configLink}}
 		</ul>
 	</div>
 	<div class="otherLinks">

@@ -422,36 +422,23 @@ class requestHandler {
 			$this->uploaderHTML->drawFooter();
 		}
 		else if($modPage === 'boardDefaults') {
-			$boardDefaults = new boardDefaultsRepository(\GLOBAL_DATA_DIR . 'boardDefaults.log');
+			$overrides = configOverrideRepository::instanceDefaults();
+			$pageUrl = $this->conf['mainScript'] . '?request=admin&modPage=boardDefaults';
 
 			if ($modAction === 'saveBoardDefaults') {
-				$this->requireCsrf();
-
-				$newValues = $_POST['defaults'] ?? [];
-				if (!is_array($newValues)) {
-					$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.configError'), $this->languageManager->get('errors.invalidFormData'));
-				}
-
-				// the theme name reaches the markup, so only an installed one is kept
-				$themeManager = new themeManager($this->conf['staticPath'] . 'css/themes', $this->conf['staticUrl'] . 'css/themes');
-				if (!in_array($newValues['defaultTheme'] ?? '', $themeManager->getThemeNames(), true)) {
-					unset($newValues['defaultTheme']);
-				}
-
-				$before = $boardDefaults->getAll();
-				$after = $boardDefaults->save($newValues, $this->conf);
-
-				$changedKeys = array_keys(array_diff_assoc($after, $before) + array_diff_assoc($before, $after));
-				if (!empty($changedKeys)) {
-					$this->actionLog->record(actionLogEntry::BOARD_DEFAULTS_SAVED, '', implode(', ', $changedKeys));
-				}
-
-				redirect($this->conf['mainScript'] . '?request=admin&modPage=boardDefaults');
+				$this->saveConfigOverrides($overrides, $this->conf, actionLogEntry::BOARD_DEFAULTS_SAVED, '');
+				redirect($pageUrl);
 				return;
 			}
 
 			$this->uploaderHTML->drawHeader();
-			$this->uploaderHTML->drawBoardDefaultsEditor($boardDefaults->getAll());
+			$this->uploaderHTML->drawConfigOverrideEditor(
+				$overrides->getAll(),
+				$this->conf,
+				$this->languageManager->get('admin.boardDefaults'),
+				$this->languageManager->get('admin.boardDefaultsDescription'),
+				$pageUrl . '&modAction=saveBoardDefaults'
+			);
 			$this->uploaderHTML->drawFooter();
 		}
 		else if($modPage === 'config') {
@@ -543,6 +530,36 @@ class requestHandler {
 		}
 		else if ($modPage === 'actionLog') {
 			$this->drawActionLogPage($hideIPs);
+		}
+		else if ($modPage === 'config') {
+			// the whole inherited config of this one board — the global admin's
+			// counterpart to the owner's settings page, never the owner's
+			if (!$isGlobalAdmin) {
+				$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.notAuthorized'), $this->languageManager->get('errors.contactAdmin'));
+			}
+
+			$overrides = configOverrideRepository::forBoard($this->board, $this->conf);
+			$pageUrl = $this->conf['mainScript'] . '?request=admin&modPage=config';
+
+			// what the board would get with no overrides of its own: config.php
+			// under the instance defaults, not this board's already-layered $conf
+			$fallbackConf = configOverrideRepository::instanceDefaults()->apply(require \ROOT_DIR . '/config.php');
+
+			if ($modAction === 'saveConfig') {
+				$this->saveConfigOverrides($overrides, $fallbackConf, actionLogEntry::BOARD_CONFIG_SAVED, $this->board->getUri());
+				redirect($pageUrl);
+				return;
+			}
+
+			$this->uploaderHTML->drawHeader();
+			$this->uploaderHTML->drawConfigOverrideEditor(
+				$overrides->getAll(),
+				$fallbackConf,
+				$this->languageManager->get('boards.boardConfig'),
+				$this->languageManager->get('boards.boardConfigDescription'),
+				$pageUrl . '&modAction=saveConfig'
+			);
+			$this->uploaderHTML->drawFooter();
 		}
 		else if ($modPage === 'settings') {
 			if ($modAction === 'saveSettings') {
@@ -859,6 +876,33 @@ class requestHandler {
 
 		redirect($this->conf['mainScript'] . '?request=admin&modPage=manageBoards');
 		return true;
+	}
+
+	/**
+	 * Stores a posted set of config overrides and records which keys changed.
+	 * $typeConf supplies the type of each key; the theme name is checked
+	 * against the installed themes because it reaches the markup.
+	 */
+	private function saveConfigOverrides(configOverrideRepository $overrides, array $typeConf, string $action, string $target): void {
+		$this->requireCsrf();
+
+		$newValues = $_POST['overrides'] ?? [];
+		if (!is_array($newValues)) {
+			$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.configError'), $this->languageManager->get('errors.invalidFormData'));
+		}
+
+		$themeManager = new themeManager($this->conf['staticPath'] . 'css/themes', $this->conf['staticUrl'] . 'css/themes');
+		if (!in_array($newValues['defaultTheme'] ?? '', $themeManager->getThemeNames(), true)) {
+			unset($newValues['defaultTheme']);
+		}
+
+		$before = $overrides->getAll();
+		$after = $overrides->save($newValues, $typeConf);
+
+		$changedKeys = array_keys(array_diff_assoc($after, $before) + array_diff_assoc($before, $after));
+		if (!empty($changedKeys)) {
+			$this->actionLog->record($action, $target, implode(', ', $changedKeys));
+		}
 	}
 
 	/**

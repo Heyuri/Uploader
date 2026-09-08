@@ -1,6 +1,6 @@
 <div class="manageFilesPage centerItem">
-	<h3>{{lang.admin.boardDefaults}}</h3>
-	<p>{{lang.admin.boardDefaultsDescription}}</p>
+	<h3>{{heading}}</h3>
+	<p>{{description}}</p>
 	<a href="{{backUrl}}">{{lang.admin.backToDashboard}}</a>
 	<hr>
 
@@ -8,7 +8,7 @@
 		<input type="hidden" name="csrfToken" value="{{csrfToken}}">
 		<table class="configEditorTable">
 			<tbody>
-				{{defaultRows}}
+				{{overrideRows}}
 			</tbody>
 		</table>
 		<br>

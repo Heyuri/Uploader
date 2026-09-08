@@ -25,7 +25,7 @@ require __DIR__ . '/code/TwintailUploader/include.php';
 require __DIR__ . '/autoloader.php';
 
 use TwintailUploader\Classes\actionLogRepository;
-use TwintailUploader\Classes\boardDefaultsRepository;
+use TwintailUploader\Classes\configOverrideRepository;
 use TwintailUploader\Classes\boardRepository;
 use TwintailUploader\Classes\cloudflareAPI;
 use TwintailUploader\Classes\logFile;
@@ -69,8 +69,7 @@ if ($board !== null) {
 	chdir(ROOT_DIR . '/' . $conf['boardsDir'] . $board->getUri());
 	define('DATA_DIR', getcwd() . '/data/');
 
-	$conf = (new boardDefaultsRepository(GLOBAL_DATA_DIR . 'boardDefaults.log'))->apply($conf);
-	$conf = $board->applyToConfig($conf);
+	$conf = $board->applyToConfig(configOverrideRepository::applyLayers($conf, $board));
 	$label = rtrim($conf['boardsDir'], '/') . '/' . $board->getUri();
 } else {
 	chdir(ROOT_DIR);

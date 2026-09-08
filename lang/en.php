@@ -234,6 +234,7 @@ return [
 			'boardSettings' => 'Board settings changed',
 			'configSaved' => 'Config saved',
 			'boardDefaultsSaved' => 'Board defaults saved',
+			'boardConfigSaved' => 'Board config saved',
 		],
 	],
 	'boards' => [
@@ -294,6 +295,8 @@ return [
 		'confirmDelete' => 'Delete this board and every file on it?',
 		'modRoom' => 'Board mod room',
 		'boardSettings' => 'Board settings',
+		'boardConfig' => 'Board config',
+		'boardConfigDescription' => 'Everything this board inherits, for the global admin only. Leave a field empty, or pick Inherit, to use the board default shown beside it.',
 		'settingsDescription' => 'Settings for this board only.',
 		'ownerLogin' => 'Board owner login',
 		'ownerLoginHint' => 'Enter this board\'s owner password. The instance administrator password works too.',

@@ -1288,13 +1288,15 @@ class uploaderHTML {
 	}
 
 	/**
-	 * The admin's overrides for every user board, one row per whitelisted key.
-	 * An empty field (or "Inherit") means the value config.php gives, which is
-	 * shown beside it.
+	 * One row per key in configOverrideRepository::KEYS. An empty field (or
+	 * "Inherit") means the value the layer below gives, which is shown beside
+	 * it. Serves both the instance-wide board defaults and one board's own
+	 * config.
 	 *
-	 * @param array<string,string> $stored what boardDefaultsRepository holds
+	 * @param array<string,string> $stored       what the repository holds
+	 * @param array                $fallbackConf the config the layer below resolves to
 	 */
-	public function drawBoardDefaultsEditor(array $stored): void {
+	public function drawConfigOverrideEditor(array $stored, array $fallbackConf, string $heading, string $description, string $saveUrl): void {
 		$self = htmlspecialchars($this->conf['mainScript']);
 		$themeNames = (new themeManager($this->conf['staticPath'] . 'css/themes', $this->conf['staticUrl'] . 'css/themes'))->getThemeNames();
 
@@ -1303,15 +1305,15 @@ class uploaderHTML {
 		$off = $this->lang->get('admin.disabled');
 
 		$rows = '';
-		foreach (boardDefaultsRepository::KEYS as $key) {
-			if (!array_key_exists($key, $this->conf) || is_array($this->conf[$key])) {
+		foreach (configOverrideRepository::KEYS as $key) {
+			if (!array_key_exists($key, $fallbackConf) || is_array($fallbackConf[$key])) {
 				continue;
 			}
 
-			$fallback = $this->conf[$key];
+			$fallback = $fallbackConf[$key];
 			$value = $stored[$key] ?? '';
-			$id = 'defaults_' . htmlspecialchars($key);
-			$name = 'defaults[' . htmlspecialchars($key) . ']';
+			$id = 'overrides_' . htmlspecialchars($key);
+			$name = 'overrides[' . htmlspecialchars($key) . ']';
 
 			if (is_bool($fallback)) {
 				$fallbackText = $fallback ? $on : $off;
@@ -1343,10 +1345,12 @@ class uploaderHTML {
 				. '</tr>';
 		}
 
-		echo $this->renderer->render('admin-board-defaults', [
+		echo $this->renderer->render('admin-config-overrides', [
+			'heading' => htmlspecialchars($heading),
+			'description' => htmlspecialchars($description),
 			'backUrl' => $self . '?request=admin',
-			'saveUrl' => $self . '?request=admin&modPage=boardDefaults&modAction=saveBoardDefaults',
-			'defaultRows' => $rows,
+			'saveUrl' => htmlspecialchars($saveUrl),
+			'overrideRows' => $rows,
 		]);
 	}
 
@@ -1551,6 +1555,9 @@ class uploaderHTML {
 			'manageBansUrl' => $self . '?request=admin&modPage=manageBans',
 			'actionLogUrl' => $self . '?request=admin&modPage=actionLog',
 			'settingsUrl' => $self . '?request=admin&modPage=settings',
+			'configLink' => $isGlobalAdmin
+				? '<li><a href="' . $self . '?request=admin&modPage=config">' . $this->lang->get('boards.boardConfig') . '</a></li>'
+				: '',
 			'logoutUrl' => $self . '?request=logout',
 			'backUrl' => $self,
 		]);
@@ -1696,7 +1703,8 @@ class uploaderHTML {
 			$boardRows .= '[<a href="' . $modUrl . 'toggleListed&boardUri=' . $uri . $csrf . '">' . $this->lang->get('boards.toggleListed') . '</a>] ';
 			$boardRows .= '[<a href="' . $modUrl . 'toggleLock&boardUri=' . $uri . $csrf . '">' . $lockLabel . '</a>] ';
 			$boardRows .= '[<a href="' . $url . '?request=admin&modPage=manageFiles">' . $this->lang->get('boards.moderate') . '</a>] ';
-			$boardRows .= '[<a href="' . $url . '?request=admin&modPage=settings">' . $this->lang->get('boards.boardSettings') . '</a>]';
+			$boardRows .= '[<a href="' . $url . '?request=admin&modPage=settings">' . $this->lang->get('boards.boardSettings') . '</a>] ';
+			$boardRows .= '[<a href="' . $url . '?request=admin&modPage=config">' . $this->lang->get('boards.boardConfig') . '</a>]';
 			$boardRows .= '</td>';
 
 			$boardRows .= '<td><form method="post" action="' . $modUrl . 'resetPassword">';

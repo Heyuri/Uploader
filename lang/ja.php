@@ -234,6 +234,7 @@ return [
             'boardSettings' => '掲示板設定の変更',
             'configSaved' => '設定の保存',
             'boardDefaultsSaved' => '掲示板の既定値の保存',
+            'boardConfigSaved' => '掲示板の設定値の保存',
         ],
     ],
     'boards' => [
@@ -294,6 +295,8 @@ return [
         'confirmDelete' => 'この掲示板とすべてのファイルを削除しますか？',
         'modRoom' => '掲示板の管理室',
         'boardSettings' => '掲示板の設定',
+        'boardConfig' => '掲示板の設定値',
+        'boardConfigDescription' => 'この掲示板が引き継ぐすべての値（管理者専用）。空欄または「引き継ぐ」を選ぶと、横に表示された掲示板の既定値が使われます。',
         'settingsDescription' => 'この掲示板だけの設定です。',
         'ownerLogin' => '掲示板管理者ログイン',
         'ownerLoginHint' => 'この掲示板の管理パスワードを入力してください。インスタンスの管理者パスワードでも入れます。',

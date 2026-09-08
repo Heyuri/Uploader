@@ -735,14 +735,17 @@ class uploaderHTML {
 
 		// the catalog and the search only browse the listing, so they go with it
 		$browseLinks = $this->isUnlisted() ? '' :
-			'<a href="' . $self . '?request=catalog">' . $this->lang->get('nav.catalog') . '</a> |' .
+			'<a href="' . $self . '?request=catalog">' . $this->lang->get('nav.catalog') . '</a> | ' .
 			'<a href="' . $self . '?request=search">' . $this->lang->get('nav.search') . '</a> |';
+
+		$boardsLink = empty($this->conf['allowUserBoards']) ? '' :
+			'<a href="' . $boardsUrl . '">' . $this->lang->get('nav.boards') . '</a> |';
 
 		$html = $this->renderer->render('action-links', [
 			'settingsUrl' => $self . '?request=settingsForm',
 			'indexUrl' => $self,
 			'browseLinks' => $browseLinks,
-			'boardsUrl' => $boardsUrl,
+			'boardsLink' => $boardsLink,
 			'adminUrl' => $self . '?request=login',
 			'trailingSeparator' => $trailingSeparator ? '<hr class="lineSeparator">' : '',
 		]);
@@ -1170,6 +1173,7 @@ class uploaderHTML {
 			'actionLogUrl' => $self . '?request=admin&modPage=actionLog',
 			'manageBansUrl' => $self . '?request=admin&modPage=manageBans',
 			'manageBoardsUrl' => $self . '?request=admin&modPage=manageBoards',
+			'boardDefaultsUrl' => $self . '?request=admin&modPage=boardDefaults',
 			'configUrl' => $self . '?request=admin&modPage=config',
 			'logoutUrl' => $self . '?request=logout',
 			'tenmaWelcomeImageUrl' => $this->conf['staticUrl'] . 'images/tenma.jpg',
@@ -1281,6 +1285,69 @@ class uploaderHTML {
 		]);
 
 		echo $html;
+	}
+
+	/**
+	 * The admin's overrides for every user board, one row per whitelisted key.
+	 * An empty field (or "Inherit") means the value config.php gives, which is
+	 * shown beside it.
+	 *
+	 * @param array<string,string> $stored what boardDefaultsRepository holds
+	 */
+	public function drawBoardDefaultsEditor(array $stored): void {
+		$self = htmlspecialchars($this->conf['mainScript']);
+		$themeNames = (new themeManager($this->conf['staticPath'] . 'css/themes', $this->conf['staticUrl'] . 'css/themes'))->getThemeNames();
+
+		$inherit = $this->lang->get('admin.inherit');
+		$on = $this->lang->get('admin.enabled');
+		$off = $this->lang->get('admin.disabled');
+
+		$rows = '';
+		foreach (boardDefaultsRepository::KEYS as $key) {
+			if (!array_key_exists($key, $this->conf) || is_array($this->conf[$key])) {
+				continue;
+			}
+
+			$fallback = $this->conf[$key];
+			$value = $stored[$key] ?? '';
+			$id = 'defaults_' . htmlspecialchars($key);
+			$name = 'defaults[' . htmlspecialchars($key) . ']';
+
+			if (is_bool($fallback)) {
+				$fallbackText = $fallback ? $on : $off;
+				$input = '<select id="' . $id . '" name="' . $name . '">'
+					. '<option value="">' . $inherit . '</option>'
+					. '<option value="1"' . ($value === '1' ? ' selected' : '') . '>' . $on . '</option>'
+					. '<option value="0"' . ($value === '0' ? ' selected' : '') . '>' . $off . '</option>'
+					. '</select>';
+			} elseif ($key === 'defaultTheme') {
+				$fallbackText = (string) $fallback;
+				$input = '<select id="' . $id . '" name="' . $name . '"><option value="">' . $inherit . '</option>';
+				foreach ($themeNames as $themeName) {
+					$escapedTheme = htmlspecialchars($themeName);
+					$input .= '<option value="' . $escapedTheme . '"' . ($value === $themeName ? ' selected' : '') . '>' . $escapedTheme . '</option>';
+				}
+				$input .= '</select>';
+			} elseif (is_int($fallback)) {
+				$fallbackText = (string) $fallback;
+				$input = '<input type="number" id="' . $id . '" name="' . $name . '" value="' . htmlspecialchars($value) . '" placeholder="' . htmlspecialchars($fallbackText) . '">';
+			} else {
+				$fallbackText = (string) $fallback;
+				$input = '<input type="text" id="' . $id . '" name="' . $name . '" value="' . htmlspecialchars($value) . '" placeholder="' . htmlspecialchars($fallbackText) . '" size="40">';
+			}
+
+			$rows .= '<tr>'
+				. '<td class="postblock"><label for="' . $id . '">' . htmlspecialchars($key) . '</label></td>'
+				. '<td>' . $input . '</td>'
+				. '<td><span class="grayText">' . htmlspecialchars($this->lang->get('admin.fallbackValue', $fallbackText)) . '</span></td>'
+				. '</tr>';
+		}
+
+		echo $this->renderer->render('admin-board-defaults', [
+			'backUrl' => $self . '?request=admin',
+			'saveUrl' => $self . '?request=admin&modPage=boardDefaults&modAction=saveBoardDefaults',
+			'defaultRows' => $rows,
+		]);
 	}
 
 	public function drawSearchForm(string $url, array $parameters): void {
@@ -1408,7 +1475,7 @@ class uploaderHTML {
 			$boardRows = '<tr><td colspan="4"><i>' . $this->lang->get('boards.noBoards') . '</i></td></tr>';
 		}
 
-		$createLink = !empty($this->conf['allowUserBoards'])
+		$createLink = !empty($this->conf['allowBoardCreation'])
 			? '[<a href="' . $self . '?request=createBoard">' . $this->lang->get('boards.createBoard') . '</a>]'
 			: '<i>' . $this->lang->get('boards.creationDisabled') . '</i>';
 

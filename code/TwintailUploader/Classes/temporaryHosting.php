@@ -88,7 +88,7 @@ class temporaryHosting {
 	 */
 	public function storedNameFor(int $id): string {
 		if (!$this->isEnabled()) {
-			return $this->conf['prefix'] . sprintf('%03d', $id);
+			return uploadEntry::prefixedName($this->conf, $id);
 		}
 
 		for ($attempt = 0; $attempt < 10; $attempt++) {

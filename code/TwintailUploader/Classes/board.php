@@ -44,7 +44,10 @@ class board {
 	public function isLocked(): bool { return $this->locked === '1'; }
 	public function isCommentRequired(): bool { return $this->commentRequired === '1'; }
 	public function getDefaultComment(): string { return $this->defaultComment; }
-	public function getPrefix(): string { return $this->prefix; }
+	/** The prefix names files on disk, so a stored value is revalidated like a form one */
+	public function getPrefix(): string {
+		return preg_match('/^[A-Za-z0-9_-]{1,10}$/', $this->prefix) ? $this->prefix : 'up';
+	}
 	public function getTheme(): string { return $this->theme; }
 	public function getCustomTheme(): string { return $this->customTheme; }
 
@@ -135,7 +138,7 @@ class board {
 		$conf['home'] = $conf['rootScript'] . '?request=boards';
 		$conf['uploadDir'] = 'src/';
 		$conf['thumbDir'] = 'thmb/';
-		$conf['prefix'] = $this->prefix;
+		$conf['prefix'] = $this->getPrefix();
 		$conf['defaultComment'] = $this->defaultComment;
 		$conf['commentRequired'] = $this->isCommentRequired();
 		$conf['maxAmountOfFiles'] = $conf['boardMaxAmountOfFiles'];
@@ -179,7 +182,7 @@ class board {
 
 		$conf['boardTitle'] = $this->title;
 		$conf['boardSubTitle'] = $this->subTitle;
-		$conf['prefix'] = $this->prefix;
+		$conf['prefix'] = $this->getPrefix();
 		$conf['uploadDir'] = $boardDir . $conf['uploadDir'];
 		$conf['thumbDir'] = $boardDir . $conf['thumbDir'];
 

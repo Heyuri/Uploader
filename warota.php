@@ -91,6 +91,7 @@ ini_set('error_log', GLOBAL_DATA_DIR . 'error.log');
 require __DIR__.'/code/TwintailUploader/include.php';
 require __DIR__.'/autoloader.php';
 
+use TwintailUploader\Classes\boardDefaultsRepository;
 use TwintailUploader\Classes\boardRepository;
 use TwintailUploader\Classes\languageManager;
 use TwintailUploader\Classes\requestHandler;
@@ -118,6 +119,7 @@ try {
 	$conf['actionLog'] = $conf['actionLog'] ?? true;
 	$conf['actionLogFile'] = $conf['actionLogFile'] ?? 'actions.log';
 	$conf['actionLogMaxEntries'] = (int) ($conf['actionLogMaxEntries'] ?? 2000);
+	$conf['allowBoardCreation'] = $conf['allowBoardCreation'] ?? true;
 
 	// Resolve the board being served, if any, and scope every relative path to it.
 	// chdir() means "src/", "thmb/" and "data/" resolve inside the board directory
@@ -131,6 +133,7 @@ try {
 		chdir(ROOT_DIR . '/' . $conf['boardsDir'] . $board->getUri());
 		define('DATA_DIR', getcwd() . '/data/');
 
+		$conf = (new boardDefaultsRepository(GLOBAL_DATA_DIR . 'boardDefaults.log'))->apply($conf);
 		$conf = $board->applyToConfig($conf);
 	} else {
 		chdir(ROOT_DIR);

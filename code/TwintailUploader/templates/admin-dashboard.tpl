@@ -14,6 +14,7 @@
 			<li><a href="{{actionLogUrl}}">{{lang.actionLog.title}}</a></li>
 			<li><a href="{{manageBansUrl}}">{{lang.admin.bans}}</a></li>
 			<li><a href="{{manageBoardsUrl}}">{{lang.boards.manageBoards}}</a></li>
+			<li><a href="{{boardDefaultsUrl}}">{{lang.admin.boardDefaults}}</a></li>
 			<li><a href="{{configUrl}}">{{lang.admin.config}}</a></li>
 		</ul>
 	</div>

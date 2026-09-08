@@ -24,8 +24,9 @@ class recentFilesRepository {
 		if ($this->sources === null) {
 			$this->sources = [fileSource::main($this->conf)];
 
+			$boardConf = (new boardDefaultsRepository(\GLOBAL_DATA_DIR . 'boardDefaults.log'))->apply($this->conf);
 			foreach ($this->boardRepository->getAll() as $board) {
-				$this->sources[] = fileSource::forBoard($this->conf, $board);
+				$this->sources[] = fileSource::forBoard($boardConf, $board);
 			}
 		}
 

@@ -184,6 +184,12 @@ return [
         'recentFilesDescription' => 'このアップローダーとすべてのユーザー掲示板の最新の投稿。',
         'bansAreInstanceWide' => '削除は投稿された掲示板に対して行われます。ここでのBANはインスタンス全体に適用されます。',
         'noFiles' => 'まだファイルがありません。',
+        'boardDefaults' => '掲示板の既定値',
+        'boardDefaultsDescription' => 'すべてのユーザー掲示板が引き継ぐ値。空欄または「引き継ぐ」を選ぶと、横に表示された config.php の値が使われます。',
+        'inherit' => '引き継ぐ',
+        'enabled' => 'オン',
+        'disabled' => 'オフ',
+        'fallbackValue' => 'config.php: %s',
     ],
     'actionLog' => [
         'title' => '操作ログ',
@@ -227,6 +233,7 @@ return [
             'boardPasswordReset' => '掲示板主パスワードのリセット',
             'boardSettings' => '掲示板設定の変更',
             'configSaved' => '設定の保存',
+            'boardDefaultsSaved' => '掲示板の既定値の保存',
         ],
     ],
     'boards' => [
@@ -247,6 +254,7 @@ return [
         'createdPasswordWarning' => '管理パスワードは必ず控えておいてください。掲示板の管理ツールに入る唯一の手段で、再発行はできません。',
         'visitBoard' => '掲示板へ行く',
         'creationDisabled' => '掲示板の作成は現在無効になっています。',
+        'boardsDisabled' => 'このアップローダーではユーザー掲示板は無効になっています。',
         'creationError' => '掲示板を作成できませんでした',
         'limitsNote' => '各掲示板の上限は %s ファイル、1ファイルあたり %s 、合計 %s です。',
         'ownerPassword' => '管理パスワード',

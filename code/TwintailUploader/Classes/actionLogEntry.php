@@ -37,6 +37,7 @@ class actionLogEntry {
 	public const BOARD_PASSWORD_RESET = 'boardPasswordReset';
 	public const BOARD_SETTINGS = 'boardSettings';
 	public const CONFIG_SAVED = 'configSaved';
+	public const BOARD_DEFAULTS_SAVED = 'boardDefaultsSaved';
 
 	/** Every action key, in the order the filter on the log page offers them */
 	public const ACTIONS = [
@@ -61,6 +62,7 @@ class actionLogEntry {
 		self::BOARD_PASSWORD_RESET,
 		self::BOARD_SETTINGS,
 		self::CONFIG_SAVED,
+		self::BOARD_DEFAULTS_SAVED,
 	];
 
 	private string $time = '0';

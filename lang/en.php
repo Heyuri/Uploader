@@ -184,6 +184,12 @@ return [
 		'recentFilesDescription' => 'The newest uploads from this uploader and every user board.',
 		'bansAreInstanceWide' => 'Deletions apply to the board the file was posted on. Bans made here apply to the whole instance.',
 		'noFiles' => 'No files yet.',
+		'boardDefaults' => 'Board defaults',
+		'boardDefaultsDescription' => 'Values every user board inherits. Leave a field empty, or pick Inherit, to use the value from config.php shown beside it.',
+		'inherit' => 'Inherit',
+		'enabled' => 'On',
+		'disabled' => 'Off',
+		'fallbackValue' => 'config.php: %s',
 	],
 	'actionLog' => [
 		'title' => 'Action log',
@@ -227,6 +233,7 @@ return [
 			'boardPasswordReset' => 'Owner password reset',
 			'boardSettings' => 'Board settings changed',
 			'configSaved' => 'Config saved',
+			'boardDefaultsSaved' => 'Board defaults saved',
 		],
 	],
 	'boards' => [
@@ -247,6 +254,7 @@ return [
 		'createdPasswordWarning' => 'Write your owner password down. It is the only way into your board\'s mod tools and it cannot be recovered.',
 		'visitBoard' => 'Go to your board',
 		'creationDisabled' => 'Board creation is currently disabled.',
+		'boardsDisabled' => 'User boards are disabled on this uploader.',
 		'creationError' => 'Could not create board',
 		'limitsNote' => 'Each board holds up to %s files, %s per file, %s in total.',
 		'ownerPassword' => 'Owner password',

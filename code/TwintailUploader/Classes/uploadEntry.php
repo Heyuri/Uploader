@@ -106,7 +106,16 @@ class uploadEntry {
 		// path traversal impossible even if a malformed log line ever carries a
 		// "../" here.
 		$storedName = preg_replace('/[^A-Za-z0-9_-]/', '', $this->getStoredName());
-		return $storedName !== '' ? $storedName : $conf['prefix'] . sprintf("%03d", $this->id);
+		return $storedName !== '' ? $storedName : self::prefixedName($conf, $this->id);
+	}
+
+	/**
+	 * "<prefix><3-digit id>", with the prefix held to the same safe charset:
+	 * it comes from config or the board registry, and a dot or slash in it
+	 * would reach the filesystem otherwise.
+	 */
+	public static function prefixedName(array $conf, int $id): string {
+		return preg_replace('/[^A-Za-z0-9_-]/', '', (string) $conf['prefix']) . sprintf('%03d', $id);
 	}
 
 	/**

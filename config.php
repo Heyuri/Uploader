@@ -65,7 +65,8 @@ return $conf = [
     'actionLogMaxEntries' => 2000,      // how many actions each log keeps before the oldest ones fall off / 各ログが保持する操作の件数（超えると古いものから削除）
 
     /* User boards / ユーザー掲示板 */
-    'allowUserBoards' => true,          // let visitors create their own boards under boards/ / 訪問者が boards/ 以下に独自の掲示板を作成できるようにする
+    'allowUserBoards' => true,          // enable user boards under boards/ (listing, creation, nav link) / boards/ 以下のユーザー掲示板機能を有効にする（一覧・作成・ナビリンク）
+    'allowBoardCreation' => true,       // let visitors create new boards; off keeps existing boards but stops new ones / 訪問者による掲示板の新規作成を許可する（無効にしても既存の掲示板は残る）
     'boardsDir' => 'boards/',           // directory user boards live in, trailing slash required / ユーザー掲示板を置くディレクトリ（末尾スラッシュ必須）
     'maxUserBoards' => 100,             // maximum number of user boards that can exist / 作成できるユーザー掲示板の最大数
     'boardMaxAmountOfFiles' => 200,     // maximum number of files stored per user board / 1掲示板あたりに保存できるファイルの最大数

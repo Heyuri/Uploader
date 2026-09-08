@@ -245,6 +245,7 @@ class requestHandler {
 
 			case self::REQUEST_BOARDS:
 				$this->requireGlobalContext($pageRequest);
+				$this->requireUserBoards();
 
 				$this->uploaderHTML->drawHeader();
 				$this->uploaderHTML->drawActionLinks();
@@ -254,8 +255,9 @@ class requestHandler {
 
 			case self::REQUEST_CREATE_BOARD:
 				$this->requireGlobalContext($pageRequest);
+				$this->requireUserBoards();
 
-				if (empty($this->conf['allowUserBoards'])) {
+				if (empty($this->conf['allowBoardCreation'])) {
 					$this->uploaderHTML->drawBoardErrorPageAndExit($this->languageManager->get('boards.creationError'), $this->languageManager->get('boards.creationDisabled'), $this->conf['mainScript'] . '?request=boards');
 				}
 
@@ -417,6 +419,39 @@ class requestHandler {
 
 			$this->uploaderHTML->drawHeader();
 			$this->uploaderHTML->drawManageBoardsPage($this->boardRepository->getAll(), $boardController);
+			$this->uploaderHTML->drawFooter();
+		}
+		else if($modPage === 'boardDefaults') {
+			$boardDefaults = new boardDefaultsRepository(\GLOBAL_DATA_DIR . 'boardDefaults.log');
+
+			if ($modAction === 'saveBoardDefaults') {
+				$this->requireCsrf();
+
+				$newValues = $_POST['defaults'] ?? [];
+				if (!is_array($newValues)) {
+					$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.configError'), $this->languageManager->get('errors.invalidFormData'));
+				}
+
+				// the theme name reaches the markup, so only an installed one is kept
+				$themeManager = new themeManager($this->conf['staticPath'] . 'css/themes', $this->conf['staticUrl'] . 'css/themes');
+				if (!in_array($newValues['defaultTheme'] ?? '', $themeManager->getThemeNames(), true)) {
+					unset($newValues['defaultTheme']);
+				}
+
+				$before = $boardDefaults->getAll();
+				$after = $boardDefaults->save($newValues, $this->conf);
+
+				$changedKeys = array_keys(array_diff_assoc($after, $before) + array_diff_assoc($before, $after));
+				if (!empty($changedKeys)) {
+					$this->actionLog->record(actionLogEntry::BOARD_DEFAULTS_SAVED, '', implode(', ', $changedKeys));
+				}
+
+				redirect($this->conf['mainScript'] . '?request=admin&modPage=boardDefaults');
+				return;
+			}
+
+			$this->uploaderHTML->drawHeader();
+			$this->uploaderHTML->drawBoardDefaultsEditor($boardDefaults->getAll());
 			$this->uploaderHTML->drawFooter();
 		}
 		else if($modPage === 'config') {
@@ -1009,6 +1044,13 @@ class requestHandler {
 	private function requireGlobalContext(string $pageRequest): void {
 		if ($this->board !== null) {
 			redirect($this->conf['rootScript'] . '?request=' . $pageRequest);
+		}
+	}
+
+	/** The listing and creation pages exist only while user boards are on */
+	private function requireUserBoards(): void {
+		if (empty($this->conf['allowUserBoards'])) {
+			$this->uploaderHTML->drawBoardErrorPageAndExit($this->languageManager->get('nav.boards'), $this->languageManager->get('boards.boardsDisabled'), $this->conf['mainScript']);
 		}
 	}
 

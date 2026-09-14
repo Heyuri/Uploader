@@ -182,6 +182,10 @@ Relevant `config.php` keys:
 - `actionLogFile` — file name, `actions.log` by default
 - `actionLogMaxEntries` — how many actions each log keeps; the oldest fall off the front once it is full
 
+### Regenerating thumbnails
+
+The admin dashboard's *Regenerate thumbnails* page rebuilds the thumbnails of the main uploader or of any one board, either only the ones that are missing or every one.
+
 ### Migrating boards made before 4.4
 
 Older versions kept user boards in `user/boards/<name>/`, each a standalone copy of the uploader with its own `config.php`. `migrateUserBoards.php` converts those into the current layout. It only reads the old boards, so it is safe to run and re-run:

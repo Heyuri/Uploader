@@ -9,6 +9,7 @@ use TwintailUploader\Controllers\uploadedFileService;
 use TwintailUploader\Controllers\chunkUploadService;
 use TwintailUploader\Controllers\boardController;
 use TwintailUploader\Controllers\recentFilesController;
+use TwintailUploader\Controllers\thumbnailRegenerator;
 
 use function TwintailUploader\Functions\getUserIP;
 use function TwintailUploader\Functions\instanceCookiePath;
@@ -422,6 +423,18 @@ class requestHandler {
 			$this->uploaderHTML->drawManageBoardsPage($this->boardRepository->getAll(), $boardController);
 			$this->uploaderHTML->drawFooter();
 		}
+		else if($modPage === 'regenerateThumbnails') {
+			$repository = $this->makeRecentFilesRepository();
+
+			if ($modAction === 'batch') {
+				$this->handleThumbnailBatch($repository);
+				return;
+			}
+
+			$this->uploaderHTML->drawHeader();
+			$this->uploaderHTML->drawRegenerateThumbnailsPage($repository->getSources());
+			$this->uploaderHTML->drawFooter();
+		}
 		else if($modPage === 'boardDefaults') {
 			$overrides = configOverrideRepository::instanceDefaults();
 			$pageUrl = $this->conf['mainScript'] . '?request=admin&modPage=boardDefaults';
@@ -826,6 +839,45 @@ class requestHandler {
 
 	private function makeRecentFilesRepository(): recentFilesRepository {
 		return new recentFilesRepository($this->conf, $this->boardRepository);
+	}
+
+	/**
+	 * One batch of thumbnail regeneration, answered as JSON for the page's
+	 * script. The run's totals ride along from the client so the finishing
+	 * batch can record the whole run in one action log entry.
+	 */
+	private function handleThumbnailBatch(recentFilesRepository $repository): void {
+		ini_set('display_errors', '0');
+		header('Content-Type: application/json');
+
+		if ($this->sessionController === null || !$this->sessionController->verifyCsrfToken($_POST['csrfToken'] ?? null)) {
+			http_response_code(403);
+			echo json_encode(['error' => $this->languageManager->get('errors.invalidRequest')]);
+			return;
+		}
+
+		$source = $repository->getSource((string) ($_POST['source'] ?? ''));
+		if ($source === null) {
+			http_response_code(400);
+			echo json_encode(['error' => $this->languageManager->get('errors.invalidFormData')]);
+			return;
+		}
+
+		$mode = ($_POST['mode'] ?? '') === thumbnailRegenerator::MODE_ALL ? thumbnailRegenerator::MODE_ALL : thumbnailRegenerator::MODE_MISSING;
+		$result = (new thumbnailRegenerator($source, $this->languageManager))->runBatch($mode, (int) ($_POST['offset'] ?? 0));
+
+		if ($result['done']) {
+			$created = (int) ($_POST['created'] ?? 0) + $result['created'];
+			$failed = (int) ($_POST['failed'] ?? 0) + $result['failed'];
+			$details = $mode . ': ' . $created . ' created, ' . $failed . ' failed';
+			$board = $source->getBoard();
+
+			// a board's run goes in its own log, where its owner can see it
+			$log = $board !== null ? $this->actionLog->forBoard($board, $this->conf) : $this->actionLog;
+			$log->record(actionLogEntry::THUMBNAILS_REGENERATED, $source->getLabel(), $details);
+		}
+
+		echo json_encode($result);
 	}
 
 	/**

@@ -12,6 +12,8 @@ Twintail Uploader — a Heyuri fork of the classic Japanese imageboard uploader 
 
 Routing is one `switch` on `$_REQUEST['request']` in [requestHandler.php](code/TwintailUploader/Classes/requestHandler.php) (default `index`); request names are the `REQUEST_*` constants. The constructor wires up all collaborators and passes them into per-request controllers. Adding a page = new constant + `case`.
 
+The *Regenerate thumbnails* mod page (`modPage=regenerateThumbnails`, global admin only) is the one HTML page with a JSON side: its `modAction=batch` is answered by `requestHandler::handleThumbnailBatch()` and driven by `static/javascript/thumbnailRegenerator.js`. [thumbnailRegenerator.php](code/TwintailUploader/Controllers/thumbnailRegenerator.php) walks one source's log from an offset and stops at a time budget or an entry cap, so a run of any size never outlives `max_execution_time` — keep that shape for any other long job.
+
 Two route families differ:
 - **HTML routes** echo `drawHeader()` → body → `drawFooter()` on `uploaderHTML`.
 - **Chunk-upload routes** (`uploadChunk`, `finalizeChunkUpload`) are intercepted *before* any HTML/cookie handling and return **JSON only** — `display_errors` is forced off there so stray output can't corrupt the JSON. Never emit HTML on these paths.

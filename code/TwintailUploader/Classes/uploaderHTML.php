@@ -1165,6 +1165,25 @@ class uploaderHTML {
 		]);
 	}
 
+	/**
+	 * @param fileSource[] $sources the main uploader and every board, to pick from
+	 */
+	public function drawRegenerateThumbnailsPage(array $sources): void {
+		$self = htmlspecialchars($this->conf['mainScript']);
+
+		$options = '';
+		foreach ($sources as $source) {
+			$options .= '<option value="' . htmlspecialchars($source->getKey()) . '">' . htmlspecialchars($source->getLabel()) . '</option>';
+		}
+
+		echo $this->renderer->render('admin-regenerate-thumbnails', [
+			'backUrl' => $self . '?request=admin',
+			'batchUrl' => $self . '?request=admin&modPage=regenerateThumbnails&modAction=batch',
+			'sourceOptions' => $options,
+			'staticUrl' => htmlspecialchars($this->conf['staticUrl']),
+		]);
+	}
+
 	public function drawAdminDashboard(): void {
 		$self = htmlspecialchars($this->conf['mainScript']);
 
@@ -1175,6 +1194,7 @@ class uploaderHTML {
 			'manageBansUrl' => $self . '?request=admin&modPage=manageBans',
 			'manageBoardsUrl' => $self . '?request=admin&modPage=manageBoards',
 			'boardDefaultsUrl' => $self . '?request=admin&modPage=boardDefaults',
+			'regenerateThumbnailsUrl' => $self . '?request=admin&modPage=regenerateThumbnails',
 			'configUrl' => $self . '?request=admin&modPage=config',
 			'logoutUrl' => $self . '?request=logout',
 			'tenmaWelcomeImageUrl' => $this->conf['staticUrl'] . 'images/tenma.jpg',

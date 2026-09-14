@@ -39,6 +39,7 @@ class actionLogEntry {
 	public const CONFIG_SAVED = 'configSaved';
 	public const BOARD_DEFAULTS_SAVED = 'boardDefaultsSaved';
 	public const BOARD_CONFIG_SAVED = 'boardConfigSaved';
+	public const THUMBNAILS_REGENERATED = 'thumbnailsRegenerated';
 
 	/** Every action key, in the order the filter on the log page offers them */
 	public const ACTIONS = [
@@ -65,6 +66,7 @@ class actionLogEntry {
 		self::CONFIG_SAVED,
 		self::BOARD_DEFAULTS_SAVED,
 		self::BOARD_CONFIG_SAVED,
+		self::THUMBNAILS_REGENERATED,
 	];
 
 	private string $time = '0';

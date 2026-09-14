@@ -296,17 +296,22 @@ class requestHandler {
 				$session = new session;
 				$sessionController = new sessionController($session);
 
-				// on a board only the owner session for that board is dropped —
-				// a global admin logs out from the main admin room
+				// on a board, the owner session for that board is dropped, and so
+				// is a global admin session — the admin password gets into a
+				// board's mod room too, and "log out" has to mean it there
 				if ($this->board !== null) {
 					// only a session that was actually logged in is worth recording,
 					// or anyone could fill the log by asking to log out
 					if ($sessionController->isBoardOwner($this->board->getUri())) {
 						$this->actionLog->setActor(actionLogEntry::ACTOR_OWNER);
 						$this->actionLog->record(actionLogEntry::LOGOUT, $this->board->getUri());
+					} elseif ($sessionController->isLoggedIn()) {
+						$this->actionLog->setActor(actionLogEntry::ACTOR_ADMIN);
+						$this->actionLog->record(actionLogEntry::LOGOUT, $this->board->getUri());
 					}
 
 					$sessionController->logOutBoard($this->board->getUri());
+					$sessionController->logOut();
 				} else {
 					if ($sessionController->isLoggedIn()) {
 						$this->actionLog->setActor(actionLogEntry::ACTOR_ADMIN);

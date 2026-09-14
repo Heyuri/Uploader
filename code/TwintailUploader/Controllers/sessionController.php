@@ -20,6 +20,11 @@ class sessionController {
 	    $this->session->set('mod_id', 1337);
     }
 
+    /** Drops the global admin session, leaving any board owner sessions alone */
+    public function logOut(): void {
+        $this->session->remove('mod_id');
+    }
+
     /**
      * Board owner sessions are tracked per board URI, so being the owner of
      * one board grants nothing anywhere else.

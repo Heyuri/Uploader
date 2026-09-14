@@ -176,6 +176,9 @@ function migrateBoard(string $uri, string $oldConfigFile, array $conf, string $b
 	$bans = collectOldBans($oldConf);
 
 	$messages[] = count($entries) . ' upload(s), ' . count($bans) . ' ban(s).';
+	if ($prefix === '') {
+		$messages[] = 'NOTE: the board has no file prefix, so its files keep their bare "<id>.<ext>" names.';
+	}
 	reportDroppedSettings($oldConf, $conf, $messages);
 
 	if ($dryRun) {

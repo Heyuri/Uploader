@@ -39,6 +39,10 @@ class session {
 		return isset($_SESSION[$key]);
 	}
 
+	public function remove(string $key): void {
+		unset($_SESSION[$key]);
+	}
+
 	// Destroy session
 	public function destroy() {
 		session_unset();

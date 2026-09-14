@@ -62,7 +62,7 @@
 	2026/03/26 v4.2 Minor tweaks to table HTML and CSS.
 	2026/07/07 v4.3 AJAX file uploading without a full page refresh, track own uploaded files with a button to copy their links to clipboard.
 	2026/09/01 v4.4 Overhaul of user board creation, optional file expirations, unlisted uploads, action logs, and minor bug fixes
-	2026/09/14 v4.5 Fix board cookies and thumbnail migration
+	2026/09/14 v4.5 Thumbnail regeneration system, fix board cookies, empty prefixes, and thumbnail migration
 ■Installation
 	・Clone repo into web directory (or unzip it there)
 	・Make data/, src/ and thmb/ writable by the web user; the uploader creates its own

@@ -12,6 +12,10 @@
  *
  * Usage:
  *   php migrateUserBoards.php [--dry-run] [--source=path/to/user/boards]
+ *   php migrateUserBoards.php --thumbnails [--dry-run] [--source=...]
+ *
+ * --thumbnails only copies thumbnails that are missing from boards migrated
+ * earlier, for boards whose old thumbnails had no prefix.
  */
 
 if (PHP_SAPI !== 'cli') {
@@ -70,7 +74,9 @@ $skipped = 0;
 foreach (findOldBoards($sourceDir) as $uri => $oldConfigFile) {
 	echo "[$uri]\n";
 
-	$result = migrateBoard($uri, $oldConfigFile, $conf, $boardsRoot, $boardRepository, $options['dry-run']);
+	$result = $options['thumbnails']
+		? copyMissingThumbnails($uri, $oldConfigFile, $conf, $boardsRoot, $boardRepository, $options['dry-run'])
+		: migrateBoard($uri, $oldConfigFile, $conf, $boardsRoot, $boardRepository, $options['dry-run']);
 
 	foreach ($result['messages'] as $message) {
 		echo "  $message\n";
@@ -80,9 +86,9 @@ foreach (findOldBoards($sourceDir) as $uri => $oldConfigFile) {
 	echo "\n";
 }
 
-echo "Migrated $migrated board(s), skipped $skipped.\n";
+echo ($options['thumbnails'] ? 'Updated' : 'Migrated') . " $migrated board(s), skipped $skipped.\n";
 
-if ($migrated > 0 && !$options['dry-run']) {
+if ($migrated > 0 && !$options['dry-run'] && !$options['thumbnails']) {
 	echo "The old boards were left in place — remove $sourceDir once you've checked the new ones.\n";
 }
 
@@ -561,10 +567,50 @@ function copyDirContents(string $sourceDir, string $targetDir, array $allowedExt
 }
 
 /**
+ * Copies the thumbnails an already migrated board is missing, using the
+ * prefix the registry gives it and the IDs from its own log. Nothing else
+ * about the board is touched.
+ *
+ * @return array{migrated:bool,messages:string[]}
+ */
+function copyMissingThumbnails(string $uri, string $oldConfigFile, array $conf, string $boardsRoot, boardRepository $boardRepository, bool $dryRun): array {
+	$board = $boardRepository->getByUri($uri);
+	$boardDir = $boardsRoot . $uri;
+	$logFile = $boardDir . '/data/' . $conf['logFile'];
+
+	if ($board === null || !is_dir($boardDir) || !file_exists($logFile)) {
+		return ['migrated' => false, 'messages' => ['SKIPPED: not migrated yet, run without --thumbnails first.']];
+	}
+
+	$oldConf = loadOldConfig($oldConfigFile);
+	if ($oldConf === null) {
+		return ['migrated' => false, 'messages' => ['SKIPPED: could not read the old config.php.']];
+	}
+
+	$entries = [];
+	foreach (file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
+		$entries[] = explode('<>', $line);
+	}
+
+	$thumbs = copyThumbnails(
+		dirname($oldConfigFile) . '/' . ($oldConf['thumbDir'] ?? 'thmb/'),
+		$boardDir . '/' . rtrim($conf['thumbDir'], '/'),
+		$entries,
+		$board->getPrefix(),
+		$conf,
+		$dryRun
+	);
+
+	return ['migrated' => true, 'messages' => [($dryRun ? 'would copy ' : 'copied ') . "$thumbs missing thumbnail(s)."]];
+}
+
+/**
  * Old thumbnails were "<prefix><id>_thumb.<source extension>" but always held
  * JPEG data; the current scheme is "<prefix><id><thumb_suffix>.<thumbnailExtension>".
+ * Older boards left the prefix off the thumbnail, so that name is tried too.
+ * A thumbnail already in place is never overwritten.
  */
-function copyThumbnails(string $sourceDir, string $targetDir, array $entries, string $prefix, array $conf): int {
+function copyThumbnails(string $sourceDir, string $targetDir, array $entries, string $prefix, array $conf, bool $dryRun = false): int {
 	if (!is_dir($sourceDir)) {
 		return 0;
 	}
@@ -574,12 +620,18 @@ function copyThumbnails(string $sourceDir, string $targetDir, array $entries, st
 		$id = sprintf('%03d', (int) $fields[0]);
 
 		$matches = glob($sourceDir . '/' . $prefix . $id . '_thumb.*') ?: [];
+		if (!$matches && $prefix !== '') {
+			$matches = glob($sourceDir . '/' . $id . '_thumb.*') ?: [];
+		}
 		if (!$matches) {
 			continue;
 		}
 
 		$newName = $prefix . $id . $conf['thumb_suffix'] . '.' . $conf['thumbnailExtension'];
-		if (copy($matches[0], $targetDir . '/' . $newName)) {
+		if (file_exists($targetDir . '/' . $newName)) {
+			continue;
+		}
+		if ($dryRun || copy($matches[0], $targetDir . '/' . $newName)) {
 			$copied++;
 		}
 	}
@@ -610,15 +662,17 @@ function cleanText(string $value, int $maxLength): string {
 }
 
 function parseOptions(array $argv): array {
-	$options = ['dry-run' => false, 'source' => null];
+	$options = ['dry-run' => false, 'thumbnails' => false, 'source' => null];
 
 	foreach (array_slice($argv, 1) as $argument) {
 		if ($argument === '--dry-run') {
 			$options['dry-run'] = true;
+		} elseif ($argument === '--thumbnails') {
+			$options['thumbnails'] = true;
 		} elseif (str_starts_with($argument, '--source=')) {
 			$options['source'] = substr($argument, strlen('--source='));
 		} else {
-			exit("Unknown option: $argument\nUsage: php migrateUserBoards.php [--dry-run] [--source=path]\n");
+			exit("Unknown option: $argument\nUsage: php migrateUserBoards.php [--dry-run] [--thumbnails] [--source=path]\n");
 		}
 	}
 

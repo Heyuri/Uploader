@@ -11,6 +11,7 @@ use TwintailUploader\Controllers\boardController;
 use TwintailUploader\Controllers\recentFilesController;
 
 use function TwintailUploader\Functions\getUserIP;
+use function TwintailUploader\Functions\instanceCookiePath;
 use function TwintailUploader\Functions\redirect;
 
 class requestHandler {
@@ -59,7 +60,7 @@ class requestHandler {
 		$this->banChecker = new banChecker(\DATA_DIR, $board !== null ? \GLOBAL_DATA_DIR : null);
 		$this->floodControls = new floodControls($config['coolDownTime'], $this->uploadEntryRepository);
 		$this->logFile = new logFile($config);
-		$this->cookieSettingsManager = new cookieSettingsManager($config['defaultCookieValues']);
+		$this->cookieSettingsManager = new cookieSettingsManager($config['defaultCookieValues'], instanceCookiePath($config));
 		$this->uploadPasswordCookie = new uploadPasswordCookie();
 		$this->uploadedFileRepository = new uploadedFileRepository($config, new cloudflareAPI($config));
 		$this->searchRepository = new searchRepository($this->logFile);

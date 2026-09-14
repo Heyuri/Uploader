@@ -1,6 +1,8 @@
 <?php
 namespace TwintailUploader\Classes;
 
+use function TwintailUploader\Functions\requestCookiePath;
+
 /**
  * The visitor's display preferences, stored in one cookie as a JSON object
  * keyed by setting name.
@@ -9,15 +11,23 @@ namespace TwintailUploader\Classes;
  * key there and it is read, written and defaulted automatically. Values keep
  * that array's vocabulary ('checked' or ''), so they can be dropped straight
  * into a checkbox attribute.
+ *
+ * The cookie is scoped to the instance root, so the main uploader and every
+ * board share one set of preferences.
  */
 class cookieSettingsManager {
 	private const COOKIE_NAME = 'settings';
 	private const COOKIE_LIFETIME = 365 * 24 * 3600;
 
 	private array $defaultCookieValues;
+	private string $path;
 
-	public function __construct(array $defaultCookieValues) {
+	/**
+	 * @param string $path URL path the cookie is scoped to, normally the instance root
+	 */
+	public function __construct(array $defaultCookieValues, string $path = '/') {
 		$this->defaultCookieValues = $defaultCookieValues;
+		$this->path = $path;
 	}
 
 	public function loadCookieSettings(): void {
@@ -32,7 +42,14 @@ class cookieSettingsManager {
 
 		$encoded = json_encode($settings);
 
-		setcookie(self::COOKIE_NAME, $encoded, time() + self::COOKIE_LIFETIME);
+		// a cookie this board set before preferences became instance-wide
+		// would shadow the shared one, so drop it
+		$requestPath = requestCookiePath();
+		if ($requestPath !== $this->path) {
+			setcookie(self::COOKIE_NAME, '', ['expires' => 1, 'path' => $requestPath]);
+		}
+
+		setcookie(self::COOKIE_NAME, $encoded, ['expires' => time() + self::COOKIE_LIFETIME, 'path' => $this->path]);
 		$_COOKIE[self::COOKIE_NAME] = $encoded;
 	}
 

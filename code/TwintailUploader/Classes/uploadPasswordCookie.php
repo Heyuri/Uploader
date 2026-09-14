@@ -7,7 +7,7 @@ namespace TwintailUploader\Classes;
  *
  * It lives apart from cookieSettingsManager because that cookie's vocabulary is
  * checkbox state ('checked' or ''), while this is free text the visitor typed.
- * Like the settings cookie it is written with the default path, so a board
+ * Unlike the settings cookie it is written with the default path, so a board
  * keeps its own.
  */
 class uploadPasswordCookie {

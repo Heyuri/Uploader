@@ -192,7 +192,9 @@ php migrateUserBoards.php             # do it
 
 It can only be run from the command line — requesting it over the web returns 403. Pass `--source=path/to/user/boards` if the old boards aren't in the default place. Boards that are already registered, whose directory already exists, or whose name is reserved or unusable are reported and skipped, so a partial run can simply be run again.
 
-Per board it creates `boards/<name>/` with the usual `src/`, `thmb/` and `data/`, copies the uploads across, renames thumbnails from the old `<prefix><id>_thumb.<ext>` to the current `<prefix><id>s.jpg`, seeds `data/count.log` from the highest ID in the log, turns the old `denylist` and `hardBanList` into the board's own ban list, and registers the board in `data/boards.log`. The old `defaultTheme` is kept as the board's theme when the instance still ships a theme by that name, and dropped otherwise.
+Per board it creates `boards/<name>/` with the usual `src/`, `thmb/` and `data/`, copies the uploads across, renames thumbnails from the old `<prefix><id>_thumb.<ext>` (or `<id>_thumb.<ext>` on older boards) to the current `<prefix><id>s.jpg`, seeds `data/count.log` from the highest ID in the log, turns the old `denylist` and `hardBanList` into the board's own ban list, and registers the board in `data/boards.log`. The old `defaultTheme` is kept as the board's theme when the instance still ships a theme by that name, and dropped otherwise.
+
+`--thumbnails` only copies thumbnails a board migrated earlier is missing, using the prefix the board is registered with. It touches nothing else and can be combined with `--dry-run`.
 
 Every per-file deletion passwords were stored in plain text; they are hashed on the way in, so the old passwords keep working but are no longer readable on disk. Everything else is carried over as-is.
 

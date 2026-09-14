@@ -36,3 +36,25 @@ function forceJapaneseForJpUsers(languageManager $languageManager, bool $forceJa
 		$languageManager->setLanguage('ja');
 	}
 }
+
+/**
+ * URL path of the directory the current script sits in, the way a browser
+ * scopes a cookie set without an explicit path ("/" at the web root).
+ */
+function requestCookiePath(): string {
+	$dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/'));
+	return $dir === '' || $dir === '.' ? '/' : $dir;
+}
+
+/**
+ * URL path of the instance root, so a cookie set from a board is the one the
+ * main uploader and every other board read. On a board, rootScript holds the
+ * "../" hops back up; elsewhere the request path already is the root.
+ */
+function instanceCookiePath(array $conf): string {
+	$dir = requestCookiePath();
+	for ($hops = substr_count($conf['rootScript'] ?? '', '../'); $hops > 0; $hops--) {
+		$dir = dirname($dir);
+	}
+	return $dir === '' || $dir === '.' || $dir === '\\' ? '/' : $dir;
+}

@@ -6,6 +6,7 @@ use DateTime;
 use TwintailUploader\Controllers\boardController;
 
 use function TwintailUploader\Functions\bytesToHumanReadable;
+use function TwintailUploader\Functions\instanceCookiePath;
 
 
 class uploaderHTML {
@@ -33,7 +34,7 @@ class uploaderHTML {
 		$this->lang = $languageManager;
 		$this->board = $board;
 		$this->renderer = new HTMLRenderer(__DIR__ . '/../templates', $this->lang);
-		$this->cookieSettingsManager = new cookieSettingsManager($conf['defaultCookieValues']);
+		$this->cookieSettingsManager = new cookieSettingsManager($conf['defaultCookieValues'], instanceCookiePath($conf));
 		$this->uploadPasswordCookie = new uploadPasswordCookie();
 	}
 

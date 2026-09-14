@@ -221,7 +221,7 @@ class requestHandler {
 					$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.bannedFromUploading'));
 				}
 
-				if ($this->floodControls->isFlooding(getUserIP())) {
+				if ($this->floodControls->isFlooding()) {
 					$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.uploadRejected'), $this->languageManager->get('errors.mustWaitBeforePosting'));
 				}
 
@@ -1181,7 +1181,7 @@ class requestHandler {
 		}
 
 		// Check flood control before allowing chunk uploads
-		if ($this->floodControls->isFlooding(getUserIP())) {
+		if ($this->floodControls->isFlooding()) {
 			header('Content-Type: application/json');
 			http_response_code(429);
 			echo json_encode(['error' => $this->languageManager->get('errors.mustWaitBeforePosting')]);

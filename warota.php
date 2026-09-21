@@ -162,7 +162,7 @@ try {
 	date_default_timezone_set($conf['timeZone']);
 
 	// Main logic
-	$requestHandler = new requestHandler($conf, $languageManager, $board);
+	$requestHandler = new requestHandler($conf, $configFile, $languageManager, $board);
 	$requestHandler->handleRequest();
 
 } catch (\Exception $e) {

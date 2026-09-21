@@ -17,6 +17,7 @@ use function TwintailUploader\Functions\redirect;
 
 class requestHandler {
 	private array $conf;
+	private string $configFile;
 	private uploadEntryRepository $uploadEntryRepository;
 	private uploaderHTML $uploaderHTML;
 	private floodControls $floodControls;
@@ -49,8 +50,9 @@ class requestHandler {
 	private const REQUEST_BOARDS = 'boards';
 	private const REQUEST_CREATE_BOARD = 'createBoard';
 
-	public function __construct(array $config, languageManager $languageManager, ?board $board = null) {
+	public function __construct(array $config, string $configFile, languageManager $languageManager, ?board $board = null) {
 		$this->conf = $config;
+		$this->configFile = $configFile;
 		$this->languageManager = $languageManager;
 		$this->board = $board;
 		$this->uploadEntryRepository = new uploadEntryRepository(
@@ -469,8 +471,7 @@ class requestHandler {
 					$this->uploaderHTML->drawErrorPageAndExit($this->languageManager->get('errors.configError'), $this->languageManager->get('errors.invalidFormData'));
 				}
 
-				$configFile = \ROOT_DIR . '/config.php';
-				$conf = require $configFile;
+				$conf = require $this->configFile;
 				$changedKeys = [];
 
 				foreach ($newValues as $key => $value) {
@@ -493,7 +494,7 @@ class requestHandler {
 					}
 				}
 
-				$this->writeConfig($configFile, $conf);
+				$this->writeConfig($this->configFile, $conf);
 				$this->conf = $conf;
 
 				// names only: a config value can be the admin password
@@ -562,7 +563,7 @@ class requestHandler {
 
 			// what the board would get with no overrides of its own: config.php
 			// under the instance defaults, not this board's already-layered $conf
-			$fallbackConf = configOverrideRepository::instanceDefaults()->apply(require \ROOT_DIR . '/config.php');
+			$fallbackConf = configOverrideRepository::instanceDefaults()->apply(require $this->configFile);
 
 			if ($modAction === 'saveConfig') {
 				$this->saveConfigOverrides($overrides, $fallbackConf, actionLogEntry::BOARD_CONFIG_SAVED, $this->board->getUri());

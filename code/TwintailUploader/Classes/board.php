@@ -136,8 +136,6 @@ class board {
 		$conf['staticUrl'] = $toRoot . 'static/';
 		$conf['staticPath'] = $toRoot . 'static/';
 		$conf['home'] = $conf['rootScript'] . '?request=boards';
-		$conf['uploadDir'] = 'src/';
-		$conf['thumbDir'] = 'thmb/';
 		$conf['prefix'] = $this->getPrefix();
 		$conf['defaultComment'] = $this->defaultComment;
 		$conf['commentRequired'] = $this->isCommentRequired();

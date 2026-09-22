@@ -333,7 +333,7 @@ class uploaderHTML {
 		// Get display name, file path, and resolve the appropriate thumbnail
 		$fileName = $data->getFileName($rowConf);
 		$path = $data->getFilePath($rowConf);
-		$thumbPath = $this->getThumbnailPath($data, $path, $rowConf);
+		$thumbPath = $this->getThumbnailPath($data, $path, $rowConf, $missingThumb);
 
 		// Fetch thumbnail dimensions so the img element can be sized correctly
 		$width = '';
@@ -362,7 +362,7 @@ class uploaderHTML {
 		$hrefPath = htmlspecialchars($path);
 		$hrefThumb = htmlspecialchars($thumbPath);
 		if ($cookie['showPreviewImage']) {
-			$nameCell = '<td class="previewContainer"><a href="' . $hrefPath . '"> <img class="imagePreview" loading="lazy" src="' . $hrefThumb . '" width="' . $width . '" height="' . $height . '" alt="' . htmlspecialchars($fileName) . '"><br>' . htmlspecialchars($fileName) . '</a></td>';
+			$nameCell = '<td class="previewContainer"><a href="' . $hrefPath . '"> <img class="imagePreview" loading="lazy" src="' . $hrefThumb . '" width="' . $width . '" height="' . $height . '" alt="' . htmlspecialchars($fileName) . '">' . $this->missingThumbComment($missingThumb) . '<br>' . htmlspecialchars($fileName) . '</a></td>';
 		} else {
 			$nameCell = '<td><a href="' . $hrefPath . '">' . htmlspecialchars($fileName) . '</a></td>';
 		}
@@ -446,9 +446,14 @@ class uploaderHTML {
 		return $escaped;
 	}
 
-	private function getThumbnailPath(uploadEntry $data, string $defaultPath, ?array $conf = null): string {
+	/**
+	 * $missingThumb is set to the path that was looked for when the
+	 * "no thumbnail" placeholder is returned instead, and null otherwise.
+	 */
+	private function getThumbnailPath(uploadEntry $data, string $defaultPath, ?array $conf = null, ?string &$missingThumb = null): string {
 		$conf = $conf ?? $this->conf;
 		$mimeType = $data->getMimeType();
+		$missingThumb = null;
 
 		// File exists but thumbnail wasn't generated
 		$thumbPath = $data->getThumbPath($conf);
@@ -475,13 +480,18 @@ class uploaderHTML {
 
 		// If it's an image type but the thumbnail doesn't exist, show a "no thumbnail" image instead of a broken image link/preview
 		else if (!file_exists($thumbPath)) {
+			$missingThumb = $thumbPath;
 			return $this->conf['staticUrl'] . 'images/nothumb.gif';
 		}
 
 		// Video file types
 		else if (preg_match('/video/i', $mimeType)) {
 			$videoThumbPath = $data->getVideoThumbPath($conf);
-			return file_exists($videoThumbPath) ? $videoThumbPath : $this->conf['staticUrl'] . 'images/nothumb.gif';
+			if (file_exists($videoThumbPath)) {
+				return $videoThumbPath;
+			}
+			$missingThumb = $videoThumbPath;
+			return $this->conf['staticUrl'] . 'images/nothumb.gif';
 		}
 		
 		// Non-image types that weren't caught above: use archive icon as fallback
@@ -491,7 +501,18 @@ class uploaderHTML {
 
 		return $thumbPath;
 	}
-	
+
+	/**
+	 * An HTML comment naming the thumbnail path that wasn't found, or '' when
+	 * there is none. `--` is broken up so the path can't close the comment.
+	 */
+	private function missingThumbComment(?string $missingThumb): string {
+		if ($missingThumb === null) {
+			return '';
+		}
+		return '<!-- thumbnail not found: ' . str_replace('--', '- -', htmlspecialchars($missingThumb)) . ' -->';
+	}
+
 	/**
 	 * Builds the total usage and file count information.
 	 */
@@ -573,7 +594,7 @@ class uploaderHTML {
 
 			// File paths
 			$path = $data->getFilePath($this->conf);
-			$thumbPath = $this->getThumbnailPath($data, $path);
+			$thumbPath = $this->getThumbnailPath($data, $path, null, $missingThumb);
 
 			// unix timestamp
 			$timestamp = $data->getTime();
@@ -608,6 +629,7 @@ class uploaderHTML {
 			// render the column using the catalog-column template
 			$columns .= $this->renderer->render('catalog-column', [
 				'thumbUrl' => htmlspecialchars($thumbUrl),
+				'missingThumbComment' => $this->missingThumbComment($missingThumb),
 				'fileUrl' => htmlspecialchars($path),
 				'width' => $width,
 				'height' => $height,

@@ -1,6 +1,6 @@
 <td class="catalogColumn">
 	<a href="{{fileUrl}}">
-		<img class="catalogImage" width="{{width}}" height="{{height}}" loading="lazy" src="{{thumbUrl}}" alt="{{fileName}}">
+		<img class="catalogImage" width="{{width}}" height="{{height}}" loading="lazy" src="{{thumbUrl}}" alt="{{fileName}}">{{missingThumbComment}}
 	</a>
 	<div class="catalogDate"> {{formattedDate}} </div>
 	<div class="catalogFileSize"> {{fileSize}} </div>
